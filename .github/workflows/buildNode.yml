@@ -17,6 +17,7 @@ jobs:
     environment: development
     env:
       CI: ""
+      TF_VAR_base_domain: ${{ secrets.BASE_DOMAIN }}
 
     strategy:
       matrix:
@@ -25,10 +26,34 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+
       - uses: hashicorp/setup-terraform@v1
         with:
           terraform_version: 1.0.9
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt -check
+        working-directory: ./terraform
+
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+        working-directory: ./terraform
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+        working-directory: ./terraform
+
+      - name: Terraform Plan
+        id: plan
+#        if: github.event_name == 'pull_request'
+        run: terraform plan -no-color
+        continue-on-error: true
+        working-directory: ./terraform
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
