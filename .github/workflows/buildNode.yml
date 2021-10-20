@@ -6,9 +6,9 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ daCode ]
+    branches: [ main ]
   pull_request:
-    branches: [ daCode ]
+    branches: [ main ]
 
 jobs:
   build:
