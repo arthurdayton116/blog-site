@@ -1,6 +1,6 @@
 resource "aws_s3_bucket" "blog_domain" {
   bucket        = local.bucket_name
-  acl           = "public"
+  acl           = "public-read"
   force_destroy = false
   tags = merge(
     local.base_tags,
@@ -13,7 +13,7 @@ resource "aws_s3_bucket" "blog_domain" {
 
 resource "aws_s3_bucket" "blog_domain_redirect" {
   bucket        = local.redirect_bucket_name
-  acl           = "public"
+  acl           = "public-read"
   force_destroy = false
   tags = merge(
     local.base_tags,
