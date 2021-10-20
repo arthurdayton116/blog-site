@@ -1,0 +1,212 @@
+import {
+    Box,
+    Card,
+    Image,
+    Heading,
+    Text,
+    Flex,
+    Link
+} from 'rebass';
+
+export const docker = "https://www.docker.com/"
+export const containerTrainingGithub = "https://github.com/jpetazzo/container.training"
+export const containerTrainingSlides = "https://container.training/"
+export const slide23 = "https://container.training/intro-selfpaced.yml.html#23"
+export const slide25 = "https://container.training/intro-selfpaced.yml.html#25"
+export const slide26 = "https://container.training/intro-selfpaced.yml.html#26"
+export const slide28 = "https://container.training/intro-selfpaced.yml.html#28"
+export const dockerAlternatives = "https://containerjournal.com/topics/container-ecosystems/5-container-alternatives-to-docker/"
+export const dockerRun = "https://docs.docker.com/engine/reference/run/"
+export const dockerNode = "https://hub.docker.com/_/node"
+export const dockerCompose = "https://docs.docker.com/compose/"
+export const goLand = "https://www.jetbrains.com/go/whatsnew/"
+
+export const Repo = "https://github.com/arthurdayton116/aws-terraform/tree/main/terraform_vpc"
+
+#### Change is hard but it is actually harder not to change in this case
+I do a lot of programming in a lot of different languages at different times for different reasons on different machines in different places.  One of the inevitable side effects of this is the dreaded "it works on [insert wherever you are not here]".  I experience this effect on steroids when doing pipeline development where I can never count on the current version of the os or toolchain being used to perform any particular task.  The most recent incarnation of this happened when my 12 year old son asked me to teach him how to deploy his own minecraft server and learn to code.  Stop me if you've heard this one before - he has a Windows machine and I have a Mac and foobar - putting aside whether teaching a kid to program on a Windows machine is child abuse - I was faced with instant problems with pathing related to Terraform.
+
+<br/>
+
+The problem with developing on your local machine and using the product of your development is beautifully illustrated in some images I borrowed from
+<Link pl={4} href={containerTrainingSlides} target="_blank">this fantastic project</Link> by Jérôme Petazzoni.
+
+<br/>
+
+The corresponding <Link href={containerTrainingGithub} target="_blank">github repo</Link> is the single best resource I have found for learning about and teaching others about the container ecosystem and I highly recommend it.  Take the time to learn how to build the slides and you will realize just what an invaluable resource this really is.
+
+<br/>
+
+We can see in these four images how the problem of deploying code across multiple hardware domains creates problems and how the shipping industry is a great analogy.  Ultimately we need a way to encapsulate our code with it's configuration and dependencies in a reliable way that can be executed anywhere.
+
+<br/>
+
+#### The deployment problem
+<Image p={4} verticalAlign='middle' src="/images/4/slide23.png" />
+<Link p={1} href={slide23} target="_blank">Slide 23</Link>
+
+#### The parallel with the shipping industry
+<Image p={4} verticalAlign='middle' src="/images/4/slide25.png" />
+<Link p={1} href={slide25} target="_blank">Slide 25</Link>
+
+#### Intermodal shipping containers
+<Image p={4} verticalAlign='middle' src="/images/4/slide26.png" />
+<Link p={1} href={slide26} target="_blank">Slide 26</Link>
+
+#### A shipping container system for applications
+<Image p={4} verticalAlign='middle' src="/images/4/slide28.png" />
+<Link p={1} href={slide28} target="_blank">Slide 28</Link>
+
+<Image p={4} verticalAlign='middle' src="/images/4/dockerproblem.png" />
+
+
+Using <Link href={docker} target="_blank">Docker</Link>, or <Link href={dockerAlternatives} target="_blank">other container runtime environments</Link>, you can divorce the OS, executables and configuration from the local environment.  This lends itself directly to making it easier to prepare your applications for Kubernetes or any of the various cloud flavors of container instances.  I even use Docker when deploying to compute instances because it greatly simplifies the setup and maintenance of any given machine.
+
+<br/>
+
+Most importantly it gives you a way to define your development environment as code so when you share it with someone else or come back to it 6 months later you don't have to try and figure out what the magic state of your machine was when you created it.  Given the simplicity of doing it I am often surprised by how little I see people doing it.  Just recently I needed to add some code to a cli built with Go and cobra and was struck by the extensive documentation on how to set up you local environment.  One dockerfile and one docker-compose file and 5 minutes later no developer should ever have to suffer "the set up" again.  Run docker-compose run --rm magicgocli and proceed with your brilliance future developer.
+
+<Image p={4} verticalAlign='middle' src="/images/4/youarewelcome.png" />
+
+<br/>
+
+Tools like <Link href={goLand} target="_blank">JetBrains GoLand</Link> are now supporting run targets where you can configure your IDE task to use Docker, or other remote hosts, to run your code.
+
+<br/>
+
+Some examples of how I use this in my own life include:
+
+##### This blog:
+
+I use github pages to serve this blog as I showed in <Link href="/post/1/" target="_blank">my first post</Link>.  When I want to work on a post locally I don't want to be dependent on what machine I'm on or what the configuration was the last time I used it so I use a simple docker-compose file that allows me to run ``` docker-compose run --rm blog``` whenever I need to stand up my local environment.  The compose file allows me to keep my run command short and looks like this:
+
+```go
+version: "3.9"
+
+services:
+  blog:
+    image: node:15.12.0-buster
+    working_dir: /mnt
+    command: bash -c "npm install -g nodemon; npm install; nodemon --watch src start"
+    volumes:
+      - .:/mnt
+      - /mnt/node_modules
+    ports:
+      - "4000:3000"
+```
+
+If we decompose this file we can see a lot of super cool stuff going on.  Running top to bottom we have:
+ - services: blog which defines the name of my service
+ - image: which fetches the exact node version I want from Docker hub
+ - working_dir: that sets the context for commands and where I will land inside the container
+ - command: which using the -c option allows me to do my installs and start the development server with nodemon
+ - After that comes one of the things I love most about Docker, volumes, which mounts my local git repository to the container as part of its file system.  This has two crucially useful side effects:
+ -- Anything I do inside the container that needs to be preserved, such as npm install that would write to package json, is written to my local directory.
+ -- Any changes I make to my source files locally via my IDE are written to the file system inside the container because they are the same thing! 💥
+ - Last is ports which maps a local port to a container port.  In this case I am saying use my local port 4000 to route to the container port 3000.  This is super handy when we have multiple container services running that all use the same code base and configuration.
+
+##### Terraform
+Similarly for Terraform I can use their officially maintained image to execute my local code by starting an interactive container mounted to a directory
+
+<Image p={4} verticalAlign='middle' src="/images/4/finder.png" />
+
+Here I use docker-compose with a Dockerfile to tweak the base image for my purposes by making directories to mount various things to that I want to use:
+
+```
+FROM hashicorp/terraform:0.14.8
+RUN mkdir /keys
+RUN mkdir /api
+RUN mkdir /react
+RUN chmod -R 400 /keys
+```
+
+Then compose file looks like:
+
+```go
+version: "3.9"
+
+services:
+  devenv:
+    build:
+      context: .
+      dockerfile: devEnv.dockerfile
+    working_dir: /mnt
+    entrypoint: /bin/sh
+    volumes:
+      - .:/mnt
+      - ~/.ssh:/keys
+      - ~/arthurProjects/goapi:/api
+      - ~/arthurProjects/simpleReactWithApi:/react
+```
+
+What is even cooler is that after starting my container I can exec in with multiple sessions using ```docker exec -it 19a9 /bin/sh``` to perform terraform tasks on different directories simultaneously!
+
+<Image p={4} verticalAlign='middle' src="/images/4/multiplesessions.png" />
+
+##### GoApi
+In a more complex scenario when I want to run multiple API endpoints locally to test some microservices I can use <Link href={dockerCompose} target="_blank">docker compose</Link>to define multiple container instances and start them as a group using docker-compose up.  Here I create a docker-compose.yml file that mounts the same source code (volumes) to 3 separate containers (api1, api2, api3) using the same base image (golang:1.16.2-buster) from the Go team and map the container port (1323) to different host ports (3140, 3150, 3160).
+
+```go
+version: "3.9"
+
+services:
+  api1:
+    image: golang:1.16.2-buster
+    working_dir: /go/src
+    command: go run .
+    volumes:
+      - ./src:/go/src
+    ports:
+      - "3140:1323"
+    environment:
+      -  SWAGGER_HOST=localhost:3140
+      -  SWAGGER_BASE_PATH=/
+      -  TARGETOS=linux
+      -  TARGETARCH=amd64
+      -  PRIVATE_IP=123.456
+      -  PRIVATE_DNS=localhost1
+      -  SECURITY_GROUP=public
+      -  AVAILABILTY_ZONE=A
+  api2:
+    image: golang:1.16.2-buster
+    working_dir: /go/src
+    command: go run .
+    volumes:
+      - ./src:/go/src
+    ports:
+      - "3150:1323"
+    environment:
+      -  SWAGGER_HOST=localhost:3150
+      -  SWAGGER_BASE_PATH=/
+      -  TARGETOS=linux
+      -  TARGETARCH=amd64
+      - PRIVATE_IP=789.101
+      - PRIVATE_DNS=localhost2
+      - SECURITY_GROUP=private
+      - AVAILABILTY_ZONE=B
+  api3:
+    image: golang:1.16.2-buster
+    working_dir: /go/src
+    command: go run .
+    volumes:
+      - ./src:/go/src
+    ports:
+      - "3160:1323"
+    environment:
+      - SWAGGER_HOST=localhost:3160
+      - SWAGGER_BASE_PATH=/
+      - TARGETOS=linux
+      - TARGETARCH=amd64
+      - PRIVATE_IP=678.456
+      - PRIVATE_DNS=localhost3
+      - SECURITY_GROUP=public
+      - AVAILABILTY_ZONE=C
+```
+
+<br/>
+
+##### Conclusion
+
+Hopefully what these examples show is how easy it is to use container technology to codify development environments for reliable and repeatable local use with the only requirement being the presence of the Docker runtime.  Not using containers for local development leads to slower and more painful development as the size of your team and the number of other teams you collaborate with increases.
+
+<br/>

@@ -1,0 +1,600 @@
+import {
+    Box,
+    Card,
+    Image,
+    Heading,
+    Text,
+    Flex,
+    Link
+} from 'rebass';
+
+export const vpcConcepts = "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html"
+
+export const Repo = "https://github.com/arthurdayton116/aws-terraform/tree/main/peering/terraform_vpc_peering"
+export const RepoEC2 = "https://github.com/arthurdayton116/aws-terraform/tree/main/peering/terraform_ec2_dynamic"
+export const tfProviders = "https://registry.terraform.io/browse/providers"
+export const tfCloud = "https://www.terraform.io/cloud"
+export const iaacTools = "https://dzone.com/articles/the-top-7-infrastructure-as-code-tools-for-automat"
+export const tfTypes = "https://www.terraform.io/docs/language/expressions/types.html"
+export const tfForEach = "https://www.terraform.io/docs/language/meta-arguments/for_each.html"
+export const tfForEachVsCount = "https://www.terraform.io/docs/language/meta-arguments/count.html#when-to-use-for_each-instead-of-count"
+export const tfFor = "https://www.terraform.io/docs/language/expressions/for.html"
+
+#### Using maps and for-each to kick it up a notch
+Infrastructure as code is the standard for cloud development that all companies are trying to achieve.  <Link href={iaacTools} target="_blank">Lots of tools exist</Link> but I'm a big fan of Terraform, especially over learning cloud vendor specific tools like Cloud Formation or ARM, because of the ease with which I can do similar things on different clouds, state management with <Link href={tfCloud} target="_blank">Terraform Cloud</Link> and their ever expanding <Link href={tfProviders} target="_blank">list of providers</Link>.  Deploying single stand alone resources is easy and for a lot of scenarios that's fine but what happens when we have more complex scenarios where we need to deploy multiple types of resources that have interdependencies, different lifecycles and n number of instances?  This is where infrastructure as code becomes more like development then configuration and the power of maps and loops in Terraform shines.
+
+<br/>
+
+<Link pl={2} href={tfTypes} target="_blank">Terraform types </Link> include maps which allow us to define hierarchical objects which we can iterate over and output to be used by other processes.  The scenario I need to accommodate is creating multiple peered VPCs, subnets and compute instances.  The number of all is arbitrary and I need to be able to iterate the results of the creation of my VPCs to create the subnets and EC2 instances.
+
+<br/>
+
+<Link p={4} href={Repo} target="_blank">Code located here</Link>
+
+I will start by using a local variable to define the configuration of my VPCs
+
+```json
+locals {
+  vpc_values = {
+    a = {
+      name      = "${local.resource_prefix}-vpc",
+      cidr_vpc  = "10.1.0.0/16",
+      region    = local.region
+      security_group_ingress_cidr   = ["10.1.0.0/16", "10.2.0.0/16"]
+      peer_cidr = "10.2.0.0/16"
+    },
+    b = {
+      name      = "${local.resource_prefix}-vpc",
+      cidr_vpc  = "10.2.0.0/16",
+      region    = local.region,
+      security_group_ingress_cidr   = ["10.1.0.0/16", "10.2.0.0/16"]
+      peer_cidr = "10.1.0.0/16"
+    },
+  }
+}
+```
+
+Looking at the vpc_values we see values for two VPCs, a and b, with cidr ranges for the vpc and ranges for defining peering realationships and security groups.
+
+There are two approaches, count and for_each, to create multiple instances of resources with Terraform.  When to use one or the other is described <Link href={tfForEachVsCount} target="_blank">here.</Link>
+
+To create VPCs from these values we use a <Link href={tfForEach} target="_blank">for_each</Link> loop:
+
+```json
+resource "aws_vpc" "vpc" {
+  for_each             = local.vpc_values
+  cidr_block           = each.value.cidr_vpc
+  instance_tenancy     = "default"
+  enable_dns_support   = true
+  enable_dns_hostnames = true
+}
+```
+
+We pass the local variable to a resource definition and then can reference the values within the object using the each property.  This allows us to use one resource definition to create an arbitrary number of resources.  We can reference our vpc resource definition in other resources, again using the for_each property, like I do here with internet gateway resource to access the VPC id (each.value.id) and the vpc keys (each.key):
+
+```json
+resource "aws_internet_gateway" "i" {
+  for_each = aws_vpc.vpc
+  vpc_id   = each.value.id
+  tags = merge(
+    local.base_tags,
+    {
+      Name = "${local.resource_prefix}-vpc${each.key}-igw"
+    },
+  )
+}
+```
+
+We can use the <Link href={tfFor} target="_blank">for</Link> expression in our outputs to create maps of values to reference in other terrafom projects downstream:
+
+```json
+output "vpc_ids" {
+  value = {
+    for k, vpc in aws_vpc.vpc :
+    k => vpc.id
+  }
+}
+
+output "vpc_info" {
+  value = {
+    for k, vpc in aws_vpc.vpc :
+    k => vpc
+  }
+}
+
+output "vpc_config" {
+  value = {
+    for k, vpc in local.vpc_values :
+    k => vpc
+  }
+}
+
+output "igw_ids" {
+  value = {
+    for k, igw in aws_internet_gateway.i :
+    k => igw.id
+  }
+}
+```
+
+produces:
+
+```json
+vpc_ids = {
+  "a" = "vpc-01e64fe235cb0c529"
+  "b" = "vpc-079dd05c64c0a3ebe"
+}
+
+vpc_info = {
+  "a" = {
+    "arn" = "arn:aws:ec2:us-west-2:793219755011:vpc/vpc-01e64fe235cb0c529"
+    "assign_generated_ipv6_cidr_block" = false
+    "cidr_block" = "10.1.0.0/16"
+    "default_network_acl_id" = "acl-015de4d9c963111ab"
+    "default_route_table_id" = "rtb-0317b663263959e41"
+    "default_security_group_id" = "sg-0806180aa07a0b29a"
+    "dhcp_options_id" = "dopt-7754a212"
+    "enable_classiclink" = false
+    "enable_classiclink_dns_support" = false
+    "enable_dns_hostnames" = true
+    "enable_dns_support" = true
+    "id" = "vpc-01e64fe235cb0c529"
+    "instance_tenancy" = "default"
+    "ipv6_association_id" = ""
+    "ipv6_cidr_block" = ""
+    "main_route_table_id" = "rtb-0317b663263959e41"
+    "owner_id" = "793219755011"
+    "tags" = tomap({
+      "Name" = "sample-company-vpc-a"
+      "billTo" = "study"
+      "createdBy" = "terraform"
+      "directory" = "peering/terraform_vpc_peering"
+      "environment" = "production"
+      "owner" = "Sample Company"
+    })
+  }
+  "b" = {
+    "arn" = "arn:aws:ec2:us-west-2:793219755011:vpc/vpc-079dd05c64c0a3ebe"
+    "assign_generated_ipv6_cidr_block" = false
+    "cidr_block" = "10.2.0.0/16"
+    "default_network_acl_id" = "acl-037ba106a3cc0cc8e"
+    "default_route_table_id" = "rtb-0972dfffc68a8f736"
+    "default_security_group_id" = "sg-0858668e97965b657"
+    "dhcp_options_id" = "dopt-7754a212"
+    "enable_classiclink" = false
+    "enable_classiclink_dns_support" = false
+    "enable_dns_hostnames" = true
+    "enable_dns_support" = true
+    "id" = "vpc-079dd05c64c0a3ebe"
+    "instance_tenancy" = "default"
+    "ipv6_association_id" = ""
+    "ipv6_cidr_block" = ""
+    "main_route_table_id" = "rtb-0972dfffc68a8f736"
+    "owner_id" = "793219755011"
+    "tags" = tomap({
+      "Name" = "sample-company-vpc-b"
+      "billTo" = "study"
+      "createdBy" = "terraform"
+      "directory" = "peering/terraform_vpc_peering"
+      "environment" = "production"
+      "owner" = "Sample Company"
+    })
+  }
+}
+
+vpc_config = {
+  "a" = {
+    "cidr_vpc" = "10.1.0.0/16"
+    "name" = "sample-company-vpc"
+    "peer_cidr" = "10.2.0.0/16"
+    "region" = "us-west-2"
+    "sg_cidr" = [
+      "10.1.0.0/16",
+      "10.2.0.0/16",
+    ]
+  }
+  "b" = {
+    "cidr_vpc" = "10.2.0.0/16"
+    "name" = "sample-company-vpc"
+    "peer_cidr" = "10.1.0.0/16"
+    "region" = "us-west-2"
+    "sg_cidr" = [
+      "10.1.0.0/16",
+      "10.2.0.0/16",
+    ]
+  }
+}
+
+igw_ids = {
+  "a" = "igw-0c5265d2efc316c84"
+  "b" = "igw-0a029debee5da18f3"
+}
+```
+
+Next I want to create subnets in my VPCs and can again use a local variable to create a map:
+
+```json
+locals {
+  subnets = {
+    a_a = {
+      vpc_key     = "a",
+      zone        = "${local.region}a",
+      cidr_block  = "10.1.0.0/19"
+      public      = "true"
+      nat_gateway = "true"
+      api_ip      = "10.1.96.10"
+    },
+    a_b = {
+      vpc_key     = "a",
+      zone        = "${local.region}b",
+      cidr_block  = "10.1.32.0/19"
+      public      = "true"
+      nat_gateway = "false"
+      api_ip      = "10.1.128.10"
+    },
+    a_c = {
+      vpc_key     = "a",
+      zone        = "${local.region}c",
+      cidr_block  = "10.1.64.0/19"
+      public      = "true"
+      nat_gateway = "false"
+      api_ip      = "10.1.160.10"
+    },
+    a_d = {
+      vpc_key     = "a",
+      zone        = "${local.region}a",
+      cidr_block  = "10.1.96.0/19"
+      public      = "false"
+      nat_gateway = "false"
+      private_ip  = "10.1.96.10"
+    },
+    a_e = {
+      vpc_key     = "a",
+      zone        = "${local.region}b",
+      cidr_block  = "10.1.128.0/19"
+      public      = "false"
+      nat_gateway = "false"
+      private_ip  = "10.1.128.10"
+    },
+    a_f = {
+      vpc_key     = "a",
+      zone        = "${local.region}c",
+      cidr_block  = "10.1.160.0/19"
+      public      = "false"
+      nat_gateway = "false"
+      private_ip  = "10.1.160.10"
+    },
+    b_a = {
+      vpc_key     = "b",
+      zone        = "${local.region}a",
+      cidr_block  = "10.2.0.0/19"
+      public      = "true"
+      nat_gateway = "true"
+      api_ip      = "10.2.96.10"
+    },
+    b_b = {
+      vpc_key     = "b",
+      zone        = "${local.region}b",
+      cidr_block  = "10.2.32.0/19"
+      public      = "true"
+      nat_gateway = "false"
+      api_ip      = "10.2.128.10"
+    },
+    b_c = {
+      vpc_key     = "b",
+      zone        = "${local.region}c",
+      cidr_block  = "10.2.64.0/19"
+      public      = "true"
+      nat_gateway = "false"
+      api_ip      = "10.2.160.10"
+    }
+    b_d = {
+      vpc_key     = "b",
+      zone        = "${local.region}a",
+      cidr_block  = "10.2.96.0/19"
+      public      = "false"
+      nat_gateway = "false"
+      private_ip  = "10.2.96.10"
+    },
+    b_e = {
+      vpc_key     = "b",
+      zone        = "${local.region}b",
+      cidr_block  = "10.2.128.0/19"
+      public      = "false"
+      nat_gateway = "false"
+      private_ip  = "10.2.128.10"
+    },
+    b_f = {
+      vpc_key     = "b",
+      zone        = "${local.region}c",
+      cidr_block  = "10.2.160.0/19"
+      public      = "false"
+      nat_gateway = "false"
+      private_ip  = "10.2.160.10"
+    },
+  }
+}
+```
+
+Because we don't have a one to one relationship between VPCs and subnets, like we did with internet gateways, we will reference our VPCs using their known key values with the vpc_key property (aws_vpc.vpc[each.value.vpc_key].id) in or subnet map.  We also introduce using ternary expressions to set tag values:
+
+```json
+resource "aws_subnet" "i" {
+  for_each = local.subnets
+
+  vpc_id                  = aws_vpc.vpc[each.value.vpc_key].id
+  cidr_block              = each.value.cidr_block
+  map_public_ip_on_launch = each.value.public
+  availability_zone       = each.value.zone
+  tags = merge(
+    local.base_tags,
+    {
+      Name   = "${local.resource_prefix}-vpc-${each.key}-${each.value.public == "true" ? "public" : "private"}"
+      vpc    = "vpc-${each.value.vpc_key}"
+      access = each.value.public == "true" ? "public" : "private"
+    },
+  )
+}
+```
+
+Subnet outputs are generated the same way:
+```json
+output "subnet_info" {
+  value = {
+    for k, subnet in local.subnets : k => subnet
+  }
+}
+
+output "subnet_ids" {
+  value = {
+    for k, subnet in aws_subnet.i : k => subnet.id
+  }
+}
+```
+
+producing
+
+```json
+subnet_ids = {
+  "a_a" = "subnet-036d8021fa31a75df"
+  "a_b" = "subnet-0c591947f5e3ea68f"
+  "a_c" = "subnet-06719e47a1e6c8d4b"
+  "a_d" = "subnet-0f2ff9bca4118037d"
+  "a_e" = "subnet-0e0bd3a8ab72c77be"
+  "a_f" = "subnet-020cc27bd5f868929"
+  "b_a" = "subnet-0b9742bc7724f6d72"
+  "b_b" = "subnet-0b896d1d35a38eb43"
+  "b_c" = "subnet-0d67b9a34a9843c6a"
+  "b_d" = "subnet-077c4ff53836eab0d"
+  "b_e" = "subnet-094b9eac22a4bfcff"
+  "b_f" = "subnet-006fb422f4668983a"
+}
+subnet_info = {
+  "a_a" = {
+    "api_ip" = "10.1.96.10"
+    "cidr_block" = "10.1.0.0/19"
+    "nat_gateway" = "true"
+    "public" = "true"
+    "vpc_key" = "a"
+    "zone" = "us-west-2a"
+  }
+  "a_b" = {
+    "api_ip" = "10.1.128.10"
+    "cidr_block" = "10.1.32.0/19"
+    "nat_gateway" = "false"
+    "public" = "true"
+    "vpc_key" = "a"
+    "zone" = "us-west-2b"
+  }
+  "a_c" = {
+    "api_ip" = "10.1.160.10"
+    "cidr_block" = "10.1.64.0/19"
+    "nat_gateway" = "false"
+    "public" = "true"
+    "vpc_key" = "a"
+    "zone" = "us-west-2c"
+  }
+  "a_d" = {
+    "cidr_block" = "10.1.96.0/19"
+    "nat_gateway" = "false"
+    "private_ip" = "10.1.96.10"
+    "public" = "false"
+    "vpc_key" = "a"
+    "zone" = "us-west-2a"
+  }
+  "a_e" = {
+    "cidr_block" = "10.1.128.0/19"
+    "nat_gateway" = "false"
+    "private_ip" = "10.1.128.10"
+    "public" = "false"
+    "vpc_key" = "a"
+    "zone" = "us-west-2b"
+  }
+  "a_f" = {
+    "cidr_block" = "10.1.160.0/19"
+    "nat_gateway" = "false"
+    "private_ip" = "10.1.160.10"
+    "public" = "false"
+    "vpc_key" = "a"
+    "zone" = "us-west-2c"
+  }
+  "b_a" = {
+    "api_ip" = "10.2.96.10"
+    "cidr_block" = "10.2.0.0/19"
+    "nat_gateway" = "true"
+    "public" = "true"
+    "vpc_key" = "b"
+    "zone" = "us-west-2a"
+  }
+  "b_b" = {
+    "api_ip" = "10.2.128.10"
+    "cidr_block" = "10.2.32.0/19"
+    "nat_gateway" = "false"
+    "public" = "true"
+    "vpc_key" = "b"
+    "zone" = "us-west-2b"
+  }
+  "b_c" = {
+    "api_ip" = "10.2.160.10"
+    "cidr_block" = "10.2.64.0/19"
+    "nat_gateway" = "false"
+    "public" = "true"
+    "vpc_key" = "b"
+    "zone" = "us-west-2c"
+  }
+  "b_d" = {
+    "cidr_block" = "10.2.96.0/19"
+    "nat_gateway" = "false"
+    "private_ip" = "10.2.96.10"
+    "public" = "false"
+    "vpc_key" = "b"
+    "zone" = "us-west-2a"
+  }
+  "b_e" = {
+    "cidr_block" = "10.2.128.0/19"
+    "nat_gateway" = "false"
+    "private_ip" = "10.2.128.10"
+    "public" = "false"
+    "vpc_key" = "b"
+    "zone" = "us-west-2b"
+  }
+  "b_f" = {
+    "cidr_block" = "10.2.160.0/19"
+    "nat_gateway" = "false"
+    "private_ip" = "10.2.160.10"
+    "public" = "false"
+    "vpc_key" = "b"
+    "zone" = "us-west-2c"
+  }
+}
+```
+
+After creating our VPCs and Subnets we can then reference the outputs via remote state in a separate EC2 repository.
+
+<Link p={4} href={RepoEC2} target="_blank">Code located here</Link>
+
+In our data.tf file we define these two local variables:
+
+```json
+  subnet_ids  = data.terraform_remote_state.vpc.outputs.subnet_ids
+  subnet_info = data.terraform_remote_state.vpc.outputs.subnet_info
+```
+
+Then we can use these maps to create public and private instances of EC2 instances.  Here we demonstrate the use of a for loop (for k, subnet in local.subnet_info : k => subnet if subnet.public == "true") to filter our subnet info to only the public subnets.  The results of this filtered result set are fed to the for_each and allow us create ec2 instances for only our public subnets:
+
+```json
+resource "aws_instance" "public" {
+  for_each = { for k, subnet in local.subnet_info : k =>
+  subnet if subnet.public == "true" }
+
+  ami                    = var.ami_id
+  instance_type          = var.ami_instance_type
+  subnet_id              = local.subnet_ids[each.key]
+  vpc_security_group_ids = [aws_security_group.ec2_public[each.value.vpc_key].id]
+  key_name               = aws_key_pair.ec2key.key_name
+  iam_instance_profile   = local.s3_instance_profile_name
+  //  private_ip             = local.mc_private_ip
+
+  user_data = var.user_data
+
+  provisioner "file" {
+    source      = var.react_path
+    destination = "/tmp"
+
+    connection {
+      type        = "ssh"
+      user        = "ubuntu"
+      private_key = file(var.private_key_path)
+      host        = self.public_dns
+    }
+  }
+
+  provisioner "file" {
+    source      = var.go_api_path
+    destination = "/tmp"
+
+    connection {
+      type        = "ssh"
+      user        = "ubuntu"
+      private_key = file(var.private_key_path)
+      host        = self.public_dns
+    }
+  }
+
+  provisioner "file" {
+    source      = "goapi@.service"
+    destination = "~/goapi@.service"
+
+    connection {
+      type        = "ssh"
+      user        = "ubuntu"
+      private_key = file(var.private_key_path)
+      host        = self.public_dns
+    }
+  }
+
+  provisioner "file" {
+    source      = "dockerStart.sh"
+    destination = "~/dockerStart.sh"
+
+    connection {
+      type        = "ssh"
+      user        = "ubuntu"
+      private_key = file(var.private_key_path)
+      host        = self.public_dns
+    }
+  }
+
+  tags = merge(
+    local.base_tags,
+    {
+      Name = "${local.resource_prefix}-${each.key}-ec2_public"
+    },
+  )
+}
+```
+
+We do the same for private subnets and ultimately are able to create instances within all of our subnets using for_each to loop through the map outputs from our dynamic number of VPCs and Subnets:
+
+```json
+key_id = "sample-company_publicKey"
+key_name = "sample-company_publicKey"
+public_ssh_link = {
+  "a_a" = "ssh -i ~/.ssh/id_rsa_ec2 ubuntu@35.165.242.82"
+  "a_b" = "ssh -i ~/.ssh/id_rsa_ec2 ubuntu@34.221.13.100"
+  "a_c" = "ssh -i ~/.ssh/id_rsa_ec2 ubuntu@18.237.136.196"
+  "b_a" = "ssh -i ~/.ssh/id_rsa_ec2 ubuntu@35.163.62.108"
+  "b_b" = "ssh -i ~/.ssh/id_rsa_ec2 ubuntu@34.211.122.232"
+  "b_c" = "ssh -i ~/.ssh/id_rsa_ec2 ubuntu@54.186.21.110"
+}
+webserver_ips = {
+  "a_a" = "35.165.242.82"
+  "a_b" = "34.221.13.100"
+  "a_c" = "18.237.136.196"
+  "b_a" = "35.163.62.108"
+  "b_b" = "34.211.122.232"
+  "b_c" = "54.186.21.110"
+}
+webserver_link = {
+  "a_a" = "http://35.165.242.82"
+  "a_b" = "http://34.221.13.100"
+  "a_c" = "http://18.237.136.196"
+  "b_a" = "http://35.163.62.108"
+  "b_b" = "http://34.211.122.232"
+  "b_c" = "http://54.186.21.110"
+}
+webserver_privateips = {
+  "a_a" = "10.1.5.23"
+  "a_b" = "10.1.50.207"
+  "a_c" = "10.1.77.83"
+  "b_a" = "10.2.0.88"
+  "b_b" = "10.2.42.2"
+  "b_c" = "10.2.95.69"
+}
+
+```
+
+##### Conclusion
+As this example shows Terraform can be used to dynamically create multiple types of interrelated resources using maps to create instance configurations and for_each loops to iterate over them.
+
+<br/>

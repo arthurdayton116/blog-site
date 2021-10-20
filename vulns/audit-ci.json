@@ -1,0 +1,27 @@
+{
+  "moderate": true,
+  "skip-dev": true,
+  "show-found": false,
+  "show-not-found": true,
+  "package-manager": "auto",
+  "allowlist": [
+    "1002401|@testing-library/react>@testing-library/dom>pretty-format>ansi-regex",
+
+    "1002536|@rebass/forms>reflexbox>@emotion/styled>babel-plugin-emotion>babel-plugin-macros>resolve>path-parse",
+    "1002536|@rebass/forms>reflexbox>@emotion/core>@emotion/css>babel-plugin-emotion>babel-plugin-macros>resolve>path-parse",
+
+    "1002655|mdx.macro>babel-preset-react-app>@babel/preset-env>core-js-compat>browserslist",
+    "1002775|mdx.macro>@mdx-js/mdx>mdast-util-to-hast>trim",
+    "1002536|mdx.macro>babel-plugin-macros>resolve>path-parse",
+    "1002536|mdx.macro>babel-preset-react-app>babel-plugin-macros>resolve>path-parse",
+
+    "1003013|react-code-blocks>react-syntax-highlighter>highlight.js",
+    "1003013|react-code-blocks>react-syntax-highlighter>lowlight>highlight.js",
+    "1002422|react-code-blocks>react-syntax-highlighter>refractor>prismjs",
+    "1002944|react-code-blocks>react-syntax-highlighter>refractor>prismjs",
+    "1002580|react-code-blocks>react-syntax-highlighter>refractor>prismjs",
+    "1004043|react-code-blocks>react-syntax-highlighter>refractor>prismjs"
+
+  ],
+  "registry": "https://registry.npmjs.org"
+}

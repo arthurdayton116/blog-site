@@ -1,0 +1,139 @@
+import {
+    Box,
+    Card,
+    Image,
+    Heading,
+    Text,
+    Flex,
+    Link
+} from 'rebass';
+
+export const staticSiteSetup = "https://docs.aws.amazon.com/AmazonS3/latest/userguide/HostingWebsiteOnS3Setup.html"
+
+export const cloudFrontSetup = "https://aws.amazon.com/premiumsupport/knowledge-center/cloudfront-serve-static-website/"
+
+export const Repo = "https://github.com/arthurdayton116/arthurdayton116.github.io"
+
+export const Post1 = "https://arthurdayton116.github.io/post/1/"
+
+export const clientSideRoute = "https://create-react-app.dev/docs/deployment#serving-apps-with-client-side-routing"
+
+export const goodExp = "https://wolovim.medium.com/deploying-create-react-app-to-s3-or-cloudfront-48dae4ce0af"
+
+export const prodBuild = "https://create-react-app.dev/docs/production-build"
+
+export const gaTerraform = "https://github.com/hashicorp/setup-terraform"
+
+#### Setting up static site on S3 for a blog
+In this post I am going to cover how I set up GitHub Actions to deploy this blog to an S3 bucket using a Cloudfront distribution.
+
+<Link p={4} href={staticSiteSetup} target="_blank">S3 Static Site Setup</Link>
+<br/>
+<br/>
+
+<Link p={4} href={cloudFrontSetup} target="_blank">CloudFront Setup</Link>
+<br/>
+<br/>
+
+<Link p={4} href={goodExp} target="_blank">This post explains it all pretty good</Link>
+<br/>
+<br/>
+
+With S3 and CloudFront I have a highly scalable easy to use setup cached around the world.
+
+<br/>
+
+There is a lot going on here as I am adopting GitHub Actions for deployment and Terraform Cloud for state storage.
+
+<br/>
+
+I will need a domain and a certificate and because it's a mostly a one time set up I'm not going to get into the automation of that portion for now.
+
+<br/>
+
+#### Certificate
+Using Amazon Certificate Manager you can create a certificate for your domain and have it automatically validate by creating records in your hosted zone
+
+<Image p={4} verticalAlign='middle' src="/images/6/acm.png" />
+<br/>
+<br/>
+
+#### Cloudfront
+After creating a cloudfront distribution for my S3 buckets I can point the name records in S3 at Cloudfront
+
+<Image p={4} verticalAlign='middle' src="/images/6/cloudfront.png" />
+<br/>
+<br/>
+
+#### Hosted Zone
+
+I have a hosted zone in Route53 that ties it all together.  Most important thing to remember is that when you are sure it's not DNS it's probably DNS.
+
+
+<Image p={4} verticalAlign='middle' src="/images/6/hostedzone.png" />
+<Image p={4} verticalAlign='middle' src="/images/6/hostedzone2.png" />
+<br/>
+<br/>
+
+
+---
+
+#### Building Blog Site with Github actions
+
+This part is relatively easy assuming <Link p={0} href={Post1} target="_blank">this post</Link> makes sense.CloudFront
+
+<br/>
+
+Key differences is the 404.html page no longer matters.
+
+<br/>
+
+We use two S3 buckets to accomplish static website hosting.
+
+<br/>
+
+First www.arthurneedsadomain.com
+
+<br/>
+
+<Image p={4} verticalAlign='middle' src="/images/6/S3www.png" />
+
+<br/>
+
+which redirects to arthurneedsadomain.com that hosts the content
+
+<br/>
+
+<Image p={4} verticalAlign='middle' src="/images/6/S3domain.png" />
+
+<br/>
+
+the key on this bucket is to set the index.html as both the index and the error document because we are using React Router which doesn't play nice with S3 but the error redirection hacks it back to where it needs to be.  <Link p={0} href={clientSideRoute} target="_blank">If you care why this explains it.</Link>
+
+<br/>
+
+Once you have the bucket setup right then all you need to do is deploy your built content into it.
+
+<br/>
+
+Now that we have the mechanism set up to deploy our
+
+React (really Webpack) ultimately "compiles" the JavaScript you write into a bunch of files that are your deployment artifacts.  You can read more <Link p={0} href={prodBuild} target="_blank">here</Link>
+
+<br/>
+
+Setting up GitHub actions
+
+
+
+
+<br/>
+
+<br/>
+
+<Link p={4} href={Repo} target="_blank">Code located here</Link>
+
+<br/>
+<br/>
+
+<br/>

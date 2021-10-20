@@ -1,0 +1,65 @@
+[
+    {
+      "id": 1,
+      "title": "How to set up a Git Hub Pages Blog Site Using React and MDX",
+      "body": "Here comes some information",
+      "postLink": "../blogs/1",
+      "posted": "2021-02-15",
+      "lastUpdated": "2021-02-15",
+      "technologies": ["React", "JavaScript","GitHub"]
+    },
+    {
+      "id": 2,
+      "title": "Create a VPC",
+      "body": "Here comes some AWS information",
+      "postLink": "../blogs/2",
+      "posted": "2021-02-18",
+      "lastUpdated": "2021-02-18",
+      "technologies": ["AWS", "Terraform"]
+    },
+  {
+    "id": 3,
+    "title": "Automated Infrastructure Creation for Ephemeral Workloads Requiring Distributed Access and Persisted State Using Terraform and AWS (i.e., A Minecraft server for my kids)",
+    "body": "Here comes some AWS information",
+    "postLink": "../blogs/3",
+    "posted": "2021-02-28",
+    "lastUpdated": "2021-02-28",
+    "technologies": ["AWS", "EC2", "Terraform", "Minecraft", "Systemctl", "Ubuntu"]
+  },
+  {
+    "id": 4,
+    "title": "Using Docker for local development",
+    "body": "Here comes some information",
+    "postLink": "../blogs/4",
+    "posted": "2021-03-22",
+    "lastUpdated": "021-03-22",
+    "technologies": ["Docker", "Terraform", "React"]
+  },
+  {
+    "id": 5,
+    "title": "The magic of Infrastructure as Code with Terraform",
+    "body": "Here comes some information",
+    "postLink": "../blogs/5",
+    "posted": "2021-03-29",
+    "lastUpdated": "021-03-29",
+    "technologies": ["Docker", "Terraform", "AWS"]
+  },
+  {
+    "id": 6,
+    "title": "Deploying Blog on S3 as static site",
+    "body": "Here comes some information",
+    "postLink": "../blogs/6",
+    "posted": "2021-10-29",
+    "lastUpdated": "2021-10-29",
+    "technologies": ["React", "Terraform", "AWS"]
+  },
+  {
+    "id": 7,
+    "title": "AWS VPC Peering",
+    "body": "Here comes some information",
+    "postLink": "../blogs/7",
+    "posted": "2021-03-29",
+    "lastUpdated": "021-03-29",
+    "technologies": ["Docker", "Terraform", "AWS"]
+  }
+]

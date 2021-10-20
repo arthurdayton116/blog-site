@@ -1,0 +1,52 @@
+# This workflow will do a clean install of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: Node.js CI
+
+
+on:
+  push:
+    branches: [ daCode ]
+  pull_request:
+    branches: [ daCode ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    environment: dev
+    env:
+      CI: ""
+
+    strategy:
+      matrix:
+        node-version: [14.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.0.9
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build --if-present
+#      - run: ls
+#      - run: ls ./build
+#     - run: npm test
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy static site to S3 bucket
+        env:
+          aws_bucket_name: ${{ secrets.AWS_BUCKET_NAME }}
+        run: aws s3 sync ./build/ s3://"$aws_bucket_name" --delete
