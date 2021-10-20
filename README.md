@@ -10,15 +10,18 @@ to check vulns - https://classic.yarnpkg.com/en/docs/cli/audit/
 
 react-scripts is in dev dependencies - https://github.com/facebook/create-react-app/issues/11102
 
+# This is way better for managing vulns
 https://github.com/IBM/audit-ci
+
+Install - 
+```
 yarn add -D audit-ci
 
 ```
-npx audit-ci --skip-dev --report-type summary
 
-npx audit-ci --skip-dev --report-type full
-
-npx audit-ci --skip-dev --config vulns/audit-ci.json
+use - 
+```
+npx audit-ci --config vulns/audit-ci.json
 
 ```
 
