@@ -65,11 +65,14 @@ jobs:
         continue-on-error: true
         working-directory: ./terraform
 
-      - run: terraform output
-      - run: echo $bucket_name
+      - name: Set var from TF Output
+        id: setVar
+        run: |
+          bucket_name=$(terraform output bucket_name)
+          echo "bucket_name=$bucket_name" >> $GITHUB_ENV
+        working-directory: ./terraform
 
-      - run: redirect_bucket_name=$(terraform output redirect_bucket_name)
-      - run: echo $redirect_bucket_name
+      - run: echo "${{ env.bucket_name }}"
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
