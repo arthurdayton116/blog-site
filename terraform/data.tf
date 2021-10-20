@@ -20,8 +20,8 @@ variable "region" {
 }
 
 locals {
-  base_tags=var.base_tags
-  resource_prefix=var.resource_prefix
-  region=var.region
-  bucket_name="arthurneedsadomain"
+  base_tags       = var.base_tags
+  resource_prefix = var.resource_prefix
+  region          = var.region
+  bucket_name     = "arthurneedsadomain"
 }
