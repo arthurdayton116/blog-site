@@ -31,6 +31,7 @@ jobs:
         with:
           terraform_version: 1.0.9
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+          terraform_wrapper: false
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -57,12 +58,18 @@ jobs:
         run: terraform validate -no-color
         working-directory: ./terraform
 
-      - name: Terraform Plan
-        id: plan
+      - name: Terraform Apply
+        id: apply
 #        if: github.event_name == 'pull_request'
-        run: terraform plan -no-color
+        run: terraform apply -auto-approve
         continue-on-error: true
         working-directory: ./terraform
+
+      - run: bucket_name=$(terraform output bucket_name)
+      - run: echo $bucket_name
+
+      - run: redirect_bucket_name=$(terraform output redirect_bucket_name)
+      - run: echo $redirect_bucket_name
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
