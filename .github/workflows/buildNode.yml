@@ -15,12 +15,16 @@ jobs:
 
     runs-on: ubuntu-latest
     environment: development
+    # set environment variables
     env:
+      # Setting CI to "" avoids issue with react scripts treating  warnings as errors - probably should make this specific to GitHub environment
       CI: ""
+      # var for what doamin I'm using
       TF_VAR_base_domain: ${{ secrets.BASE_DOMAIN }}
-      react_build_override: 'true'
-      terraform_apply_override: 'true'
-      s3_deploy_override: 'true'
+      # override variables for conditionally run steps
+      react_build_override: 'false'
+      terraform_apply_override: 'false'
+      s3_deploy_override: 'false'
 
     strategy:
       matrix:
