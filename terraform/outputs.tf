@@ -1,7 +1,7 @@
 output "bucket_name" {
-  value = aws_s3_bucket.blog_domain.bucket
+  value = aws_s3_bucket.a.bucket
 }
 
 output "redirect_bucket_name" {
-  value = aws_s3_bucket.blog_domain_redirect.bucket
+  value = aws_s3_bucket.b.bucket
 }
