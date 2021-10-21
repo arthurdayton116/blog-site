@@ -127,4 +127,4 @@ yarn-debug.log*
 yarn-error.log*
 /garbage/
 /terraform/provider_override.tf
-/terraform/local.tfvars
+/terraform/local.auto.tfvars
