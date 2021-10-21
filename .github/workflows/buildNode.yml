@@ -18,9 +18,9 @@ jobs:
     env:
       CI: ""
       TF_VAR_base_domain: ${{ secrets.BASE_DOMAIN }}
-      react_build_override: 'false'
-      terraform_apply_override: 'false'
-      s3_deploy_override: 'false'
+      react_build_override: 'true'
+      terraform_apply_override: 'true'
+      s3_deploy_override: 'true'
 
     strategy:
       matrix:
