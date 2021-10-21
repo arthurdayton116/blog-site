@@ -1,7 +1,7 @@
 // root domain bucket and policy
 resource "aws_s3_bucket" "a" {
   bucket = local.bucket_name
-  acl    = "public-read"
+  //  acl    = "public-read"
 
   website {
     index_document = "index.html"
@@ -46,8 +46,8 @@ resource "aws_s3_bucket_policy" "a" {
 
 // redirect bucket and policy
 resource "aws_s3_bucket" "b" {
-  bucket        = local.redirect_bucket_name
-  acl           = "public-read"
+  bucket = local.redirect_bucket_name
+  //  acl           = "public-read"
   force_destroy = true
 
   website {
