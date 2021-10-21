@@ -43,30 +43,35 @@ jobs:
           files: |
             terraform
 
-      # run step if terraform files changed
-      - name: Run step if only the files listed above change
+      - name: Set tf_dir_changed var
+        id: tfChanged_true
         if: steps.changed-files-terraform.outputs.only_changed == 'true'
         run: |
-          echo "Only files listed above have changed."
+          echo "tf_dir_changed=true" >> $GITHUB_ENV
+
+      - name: Set tf_dir_changed var
+        id: tfChanged_false
+        if: steps.changed-files-terraform.outputs.only_changed == 'false'
+        run: |
+          echo "tf_dir_changed=false" >> $GITHUB_ENV
+
+      # run step if terraform files changed
+      - name: Run step if only the files listed above change
+        if: ${{ env.tf_dir_changed }} == 'true'
+        run: |
+          echo "terraform directory files have changed."
 
           for file in ${{ steps.changed-files-terraform.outputs.added_files }}; do
                       echo "$file was added"
           done
 
-#      - name: Run changed-files with defaults on the dir1
-#        id: changed-files-for-dir1
-#        uses: tj-actions/changed-files@v10.1
-#        with:
-#          path: dir1
-
-#      - name: List all added files in dir1
-#        run: |
-#          for file in ${{ steps.changed-files-terraform.outputs.added_files }}; do
-#            echo "$file was added"
-#          done
-
+      - name: Run step if only the files listed above change
+        if: ${{ env.tf_dir_changed }} == 'false'
+        run: |
+          echo "No terraform directory files have changed."
 
       - uses: hashicorp/setup-terraform@v1
+        if: ${{ env.tf_dir_changed }} == 'true'
         with:
           terraform_version: 1.0.9
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
@@ -99,7 +104,7 @@ jobs:
 
       - name: Terraform Apply
         id: apply
-#        if: github.event_name == 'pull_request'
+        if: ${{ env.tf_dir_changed }} == 'true'
         run: terraform apply -auto-approve
         continue-on-error: true
         working-directory: ./terraform
