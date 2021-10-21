@@ -57,7 +57,7 @@ jobs:
 
       # run step if terraform files changed
       - name: Run step if terraform files changed
-        if: ${{ env.tf_dir_changed == true }}
+        if: ${{ env.tf_dir_changed == 'true' }}
         run: |
           echo "terraform directory files have changed."
 
@@ -66,7 +66,7 @@ jobs:
           done
 
       - name: Run step if terraform files have not changed
-        if: ${{ env.tf_dir_changed == false }}
+        if: ${{ env.tf_dir_changed == 'false' }}
         run: |
           echo "No terraform directory files have changed."
 
@@ -103,7 +103,7 @@ jobs:
 
       - name: Terraform Apply
         id: apply
-        if: ${{ env.tf_dir_changed == true }}
+        if: ${{ env.tf_dir_changed == 'true' }}
         run: terraform apply -auto-approve
         continue-on-error: true
         working-directory: ./terraform
