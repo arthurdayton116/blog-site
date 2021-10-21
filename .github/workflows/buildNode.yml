@@ -27,12 +27,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      # Checkout previous commit for compare
       - name: Checkout into lastCommit
         uses: actions/checkout@v2
         with:
           fetch-depth: 2
           path: lastCommit
 
+      # Compare terraform directory to previous commit
       - name: Get specific changed files
         id: changed-files-terraform
         uses: tj-actions/changed-files@v10.1
@@ -41,10 +43,15 @@ jobs:
           files: |
             terraform
 
+      # run step if terraform files changed
       - name: Run step if only the files listed above change
         if: steps.changed-files-terraform.outputs.only_changed == 'true'
         run: |
           echo "Only files listed above have changed."
+
+          for file in ${{ steps.changed-files-terraform.outputs.added_files }}; do
+                      echo "$file was added"
+          done
 
 #      - name: Run changed-files with defaults on the dir1
 #        id: changed-files-for-dir1
@@ -52,11 +59,11 @@ jobs:
 #        with:
 #          path: dir1
 
-      - name: List all added files in dir1
-        run: |
-          for file in ${{ steps.changed-files-terraform.outputs.added_files }}; do
-            echo "$file was added"
-          done
+#      - name: List all added files in dir1
+#        run: |
+#          for file in ${{ steps.changed-files-terraform.outputs.added_files }}; do
+#            echo "$file was added"
+#          done
 
 
       - uses: hashicorp/setup-terraform@v1
