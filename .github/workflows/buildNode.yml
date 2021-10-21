@@ -18,6 +18,9 @@ jobs:
     env:
       CI: ""
       TF_VAR_base_domain: ${{ secrets.BASE_DOMAIN }}
+      react_build_override: 'false'
+      terraform_apply_override: 'false'
+      s3_deploy_override: 'false'
 
     strategy:
       matrix:
@@ -35,7 +38,7 @@ jobs:
           path: lastCommit
 
       # Compare terraform directory to previous commit
-      - name: Get specific changed files
+      - name: Get terraform changed files
         id: changed-files-terraform
         uses: tj-actions/changed-files@v10.1
         with:
@@ -43,9 +46,10 @@ jobs:
           files: |
             terraform
 
+      # set environment variable for determining if terraform apply should run
       - name: Set tf_dir_changed var
         id: tfChanged_true
-        if: steps.changed-files-terraform.outputs.only_changed == 'true'
+        if: steps.changed-files-terraform.outputs.all_changed_and_modified_files == 'true'
         run: |
           echo "tf_dir_changed=true" >> $GITHUB_ENV
 
@@ -55,7 +59,7 @@ jobs:
         run: |
           echo "tf_dir_changed=false" >> $GITHUB_ENV
 
-      # run step if terraform files changed
+      # validate logic is working correctly
       - name: Run step if terraform files changed
         if: ${{ env.tf_dir_changed == 'true' }}
         run: |
@@ -70,12 +74,14 @@ jobs:
         run: |
           echo "No terraform directory files have changed."
 
+      # Installs specified version of terraform - I like to pin versions - would make sense to use a variable at org level
       - uses: hashicorp/setup-terraform@v1
         with:
           terraform_version: 1.0.9
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
           terraform_wrapper: false
 
+      # Need these for terraform and S3 push
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -83,14 +89,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - run: ls -la
-
+      # Always run format / validate and output commands but run apply only if files have changed
       - name: Terraform Format
         id: fmt
         run: terraform fmt -check
         working-directory: ./terraform
 
-
+      # Init using workspace from Terraform Cloud
       - name: Terraform Init
         id: init
         run: terraform init
@@ -101,13 +106,15 @@ jobs:
         run: terraform validate -no-color
         working-directory: ./terraform
 
+      # run conditionally
       - name: Terraform Apply
         id: apply
-        if: ${{ env.tf_dir_changed == 'true' }}
+        if: ${{ env.tf_dir_changed == 'true' || env.terraform_apply_override == 'true' }}
         run: terraform apply -auto-approve
         continue-on-error: true
         working-directory: ./terraform
 
+      # get bucket name from terraform state and set environment variable
       - name: Set var from TF Output
         id: setVar
         run: |
@@ -115,23 +122,72 @@ jobs:
           echo "bucket_name=$bucket_name" >> $GITHUB_ENV
         working-directory: ./terraform
 
-      - run: echo "${{ env.bucket_name }}"
+      # bucket name is masked because it comes form a secret but values are passed to other steps
+      - run: |
+          echo "#######################"
+          echo "Should appear masked"
+          echo "bucket name - ${{ env.bucket_name }}"
+          echo "#######################"
 
+      # set up to build React project
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'yarn'
 
+      # Compare src directory to previous commit - this is boiler plate and I could write a template for this
+      - name: Get React changed files
+        id: changed-files-src
+        uses: tj-actions/changed-files@v10.1
+        with:
+          path: lastCommit
+          files: |
+            src
 
-      - run: yarn install --frozen-lockfile
-      - run: yarn run build --if-present
+      # set environment variable for determining if React build should run
+      - name: Set src_dir_changed var
+        id: srcChanged_true
+        if: steps.changed-files-src.outputs.only_changed == 'true'
+        run: |
+          echo "src_dir_changed=true" >> $GITHUB_ENV
+
+      - name: Set src_dir_changed var
+        id: srcChanged_false
+        if: steps.changed-files-src.outputs.only_changed == 'false'
+        run: |
+          echo "src_dir_changed=false" >> $GITHUB_ENV
+
+      # validate logic is working correctly
+      - name: Run step if src files changed
+        if: ${{ env.src_dir_changed == 'true' }}
+        run: |
+          echo "src directory files have changed."
+
+          for file in ${{ steps.changed-files-src.outputs.all_changed_and_modified_files }}; do
+                      echo "$file was changed"
+          done
+
+      - name: Run step if src files have not changed
+        if: ${{ env.src_dir_changed == 'false' }}
+        run: |
+          echo "No src directory files have changed."
+
+      # build React project
+      - name: Yarn Install
+        run: yarn install --frozen-lockfile
+
+      # run conditionally
+      - name: Yarn build
+        if: ${{ env.src_dir_changed == 'true' || env.react_build_override == 'true' }}
+        run: yarn run build --if-present
 #      - run: ls
 #      - run: ls ./build
 #     - run: npm test
 
 
       - name: Deploy static site to S3 bucket
+        if: ${{ env.src_dir_changed == 'true' || env.s3_deploy_override == 'true'}}
         env:
           aws_bucket_name: ${{ secrets.AWS_BUCKET_NAME }}
         run: aws s3 sync ../build/ s3://"${{ env.bucket_name }}" --delete
