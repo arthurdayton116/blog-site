@@ -8,7 +8,7 @@ resource "aws_s3_bucket" "a" {
     error_document = "index.html"
   }
 
-  force_destroy = false
+  force_destroy = true
   tags = merge(
     local.base_tags,
     {
@@ -48,7 +48,7 @@ resource "aws_s3_bucket_policy" "a" {
 resource "aws_s3_bucket" "b" {
   bucket        = local.redirect_bucket_name
   acl           = "public-read"
-  force_destroy = false
+  force_destroy = true
 
   website {
     redirect_all_requests_to = "https://${local.bucket_name}"
