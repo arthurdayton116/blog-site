@@ -2,7 +2,7 @@ variable "base_tags" {
   default = {
     owner       = "blog-site"
     createdBy   = "terraform"
-    environment = "dev"
+    environment = "development"
     billTo      = "study"
   }
   description = "base resource tags"
