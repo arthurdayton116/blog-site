@@ -56,8 +56,8 @@ jobs:
           echo "tf_dir_changed=false" >> $GITHUB_ENV
 
       # run step if terraform files changed
-      - name: Run step if only the files listed above change
-        if: ${{ env.tf_dir_changed }} == 'true'
+      - name: Run step if terraform files changed
+        if: ${{ env.tf_dir_changed }} == true
         run: |
           echo "terraform directory files have changed."
 
@@ -65,8 +65,8 @@ jobs:
                       echo "$file was added"
           done
 
-      - name: Run step if only the files listed above change
-        if: ${{ env.tf_dir_changed }} == 'false'
+      - name: Run step if terraform files have not changed
+        if: ${{ env.tf_dir_changed }} == false
         run: |
           echo "No terraform directory files have changed."
 
