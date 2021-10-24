@@ -11,7 +11,6 @@ export const Blogs = () => {
     const theme = useTheme()
         return (
             <div>
-
                 <Flex flexWrap={'wrap'} alignItems='center' sx={theme.linkSXAlt1}>
                     {data.filter(post =>  post.id <= maxPostNumber).map(post => (
                     <Box width={cardArr} height={'130px'}  m={2}
@@ -28,7 +27,6 @@ export const Blogs = () => {
                                     },
                                 }
                             }>
-
                             <Card
                                    height={'115px'} alignItems='center' justifyContent='center'
                                   sx={{'text-align': 'center', 'vertical-align': 'middle',
@@ -37,26 +35,9 @@ export const Blogs = () => {
                                 <Heading fontSize={[ 1, 2, 3 ]} fontFamily={theme.fontFamily} color={'black'}>{post.title}</Heading>
                             </Card>
                             </NavLink>
-
                     </Box>
                     ))}
                 </Flex>
-                    {/*<ul>*/}
-                    {/*        {data.filter(post =>  post.id <= maxPostNumber).map(post => (*/}
-                    {/*            <li key={post.id}>*/}
-                    {/*                <Box sx={theme.linkSXAlt1}>*/}
-                    {/*                    <Link style={theme.linkSXAlt1} to={*/}
-                    {/*                        {*/}
-                    {/*                            pathname: `/post/${post.id}/`,*/}
-                    {/*                            state: {*/}
-                    {/*                                post: post*/}
-                    {/*                            },*/}
-                    {/*                        }*/}
-                    {/*                    }>{post.title}</Link>*/}
-                    {/*                </Box>*/}
-                    {/*            </li>*/}
-                    {/*        ))}*/}
-                    {/*</ul>*/}
             </div>
         )
 }
