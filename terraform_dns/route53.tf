@@ -2,25 +2,25 @@ resource "aws_route53_zone" "main" {
   name = local.bucket_name
 }
 
-resource "aws_route53_zone" "www" {
-  name = "www.${local.bucket_name}"
+//resource "aws_route53_zone" "www" {
+//  name = "www.${local.bucket_name}"
+//
+//  tags = merge(
+//    local.base_tags,
+//    {
+//      Name      = "${local.resource_prefix}-${local.bucket_name}-zone"
+//      directory = basename(path.cwd)
+//    },
+//  )
+//}
 
-  tags = merge(
-    local.base_tags,
-    {
-      Name      = "${local.resource_prefix}-${local.bucket_name}-zone"
-      directory = basename(path.cwd)
-    },
-  )
-}
-
-resource "aws_route53_record" "dev-ns" {
-  zone_id = aws_route53_zone.main.zone_id
-  name    = "www.${local.bucket_name}"
-  type    = "NS"
-  ttl     = "30"
-  records = aws_route53_zone.www.name_servers
-}
+//resource "aws_route53_record" "dev-ns" {
+//  zone_id = aws_route53_zone.main.zone_id
+//  name    = "www.${local.bucket_name}"
+//  type    = "NS"
+//  ttl     = "30"
+//  records = aws_route53_zone.main.name_servers
+//}
 
 // certificate
 
@@ -46,7 +46,7 @@ resource "aws_route53_record" "example" {
       name    = dvo.resource_record_name
       record  = dvo.resource_record_value
       type    = dvo.resource_record_type
-      zone_id = dvo.domain_name == local.bucket_name ? aws_route53_zone.main.zone_id : aws_route53_zone.www.zone_id
+      zone_id = aws_route53_zone.main.zone_id
     }
   }
 

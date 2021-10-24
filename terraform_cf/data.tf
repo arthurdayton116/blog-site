@@ -1,4 +1,3 @@
-//
 variable "base_tags" {
   default = {
     owner       = "blog-site"
@@ -26,4 +25,14 @@ locals {
   region               = var.region
   bucket_name          = var.base_domain
   redirect_bucket_name = "www.${var.base_domain}"
+}
+
+data "aws_s3_bucket" "a" {
+  bucket = "arthurdayton.com"
+}
+
+data "aws_acm_certificate" "amazon_issued" {
+  domain      = local.bucket_name
+  types       = ["AMAZON_ISSUED"]
+  most_recent = true
 }

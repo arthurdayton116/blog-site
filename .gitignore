@@ -128,3 +128,6 @@ yarn-error.log*
 /garbage/
 /terraform/provider_override.tf
 /terraform/local.auto.tfvars
+/terraform_dns/local.auto.tfvars
+/*/*.auto.tfvars
+/*/provider_override.tf

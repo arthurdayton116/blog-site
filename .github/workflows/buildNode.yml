@@ -18,6 +18,7 @@ jobs:
     # set environment variables
     env:
       # Setting CI to "" avoids issue with react scripts treating  warnings as errors - probably should make this specific to GitHub environment
+      # https://github.com/facebook/create-react-app/issues/3657
       CI: ""
       # var for what doamin I'm using
       TF_VAR_base_domain: ${{ secrets.BASE_DOMAIN }}
@@ -35,6 +36,7 @@ jobs:
       - uses: actions/checkout@v2
 
       # Checkout previous commit for compare
+      # https://github.com/tj-actions/changed-files
       - name: Checkout into lastCommit
         uses: actions/checkout@v2
         with:
@@ -51,6 +53,7 @@ jobs:
             terraform
 
       # set environment variable for determining if terraform apply should run
+      # https://docs.github.com/en/actions/learn-github-actions/workflow-commands-for-github-actions#setting-an-environment-variable
       - name: Set tf_dir_changed var
         id: tfChanged_true
         if: steps.changed-files-terraform.outputs.all_changed_and_modified_files == 'true'
@@ -119,6 +122,7 @@ jobs:
         working-directory: ./terraform
 
       # get bucket name from terraform state and set environment variable
+      # thank you - https://blog.nillsf.com/index.php/2020/08/25/how-to-use-terraform-output-in-a-github-action/
       - name: Set var from TF Output
         id: setVar
         run: |
