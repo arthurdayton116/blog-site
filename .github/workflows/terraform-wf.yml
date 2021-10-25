@@ -47,12 +47,13 @@ jobs:
 
       # Always run format / validate and output commands but run apply only if files have changed
       - run: ls -la
+
       - name: Terraform Format
         id: fmt
         run: terraform fmt -check
         working-directory: ./${env.work-dir}
         with:
-          work-dir: ${inputs.terraform_directory}
+          work-dir: ${env.terraform_directory}
 
       # Init using workspace from Terraform Cloud
       - name: Terraform Init
