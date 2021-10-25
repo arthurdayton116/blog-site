@@ -14,7 +14,7 @@ jobs:
   set-tf-vars:
 
   call-terraform:
-    uses: arthurdayton116/blog-site/.github/terraform-wf.yml@main
+    uses: arthurdayton116/blog-site/.github/workflows/terraform-wf.yml@main
     with:
       terraform_directory: terraform
     secrets:
