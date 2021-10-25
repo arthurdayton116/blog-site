@@ -28,12 +28,16 @@ jobs:
   terraform_job:
     name: Terraform Job
     runs-on: ubuntu-latest
+    outputs:
+      output1: ${{ steps.step1.outputs.test }}
     environment:
       name: ${{ inputs.environment }}
       url: https://${{ inputs.environment }}
     env:
       TF_VAR_base_domain: ${{ secrets.TF_VAR_base_domain }}
     steps:
+      - id: step1
+        run: echo "::set-output name=test::FRED"
       - uses: actions/checkout@v2
       # Installs specified version of terraform - I like to pin versions - would make sense to use a variable at org level
       - uses: hashicorp/setup-terraform@v1

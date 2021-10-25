@@ -93,6 +93,12 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ${{ secrets.AWS_REGION }}
 
+  job3:
+    runs-on: ubuntu-latest
+    needs: call-terraform
+    steps:
+      - run: echo ${{needs.call-terraform.outputs.output1}}
+
   build:
     runs-on: ubuntu-latest
     environment:
