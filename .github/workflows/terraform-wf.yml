@@ -7,14 +7,21 @@ on:
         required: false
         default: terraform
         type: string
-      environment:
-        required: false
-        default: development
-        type: string
+    secrets:
+      TF_API_TOKEN:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+      AWS_REGION:
+        required: true
+      TF_VAR_base_domain:
+        required: true
+
 jobs:
   terraform_job:
     name: Terraform Job
     runs-on: ubuntu-latest
+    environment: development
     steps:
 
       # Installs specified version of terraform - I like to pin versions - would make sense to use a variable at org level
