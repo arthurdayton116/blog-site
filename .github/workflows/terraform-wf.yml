@@ -5,7 +5,7 @@ on:
     inputs:
       terraform_directory:
         required: false
-        default: terraform
+        default: ./terraform
         type: string
       environment:
         required: false
@@ -51,7 +51,7 @@ jobs:
       - name: Terraform Format
         id: fmt
         run: terraform fmt -check
-        working-directory: ./${env.work-dir}
+        working-directory: ${{inputs.terraform_directory}}
 
       # Init using workspace from Terraform Cloud
       - name: Terraform Init
