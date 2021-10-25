@@ -52,8 +52,6 @@ jobs:
         id: fmt
         run: terraform fmt -check
         working-directory: ./${env.work-dir}
-        with:
-          work-dir: ${env.terraform_directory}
 
       # Init using workspace from Terraform Cloud
       - name: Terraform Init
