@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: development
-      url: development
+      url: https://development
     needs: call-terraform
     # set environment variables
     env:
@@ -47,8 +47,6 @@ jobs:
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-      - uses: actions/checkout@v2
-
       # Checkout previous commit for compare
       # https://github.com/tj-actions/changed-files
       - name: Checkout into lastCommit
