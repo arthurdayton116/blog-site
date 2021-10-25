@@ -36,3 +36,7 @@ data "aws_acm_certificate" "amazon_issued" {
   types       = ["AMAZON_ISSUED"]
   most_recent = true
 }
+
+data "aws_route53_zone" "main" {
+  name = local.bucket_name
+}

@@ -11,16 +11,28 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  set-tf-vars:
 
+  call-terraform:
+    uses: arthurdayton116/blog-site/.github/terraform-wf.yml@main
+    with:
+      terraform_directory: terraform
+    secrets:
+      TF_API_TOKEN: ${{ secrets.TF_API_TOKEN }}
+      TF_VAR_base_domain: ${{ secrets.BASE_DOMAIN }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+
+  build:
     runs-on: ubuntu-latest
     environment: development
+    needs: call-terraform
     # set environment variables
     env:
       # Setting CI to "" avoids issue with react scripts treating  warnings as errors - probably should make this specific to GitHub environment
       # https://github.com/facebook/create-react-app/issues/3657
       CI: ""
-      # var for what doamin I'm using
+      # var for what domain I'm using
       TF_VAR_base_domain: ${{ secrets.BASE_DOMAIN }}
       # override variables for conditionally run steps
       react_build_override: 'false'
@@ -81,12 +93,12 @@ jobs:
         run: |
           echo "No terraform directory files have changed."
 
-      # Installs specified version of terraform - I like to pin versions - would make sense to use a variable at org level
-      - uses: hashicorp/setup-terraform@v1
-        with:
-          terraform_version: 1.0.9
-          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
-          terraform_wrapper: false
+#      # Installs specified version of terraform - I like to pin versions - would make sense to use a variable at org level
+#      - uses: hashicorp/setup-terraform@v1
+#        with:
+#          terraform_version: 1.0.9
+#          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+#          terraform_wrapper: false
 
       # Need these for terraform and S3 push
       - name: Configure AWS Credentials
@@ -96,30 +108,30 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      # Always run format / validate and output commands but run apply only if files have changed
-      - name: Terraform Format
-        id: fmt
-        run: terraform fmt -check
-        working-directory: ./terraform
-
-      # Init using workspace from Terraform Cloud
-      - name: Terraform Init
-        id: init
-        run: terraform init
-        working-directory: ./terraform
-
-      - name: Terraform Validate
-        id: validate
-        run: terraform validate -no-color
-        working-directory: ./terraform
-
-      # run conditionally
-      - name: Terraform Apply
-        id: apply
-        if: ${{ env.tf_dir_changed == 'true' || env.terraform_apply_override == 'true' }}
-        run: terraform apply -auto-approve
-        continue-on-error: true
-        working-directory: ./terraform
+#      # Always run format / validate and output commands but run apply only if files have changed
+#      - name: Terraform Format
+#        id: fmt
+#        run: terraform fmt -check
+#        working-directory: ./terraform
+#
+#      # Init using workspace from Terraform Cloud
+#      - name: Terraform Init
+#        id: init
+#        run: terraform init
+#        working-directory: ./terraform
+#
+#      - name: Terraform Validate
+#        id: validate
+#        run: terraform validate -no-color
+#        working-directory: ./terraform
+#
+#      # run conditionally
+#      - name: Terraform Apply
+#        id: apply
+#        if: ${{ env.tf_dir_changed == 'true' || env.terraform_apply_override == 'true' }}
+#        run: terraform apply -auto-approve
+#        continue-on-error: true
+#        working-directory: ./terraform
 
       # get bucket name from terraform state and set environment variable
       # thank you - https://blog.nillsf.com/index.php/2020/08/25/how-to-use-terraform-output-in-a-github-action/

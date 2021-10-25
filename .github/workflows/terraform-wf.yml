@@ -1,0 +1,67 @@
+name: Terraform Reusable Workflow
+
+on:
+  workflow_call:
+    inputs:
+      terraform_directory:
+        required: false
+        default: terraform
+        type: string
+      environment:
+        required: false
+        default: development
+        type: string
+    secrets:
+      TF_API_TOKEN:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+      AWS_REGION:
+        required: true
+      TF_VAR_base_domain:
+        required: false
+
+jobs:
+  terraform_job:
+    name: Terraform Job
+    runs-on: ubuntu-latest
+    environment: ${inputs.environment}
+    steps:
+
+      # Installs specified version of terraform - I like to pin versions - would make sense to use a variable at org level
+      - uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.0.9
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+          terraform_wrapper: false
+
+      # Need these for terraform and S3 push
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # Always run format / validate and output commands but run apply only if files have changed
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt -check
+        working-directory: ./${inputs.terraform_directory}
+
+      # Init using workspace from Terraform Cloud
+      - name: Terraform Init
+        id: init
+        run: terraform init
+        working-directory: ./${inputs.terraform_directory}
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+        working-directory: ./${inputs.terraform_directory}
+
+      - name: Terraform Apply
+        id: apply
+        run: terraform apply -auto-approve
+        continue-on-error: true
+        working-directory: ./${inputs.terraform_directory}
