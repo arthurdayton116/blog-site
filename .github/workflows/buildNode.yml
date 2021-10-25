@@ -25,7 +25,9 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
-    environment: development
+    environment:
+      name: development
+      url: development
     needs: call-terraform
     # set environment variables
     env:

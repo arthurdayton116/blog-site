@@ -28,7 +28,8 @@ jobs:
   terraform_job:
     name: Terraform Job
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
+    environment:
+      name: ${{ inputs.environment }}
     env:
       TF_VAR_base_domain: ${{ secrets.TF_VAR_base_domain }}
     steps:
