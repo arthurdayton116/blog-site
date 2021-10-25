@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: ${{ inputs.environment }}
-      url: https://github.com/arthurdayton116/blog-site/settings/environments?${{ inputs.environment }}
+      url: https://${{ inputs.environment }}
     env:
       TF_VAR_base_domain: ${{ secrets.TF_VAR_base_domain }}
     steps:
