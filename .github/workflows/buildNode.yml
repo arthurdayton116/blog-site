@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: development
-      url: https://development
+      url: https://github.com/arthurdayton116/blog-site/settings/environments?development
     needs: call-terraform
     # set environment variables
     env:
