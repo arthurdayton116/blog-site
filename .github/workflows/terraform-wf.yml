@@ -3,9 +3,10 @@ name: Terraform Reusable Workflow
 on:
   workflow_call:
     inputs:
+      # https://github.community/t/set-an-environment-variable-to-working-directory/146206/4
       terraform_directory:
         required: false
-        default: ./terraform
+        default: notthis
         type: string
       environment:
         required: false
@@ -57,15 +58,15 @@ jobs:
       - name: Terraform Init
         id: init
         run: terraform init
-        working-directory: ./${inputs.terraform_directory}
+        working-directory: ${{inputs.terraform_directory}}
 
       - name: Terraform Validate
         id: validate
         run: terraform validate -no-color
-        working-directory: ./${inputs.terraform_directory}
+        working-directory: ${{inputs.terraform_directory}}
 
       - name: Terraform Apply
         id: apply
         run: terraform apply -auto-approve
         continue-on-error: true
-        working-directory: ./${inputs.terraform_directory}
+        working-directory: ${{inputs.terraform_directory}}
