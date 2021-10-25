@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: development
     steps:
-
+      - uses: actions/checkout@v2
       # Installs specified version of terraform - I like to pin versions - would make sense to use a variable at org level
       - uses: hashicorp/setup-terraform@v1
         with:
