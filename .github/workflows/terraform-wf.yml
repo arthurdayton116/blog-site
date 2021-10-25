@@ -46,10 +46,11 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       # Always run format / validate and output commands but run apply only if files have changed
+      - run: ls -la
       - name: Terraform Format
         id: fmt
         run: terraform fmt -check
-        working-directory: ./${inputs.terraform_directory}
+        working-directory: "./${inputs.terraform_directory}"
 
       # Init using workspace from Terraform Cloud
       - name: Terraform Init
