@@ -35,9 +35,9 @@ jobs:
       # var for what domain I'm using
       TF_VAR_base_domain: ${{ secrets.BASE_DOMAIN }}
       # override variables for conditionally run steps
-      react_build_override: 'false'
+      react_build_override: 'true'
       terraform_apply_override: 'false'
-      s3_deploy_override: 'false'
+      s3_deploy_override: 'true'
 
     strategy:
       matrix:
