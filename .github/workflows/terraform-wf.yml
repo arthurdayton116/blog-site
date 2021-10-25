@@ -50,7 +50,7 @@ jobs:
       - name: Terraform Format
         id: fmt
         run: terraform fmt -check
-        working-directory: "./${inputs.terraform_directory}"
+        working-directory: ${inputs.terraform_directory}
 
       # Init using workspace from Terraform Cloud
       - name: Terraform Init
