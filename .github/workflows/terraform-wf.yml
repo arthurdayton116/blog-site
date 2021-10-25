@@ -7,6 +7,10 @@ on:
         required: false
         default: terraform
         type: string
+      environment:
+        required: false
+        default: development
+        type: string
     secrets:
       TF_API_TOKEN:
         required: true
