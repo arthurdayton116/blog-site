@@ -7,10 +7,6 @@ on:
         required: false
         default: terraform
         type: string
-      environment:
-        required: false
-        default: development
-        type: string
     secrets:
       TF_API_TOKEN:
         required: true
@@ -25,7 +21,6 @@ jobs:
   terraform_job:
     name: Terraform Job
     runs-on: ubuntu-latest
-    environment: ${inputs.environment}
     steps:
 
       # Installs specified version of terraform - I like to pin versions - would make sense to use a variable at org level

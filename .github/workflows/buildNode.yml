@@ -15,7 +15,6 @@ jobs:
     uses: arthurdayton116/blog-site/.github/workflows/terraform-wf.yml@main
     with:
       terraform_directory: terraform
-      environment: development
     secrets:
       TF_API_TOKEN: ${{ secrets.TF_API_TOKEN }}
       TF_VAR_base_domain: ${{ secrets.BASE_DOMAIN }}
