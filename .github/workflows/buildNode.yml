@@ -133,6 +133,12 @@ jobs:
 #        continue-on-error: true
 #        working-directory: ./terraform
 
+       # Init using workspace from Terraform Cloud
+      - name: Terraform Init
+        id: init
+        run: terraform init
+        working-directory: ./terraform
+
       # get bucket name from terraform state and set environment variable
       # thank you - https://blog.nillsf.com/index.php/2020/08/25/how-to-use-terraform-output-in-a-github-action/
       - name: Set var from TF Output
