@@ -94,11 +94,11 @@ jobs:
           echo "No terraform directory files have changed."
 
 #      # Installs specified version of terraform - I like to pin versions - would make sense to use a variable at org level
-#      - uses: hashicorp/setup-terraform@v1
-#        with:
-#          terraform_version: 1.0.9
-#          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
-#          terraform_wrapper: false
+      - uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.0.9
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+          terraform_wrapper: false
 
       # Need these for terraform and S3 push
       - name: Configure AWS Credentials
