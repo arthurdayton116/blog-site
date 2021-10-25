@@ -29,6 +29,8 @@ jobs:
     name: Terraform Job
     runs-on: ubuntu-latest
     environment: development
+    env:
+      TF_VAR_base_domain: ${{ secrets.TF_VAR_base_domain }}
     steps:
       - uses: actions/checkout@v2
       # Installs specified version of terraform - I like to pin versions - would make sense to use a variable at org level
