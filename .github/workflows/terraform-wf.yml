@@ -7,16 +7,10 @@ on:
         required: false
         default: terraform
         type: string
-    secrets:
-      TF_API_TOKEN:
-        required: true
-      AWS_SECRET_ACCESS_KEY:
-        required: true
-      AWS_REGION:
-        required: true
-      TF_VAR_base_domain:
+      environment:
         required: false
-
+        default: development
+        type: string
 jobs:
   terraform_job:
     name: Terraform Job
