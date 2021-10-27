@@ -131,3 +131,4 @@ yarn-error.log*
 /terraform_dns/local.auto.tfvars
 /*/*.auto.tfvars
 /*/provider_override.tf
+/*/.terraform/
