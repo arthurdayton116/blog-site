@@ -24,8 +24,15 @@ export const prodBuild = "https://create-react-app.dev/docs/production-build"
 
 export const gaTerraform = "https://github.com/hashicorp/setup-terraform"
 
-#### Setting up static site on S3 for a blog
-In this post I am going to cover how I set up GitHub Actions to deploy this blog to an S3 bucket using a Cloudfront distribution.
+#### Using GitHub Actions to continuously deploy a Serverless blog site
+
+In this post I am going to cover how to use GitHub Actions to continuously build and deploy a serverless blog site using Terraform, React, AWS S3, Route53, Certificate Manager and CloudFront.
+
+To set this up yourself you need an AWS account, a Terraform cloud account, a custom domain, basic React skills, basic Terraform skills, a working knowledge of GitHub Actions and of course the requisite amount of OCD needed to figure out the stuff I almost certainly left out because I wouldn't want to deny you the delicious pain of experience.
+
+So some background from around the internet:
+
+<br/>
 
 <Link p={4} href={staticSiteSetup} target="_blank">S3 Static Site Setup</Link>
 <br/>
@@ -38,6 +45,14 @@ In this post I am going to cover how I set up GitHub Actions to deploy this blog
 <Link p={4} href={goodExp} target="_blank">This post explains it all pretty good</Link>
 <br/>
 <br/>
+
+My objective is to build a blog site that is deployed around the world and updates automatically whenever I push changes to the main branch of my repository.
+<br/>
+
+Now lets take a look at what we are trying to build:
+
+<Image p={4} verticalAlign='middle' src="/images/6/hostedzone.png" />
+
 
 With S3 and CloudFront I have a highly scalable easy to use setup cached around the world.
 

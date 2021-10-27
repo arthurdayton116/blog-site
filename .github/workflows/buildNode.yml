@@ -1,8 +1,4 @@
-# This workflow will do a clean install of node dependencies, cache/restore them, build the source code and run tests across different versions of node
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
-
-name: Node.js CI
-
+name: Build and Deploy Blog Site
 
 on:
   push:
@@ -10,101 +6,12 @@ on:
   pull_request:
     branches: [ main ]
 
-
-
 jobs:
-  set-conditions:
-    runs-on: ubuntu-latest
-    outputs:
-      output1: ${{ steps.step1.outputs.test }}
-      output2: ${{ steps.step2.outputs.test }}
-    environment:
-      name: development
-      url: https://development
-    steps:
-      # Checkout
-      - uses: actions/checkout@v2
-      # Checkout previous commit for compare
-      # https://github.com/tj-actions/changed-files
-      - name: Checkout into lastCommit
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 2
-          path: lastCommit
-
-      # Compare terraform directory to previous commit
-      - name: Get terraform changed files
-        id: changed-files-terraform
-        uses: tj-actions/changed-files@v10.1
-        with:
-          path: lastCommit
-          files: |
-            terraform
-
-      # set environment variable for determining if terraform apply should run
-      # https://docs.github.com/en/actions/learn-github-actions/workflow-commands-for-github-actions#setting-an-environment-variable
-      - name: Set tf_dir_changed var
-        id: tfChanged_true
-        if: steps.changed-files-terraform.outputs.all_changed_and_modified_files == 'true'
-        run: |
-          echo "tf_dir_changed=true" >> $GITHUB_ENV
-
-      - name: Set tf_dir_changed var
-        id: tfChanged_false
-        if: steps.changed-files-terraform.outputs.only_changed == 'false'
-        run: |
-          echo "tf_dir_changed=false" >> $GITHUB_ENV
-
-      # validate logic is working correctly
-      - name: Run step if terraform files changed
-        if: ${{ env.tf_dir_changed == 'true' }}
-        run: |
-          echo "terraform directory files have changed."
-
-          for file in ${{ steps.changed-files-terraform.outputs.added_files }}; do
-                      echo "$file was added"
-          done
-
-      - name: Run step if terraform files have not changed
-        if: ${{ env.tf_dir_changed == 'false' }}
-        run: |
-          echo "No terraform directory files have changed."
-
-      - id: step1
-        run: echo "::set-output name=test::${{ env.tf_dir_changed }}"
-      - id: step2
-        run: echo "::set-output name=test::world"
-
-  job2:
-    runs-on: ubuntu-latest
-    needs: set-conditions
-    steps:
-      - run: echo ${{needs.set-conditions.outputs.output1}} ${{needs.job1.outputs.output2}}
-
-  call-terraform:
-    uses: arthurdayton116/blog-site/.github/workflows/terraform-wf.yml@main
-    with:
-      terraform_directory: ./terraform
-      environment: development
-    secrets:
-      TF_API_TOKEN: ${{ secrets.TF_API_TOKEN }}
-      TF_VAR_base_domain: ${{ secrets.BASE_DOMAIN }}
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_REGION: ${{ secrets.AWS_REGION }}
-
-  job3:
-    runs-on: ubuntu-latest
-    needs: call-terraform
-    steps:
-      - run: echo ${{needs.call-terraform.outputs.output1}}
-
   build:
     runs-on: ubuntu-latest
     environment:
       name: development
       url: https://development
-    needs: call-terraform
     # set environment variables
     env:
       # Setting CI to "" avoids issue with react scripts treating  warnings as errors - probably should make this specific to GitHub environment
@@ -133,6 +40,20 @@ jobs:
           fetch-depth: 2
           path: lastCommit
 
+
+      ##############################
+      # CHANGED DIRECTORIES - START #
+      # THIS SECTION IS FOR CHECKING CHANGED DIRECTORIES #
+      # Because I am using mono-repo approach and because passing stuff between jobs is painful
+      # I am going to use a bunch of boiler plate - in larger org I would use a more modular approach
+      # Check for changes to files for mono-repo
+      # Thanks - https://github.com/tj-actions/changed-files
+      ##############################
+
+      ###############
+      # TERRAFORM - START
+      # set environment variable for determining if terraform apply should run
+
       # Compare terraform directory to previous commit
       - name: Get terraform changed files
         id: changed-files-terraform
@@ -140,21 +61,22 @@ jobs:
         with:
           path: lastCommit
           files: |
-            terraform
+            terraform_s3
+            terraform_cf
+            terraform_shared
+            terraform_graphql
+            terraform_dynamodb
+            terraform_dns
 
-      # set environment variable for determining if terraform apply should run
-      # https://docs.github.com/en/actions/learn-github-actions/workflow-commands-for-github-actions#setting-an-environment-variable
       - name: Set tf_dir_changed var
         id: tfChanged_true
         if: steps.changed-files-terraform.outputs.all_changed_and_modified_files == 'true'
-        run: |
-          echo "tf_dir_changed=true" >> $GITHUB_ENV
+        run: echo "tf_dir_changed=true" >> $GITHUB_ENV
 
       - name: Set tf_dir_changed var
         id: tfChanged_false
         if: steps.changed-files-terraform.outputs.only_changed == 'false'
-        run: |
-          echo "tf_dir_changed=false" >> $GITHUB_ENV
+        run: echo "tf_dir_changed=false" >> $GITHUB_ENV
 
       # validate logic is working correctly
       - name: Run step if terraform files changed
@@ -168,10 +90,54 @@ jobs:
 
       - name: Run step if terraform files have not changed
         if: ${{ env.tf_dir_changed == 'false' }}
-        run: |
-          echo "No terraform directory files have changed."
+        run: echo "No terraform directory files have changed."
 
-#      # Installs specified version of terraform - I like to pin versions - would make sense to use a variable at org level
+      # TERRAFORM END
+      ###############
+
+      ###############
+      # SRC START
+      # Compare src directory to previous commit - this is boiler plate and I could write a template for this
+      - name: Get React changed files
+        id: changed-files-src
+        uses: tj-actions/changed-files@v10.1
+        with:
+          path: lastCommit
+          files: src
+
+      # set environment variable for determining if React build should run
+      - name: Set src_dir_changed var
+        id: srcChanged_true
+        if: steps.changed-files-src.outputs.only_changed == 'true'
+        run: echo "src_dir_changed=true" >> $GITHUB_ENV
+
+      - name: Set src_dir_changed var
+        id: srcChanged_false
+        if: steps.changed-files-src.outputs.only_changed == 'false'
+        run: echo "src_dir_changed=false" >> $GITHUB_ENV
+
+      # validate logic is working correctly
+      - name: Run step if src files changed
+        if: ${{ env.src_dir_changed == 'true' }}
+        run: |
+          echo "src directory files have changed."
+
+          for file in ${{ steps.changed-files-src.outputs.all_changed_and_modified_files }}; do
+                      echo "$file was changed"
+          done
+
+      - name: Run step if src files have not changed
+        if: ${{ env.src_dir_changed == 'false' }}
+        run: echo "No src directory files have changed."
+
+      # SRC END
+      ###############
+
+      ##############################
+      # CHANGED DIRECTORIES - END #
+      ##############################
+
+      # Installs specified version of terraform - I like to pin versions - would make sense to use a variable at org level
       - uses: hashicorp/setup-terraform@v1
         with:
           terraform_version: 1.0.9
@@ -186,36 +152,132 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-#      # Always run format / validate and output commands but run apply only if files have changed
-#      - name: Terraform Format
-#        id: fmt
-#        run: terraform fmt -check
-#        working-directory: ./terraform
-#
-#      # Init using workspace from Terraform Cloud
-#      - name: Terraform Init
-#        id: init
-#        run: terraform init
-#        working-directory: ./terraform
-#
-#      - name: Terraform Validate
-#        id: validate
-#        run: terraform validate -no-color
-#        working-directory: ./terraform
-#
-#      # run conditionally
-#      - name: Terraform Apply
-#        id: apply
-#        if: ${{ env.tf_dir_changed == 'true' || env.terraform_apply_override == 'true' }}
-#        run: terraform apply -auto-approve
-#        continue-on-error: true
-#        working-directory: ./terraform
+      ##############################
+      # Create Shared - START #
+      ##############################
+      # Always run
+      - name: Terraform Format
+        id: fmt
+        run: |
+          terraform fmt -check
+        working-directory: ./terraform_shared
 
-       # Init using workspace from Terraform Cloud
+      # Init using workspace from Terraform Cloud
       - name: Terraform Init
         id: init
         run: terraform init
-        working-directory: ./terraform
+        working-directory: ./terraform_shared
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+        working-directory: ./terraform_shared
+
+      # run conditionally
+      - name: Terraform Apply
+        id: apply
+        run: terraform apply -auto-approve
+        continue-on-error: true
+        working-directory: ./terraform_shared
+
+      ##############################
+      # Create Common - END #
+      ##############################
+
+      ##############################
+      # Create DynamoDB - START #
+      ##############################
+      # Always run format / validate and output commands but run apply only if files have changed
+      - name: Terraform Format
+        id: fmt
+        run: |
+          terraform fmt -check
+        working-directory: ./terraform_dynamoDB
+
+      # Init using workspace from Terraform Cloud
+      - name: Terraform Init
+        id: init
+        run: terraform init
+        working-directory: ./terraform_dynamoDB
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+        working-directory: ./terraform_dynamoDB
+
+      # run conditionally
+      - name: Terraform Apply
+        id: apply
+        if: ${{ env.tf_dir_changed == 'true' || env.terraform_apply_override == 'true' }}
+        run: terraform apply -auto-approve
+        continue-on-error: true
+        working-directory: ./terraform_dynamoDB
+
+      ##############################
+      # Create DynamoDB - END #
+      ##############################
+
+      ##############################
+      # Create Lambda - START #
+      ##############################
+      # Always run format / validate and output commands but run apply only if files have changed
+      - name: Terraform Format
+        id: fmt
+        run: |
+          terraform fmt -check
+        working-directory: ./terraform_graphql
+
+      # Init using workspace from Terraform Cloud
+      - name: Terraform Init
+        id: init
+        run: terraform init
+        working-directory: ./terraform_graphql
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+        working-directory: ./terraform_graphql
+
+      # run conditionally
+      - name: Terraform Apply
+        id: apply
+        if: ${{ env.tf_dir_changed == 'true' || env.terraform_apply_override == 'true' }}
+        run: terraform apply -auto-approve
+        continue-on-error: true
+        working-directory: ./terraform_graphql
+
+      ##############################
+      # Create GraphQL Lambda - END #
+      ##############################
+
+      ##############################
+      # Create S3  Buckets - START #
+      ##############################
+      # Always run format / validate and output commands but run apply only if files have changed
+      - name: Terraform Format
+        id: fmt
+        run: |
+          terraform fmt -check
+        working-directory: ./terraform_s3
+
+      # Init using workspace from Terraform Cloud
+      - name: Terraform Init
+        id: init
+        run: terraform init
+        working-directory: ./terraform_s3
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+        working-directory: ./terraform_s3
+
+      # run conditionally
+      - name: Terraform Apply
+        id: apply
+        if: ${{ env.tf_dir_changed == 'true' || env.terraform_apply_override == 'true' }}
+        run: terraform apply -auto-approve
+        continue-on-error: true
+        working-directory: ./terraform_s3
 
       # get bucket name from terraform state and set environment variable
       # thank you - https://blog.nillsf.com/index.php/2020/08/25/how-to-use-terraform-output-in-a-github-action/
@@ -224,7 +286,7 @@ jobs:
         run: |
           bucket_name=$(terraform output bucket_name)
           echo "bucket_name=$bucket_name" >> $GITHUB_ENV
-        working-directory: ./terraform
+        working-directory: ./terraform_s3
 
       # bucket name is masked because it comes form a secret but values are passed to other steps
       - run: |
@@ -233,6 +295,13 @@ jobs:
           echo "bucket name - ${{ env.bucket_name }}"
           echo "#######################"
 
+      ##############################
+      # Create S3  Buckets - END #
+      ##############################
+
+      ##############################
+      # Build React Project - Start #
+      ##############################
       # set up to build React project
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
@@ -240,46 +309,13 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'yarn'
 
-      # Compare src directory to previous commit - this is boiler plate and I could write a template for this
-      - name: Get React changed files
-        id: changed-files-src
-        uses: tj-actions/changed-files@v10.1
-        with:
-          path: lastCommit
-          files: |
-            src
-
-      # set environment variable for determining if React build should run
-      - name: Set src_dir_changed var
-        id: srcChanged_true
-        if: steps.changed-files-src.outputs.only_changed == 'true'
-        run: |
-          echo "src_dir_changed=true" >> $GITHUB_ENV
-
-      - name: Set src_dir_changed var
-        id: srcChanged_false
-        if: steps.changed-files-src.outputs.only_changed == 'false'
-        run: |
-          echo "src_dir_changed=false" >> $GITHUB_ENV
-
-      # validate logic is working correctly
-      - name: Run step if src files changed
-        if: ${{ env.src_dir_changed == 'true' }}
-        run: |
-          echo "src directory files have changed."
-
-          for file in ${{ steps.changed-files-src.outputs.all_changed_and_modified_files }}; do
-                      echo "$file was changed"
-          done
-
-      - name: Run step if src files have not changed
-        if: ${{ env.src_dir_changed == 'false' }}
-        run: |
-          echo "No src directory files have changed."
-
       # build React project
       - name: Yarn Install
         run: yarn install --frozen-lockfile
+
+      - name: Check vulnerabilities
+        id: chech_vulns
+        run: npx audit-ci --config vulns/audit-ci.json
 
       # run conditionally
       - name: Yarn build
@@ -289,10 +325,48 @@ jobs:
 #      - run: ls ./build
 #     - run: npm test
 
-
       - name: Deploy static site to S3 bucket
         if: ${{ env.src_dir_changed == 'true' || env.s3_deploy_override == 'true'}}
         env:
           aws_bucket_name: ${{ secrets.AWS_BUCKET_NAME }}
         run: aws s3 sync ../build/ s3://"${{ env.bucket_name }}" --delete
         working-directory: ./terraform
+
+      # TODO - Add Cypress tests
+
+      ##############################
+      # Build React Project - END #
+      ##############################
+
+      ##############################
+      # Create CloudFront Distribution - START #
+      ##############################
+      # Always run format / validate and output commands but run apply only if files have changed
+      - name: Terraform Format
+        id: fmt
+        run: |
+          terraform fmt -check
+        working-directory: ./terraform_cf
+
+      # Init using workspace from Terraform Cloud
+      - name: Terraform Init
+        id: init
+        run: terraform init
+        working-directory: ./terraform_cf
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+        working-directory: ./terraform_cf
+
+      # run conditionally
+      - name: Terraform Apply
+        id: apply
+        if: ${{ env.tf_dir_changed == 'true' || env.terraform_apply_override == 'true' }}
+        run: terraform apply -auto-approve
+        continue-on-error: true
+        working-directory: ./terraform_cf
+
+      ##############################
+      # Create CloudFront Distribution - END #
+      ##############################

@@ -1,3 +1,15 @@
+#  call-terraform:
+#    uses: arthurdayton116/blog-site/.github/workflows/FUTURE_terraform-wf.yml@main
+#    with:
+#      terraform_directory: ./terraform
+#      environment: development
+#    secrets:
+#      TF_API_TOKEN: ${{ secrets.TF_API_TOKEN }}
+#      TF_VAR_base_domain: ${{ secrets.BASE_DOMAIN }}
+#      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#      AWS_REGION: ${{ secrets.AWS_REGION }}
+
 name: Terraform Reusable Workflow
 
 on:
@@ -28,17 +40,23 @@ jobs:
   terraform_job:
     name: Terraform Job
     runs-on: ubuntu-latest
-    outputs:
-      output1: ${{ steps.step1.outputs.test }}
     environment:
       name: ${{ inputs.environment }}
       url: https://${{ inputs.environment }}
     env:
       TF_VAR_base_domain: ${{ secrets.TF_VAR_base_domain }}
     steps:
-      - id: step1
-        run: echo "::set-output name=test::FRED"
       - uses: actions/checkout@v2
+
+      # Compare terraform directory to previous commit
+      - name: Get terraform changed files
+      id: changed-files-terraform
+      uses: tj-actions/changed-files@v10.1
+      with:
+        path: lastCommit
+        files: |
+          terraform
+
       # Installs specified version of terraform - I like to pin versions - would make sense to use a variable at org level
       - uses: hashicorp/setup-terraform@v1
         with:
