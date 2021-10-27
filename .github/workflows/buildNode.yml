@@ -177,7 +177,7 @@ jobs:
       - name: Terraform Apply
         id: apply_shared
         run: terraform apply -auto-approve
-        continue-on-error: true
+        continue-on-error: false
         working-directory: ./terraform_shared
 
       ##############################
@@ -210,7 +210,7 @@ jobs:
         id: apply_ddb
         if: ${{ env.tf_dir_changed == 'true' || env.terraform_apply_override == 'true' }}
         run: terraform apply -auto-approve
-        continue-on-error: true
+        continue-on-error: false
         working-directory: ./terraform_dynamoDB
 
       ##############################
@@ -250,7 +250,7 @@ jobs:
         id: apply_gql
         if: ${{ env.tf_dir_changed == 'true' || env.terraform_apply_override == 'true' }}
         run: terraform apply -auto-approve
-        continue-on-error: true
+        continue-on-error: false
         working-directory: ./terraform_graphql
 
       ##############################
@@ -283,7 +283,7 @@ jobs:
         id: apply_s3
         if: ${{ env.tf_dir_changed == 'true' || env.terraform_apply_override == 'true' }}
         run: terraform apply -auto-approve
-        continue-on-error: true
+        continue-on-error: false
         working-directory: ./terraform_s3
 
       # get bucket name from terraform state and set environment variable
@@ -371,7 +371,7 @@ jobs:
         id: apply_cf
         if: ${{ env.tf_dir_changed == 'true' || env.terraform_apply_override == 'true' }}
         run: terraform apply -auto-approve
-        continue-on-error: true
+        continue-on-error: false
         working-directory: ./terraform_cf
 
       ##############################
