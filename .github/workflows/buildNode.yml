@@ -336,8 +336,8 @@ jobs:
         if: ${{ env.src_dir_changed == 'true' || env.s3_deploy_override == 'true'}}
         env:
           aws_bucket_name: ${{ secrets.AWS_BUCKET_NAME }}
-        run: aws s3 sync ../build/ s3://"${{ env.bucket_name }}" --delete
-        working-directory: ./terraform
+        run: aws s3 sync ../build/ s3://"${{ env.aws_bucket_name }}" --delete
+        working-directory: ./terraform_s3
 
       # TODO - Add Cypress tests
 
