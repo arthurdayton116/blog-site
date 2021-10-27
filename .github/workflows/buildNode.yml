@@ -157,25 +157,25 @@ jobs:
       ##############################
       # Always run
       - name: Terraform Format
-        id: fmt
+        id: fmt_shared
         run: |
           terraform fmt -check
         working-directory: ./terraform_shared
 
       # Init using workspace from Terraform Cloud
       - name: Terraform Init
-        id: init
+        id: init_shared
         run: terraform init
         working-directory: ./terraform_shared
 
       - name: Terraform Validate
-        id: validate
+        id: validate_shared
         run: terraform validate -no-color
         working-directory: ./terraform_shared
 
       # run conditionally
       - name: Terraform Apply
-        id: apply
+        id: apply_shared
         run: terraform apply -auto-approve
         continue-on-error: true
         working-directory: ./terraform_shared
@@ -189,25 +189,25 @@ jobs:
       ##############################
       # Always run format / validate and output commands but run apply only if files have changed
       - name: Terraform Format
-        id: fmt
+        id: fmt_ddb
         run: |
           terraform fmt -check
         working-directory: ./terraform_dynamoDB
 
       # Init using workspace from Terraform Cloud
       - name: Terraform Init
-        id: init
+        id: init_ddb
         run: terraform init
         working-directory: ./terraform_dynamoDB
 
       - name: Terraform Validate
-        id: validate
+        id: validate_ddb
         run: terraform validate -no-color
         working-directory: ./terraform_dynamoDB
 
       # run conditionally
       - name: Terraform Apply
-        id: apply
+        id: apply_ddb
         if: ${{ env.tf_dir_changed == 'true' || env.terraform_apply_override == 'true' }}
         run: terraform apply -auto-approve
         continue-on-error: true
@@ -229,25 +229,25 @@ jobs:
         working-directory: ./terraform_graphql/function
       # Always run format / validate and output commands but run apply only if files have changed
       - name: Terraform Format
-        id: fmt
+        id: fmt_gql
         run: |
           terraform fmt -check
         working-directory: ./terraform_graphql
 
       # Init using workspace from Terraform Cloud
       - name: Terraform Init
-        id: init
+        id: init_gql
         run: terraform init
         working-directory: ./terraform_graphql
 
       - name: Terraform Validate
-        id: validate
+        id: validate_gql
         run: terraform validate -no-color
         working-directory: ./terraform_graphql
 
       # run conditionally
       - name: Terraform Apply
-        id: apply
+        id: apply_gql
         if: ${{ env.tf_dir_changed == 'true' || env.terraform_apply_override == 'true' }}
         run: terraform apply -auto-approve
         continue-on-error: true
@@ -262,25 +262,25 @@ jobs:
       ##############################
       # Always run format / validate and output commands but run apply only if files have changed
       - name: Terraform Format
-        id: fmt
+        id: fmt_s3
         run: |
           terraform fmt -check
         working-directory: ./terraform_s3
 
       # Init using workspace from Terraform Cloud
       - name: Terraform Init
-        id: init
+        id: init_s3
         run: terraform init
         working-directory: ./terraform_s3
 
       - name: Terraform Validate
-        id: validate
+        id: validate_s3
         run: terraform validate -no-color
         working-directory: ./terraform_s3
 
       # run conditionally
       - name: Terraform Apply
-        id: apply
+        id: apply_s3
         if: ${{ env.tf_dir_changed == 'true' || env.terraform_apply_override == 'true' }}
         run: terraform apply -auto-approve
         continue-on-error: true
@@ -350,25 +350,25 @@ jobs:
       ##############################
       # Always run format / validate and output commands but run apply only if files have changed
       - name: Terraform Format
-        id: fmt
+        id: fmt_cf
         run: |
           terraform fmt -check
         working-directory: ./terraform_cf
 
       # Init using workspace from Terraform Cloud
       - name: Terraform Init
-        id: init
+        id: init_cf
         run: terraform init
         working-directory: ./terraform_cf
 
       - name: Terraform Validate
-        id: validate
+        id: validate_cf
         run: terraform validate -no-color
         working-directory: ./terraform_cf
 
       # run conditionally
       - name: Terraform Apply
-        id: apply
+        id: apply_cf
         if: ${{ env.tf_dir_changed == 'true' || env.terraform_apply_override == 'true' }}
         run: terraform apply -auto-approve
         continue-on-error: true
