@@ -4,6 +4,7 @@ locals {
   region          = data.terraform_remote_state.shared.outputs.region
   bucket_name     = data.terraform_remote_state.shared.outputs.base_domain
   alt_name        = "www.${data.terraform_remote_state.shared.outputs.base_domain}"
+  hash_key_val    = uuid()
 }
 
 data "terraform_remote_state" "shared" {

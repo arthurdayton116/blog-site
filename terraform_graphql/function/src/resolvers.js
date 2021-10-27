@@ -1,15 +1,22 @@
 const AWS = require("aws-sdk");
 const uuid4 = require("uuid4")
-// Set the AWS Region.
-AWS.config.update({ region: "us-east-1" });
-const credentials = new AWS.SharedIniFileCredentials();
-AWS.config.credentials = credentials;
+const tablename = process.env.ddb_table_name || 'thats_not_it'
+const hashkey = process.env.ddb_hash_key || 'thats_not_it'
+const region = process.env.ddb_region || 'thats_not_it'
+// // Set the AWS Region.
+AWS.config.update({ region: region });
+
+// This is for use locally
+// const credentials = new AWS.SharedIniFileCredentials();
+// AWS.config.credentials = credentials;
+
 // Create DynamoDB document client
 const docClient = new AWS.DynamoDB.DocumentClient({apiVersion: '2012-08-10'});
 
+//TODO - add env variables to handle this
 const params = {
-    TableName: 'sample-company-test',
-    Key: {'TestTableHashKey': "7eaf9564-9142-4c97-9fd1-5841cf64664b"}
+    TableName: tablename,
+    Key: {'CommentsTableHashKey': hashkey}
 };
 
 
@@ -49,17 +56,17 @@ module.exports = {
                         timestamp: Item.timestamp,
                         comment: Item.comment,
                         name: Item.name,
-                        TestTableHashKey: Item.TestTableHashKey
+                        CommentsTableHashKey: Item.CommentsTableHashKey
                     }
         }
     },
     Mutation: {
         addComment:  (parent, args, context, info) => {
-
+        //TODO - add env variables to handle this
             var params = {
-                TableName: 'sample-company-test',
+                TableName: tablename,
                 Item: {
-                    'TestTableHashKey': uuid4(),
+                    'CommentsTableHashKey': uuid4(),
                     'comment': 'STRING_VALUE',
                     'name': 'graphql',
                     'postid': '100',

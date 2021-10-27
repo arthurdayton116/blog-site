@@ -15,12 +15,13 @@ locals {
   )
 
   //DB
-  dynamo_arn = data.terraform_remote_state.dynamodb.outputs.dynamo_db_arn
-
-  resource_prefix = data.terraform_remote_state.shared.outputs.resource_prefix
-  region          = data.terraform_remote_state.shared.outputs.region
-  bucket_name     = data.terraform_remote_state.shared.outputs.base_domain
-  alt_name        = "www.${data.terraform_remote_state.shared.outputs.base_domain}"
+  dynamo_arn        = data.terraform_remote_state.dynamodb.outputs.dynamo_db_arn
+  dynamo_table_name = data.terraform_remote_state.dynamodb.outputs.dynamo_db_table_name
+  dynamo_hash_key   = data.terraform_remote_state.dynamodb.outputs.dynamo_db_hash_key
+  resource_prefix   = data.terraform_remote_state.shared.outputs.resource_prefix
+  region            = data.terraform_remote_state.shared.outputs.region
+  bucket_name       = data.terraform_remote_state.shared.outputs.base_domain
+  alt_name          = "www.${data.terraform_remote_state.shared.outputs.base_domain}"
 }
 
 data "terraform_remote_state" "shared" {

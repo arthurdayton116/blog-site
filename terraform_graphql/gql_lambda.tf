@@ -1,4 +1,5 @@
 
+// attach policy to role
 resource "aws_iam_role_policy_attachment" "dynamoDb" {
   role       = aws_iam_role.iam_for_lambda.name
   policy_arn = aws_iam_policy.gql_dynamoDb.arn
@@ -9,12 +10,14 @@ resource "aws_iam_role_policy_attachment" "basic" {
   role       = aws_iam_role.iam_for_lambda.name
 }
 
+// create policy
 resource "aws_iam_policy" "gql_dynamoDb" {
   name        = "${local.resource_prefix}-gql-dynamodb"
   description = "Policy for dynamo db access"
   policy      = data.aws_iam_policy_document.gql_dynamoDb.json
 }
 
+// create policy document
 data "aws_iam_policy_document" "gql_dynamoDb" {
   statement {
     actions = [
@@ -33,7 +36,7 @@ data "aws_iam_policy_document" "gql_dynamoDb" {
 }
 
 resource "aws_iam_role" "iam_for_lambda" {
-  name = "iam_for_gql_lambda"
+  name = "${local.resource_prefix}_iam_for_gql_lambda"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -52,9 +55,10 @@ resource "aws_iam_role" "iam_for_lambda" {
 
 }
 
+// create lambda function
 resource "aws_lambda_function" "gql_lambda" {
   filename      = "./function/function.zip"
-  function_name = "simple_gql_lambda_v"
+  function_name = "${local.resource_prefix}_simple_gql_lambda_v"
   role          = aws_iam_role.iam_for_lambda.arn
   handler       = "graphql.graphqlHandler"
 
@@ -67,8 +71,10 @@ resource "aws_lambda_function" "gql_lambda" {
 
   environment {
     variables = {
-      foo    = "bar"
-      please = "work"
+      ddb_table_name = local.dynamo_table_name
+      ddb_hash_key   = local.dynamo_hash_key
+      ddb_region     = local.region
+
     }
   }
 }

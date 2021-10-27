@@ -27,6 +27,7 @@ resource "random_string" "one" {
   length = 8
 }
 
+
 // example record
 resource "aws_dynamodb_table_item" "i" {
   count      = var.number_of_records
@@ -35,7 +36,7 @@ resource "aws_dynamodb_table_item" "i" {
 
   item = <<ITEM
 {
-  "CommentsTableHashKey": {"S": "${uuid()}"},
+  "CommentsTableHashKey": {"S": "${local.hash_key_val}"},
   "comment": {"S": "${random_string.one[count.index].result}"},
   "name": {"S": "Terraform"},
   "postid": {"S": "9999"},

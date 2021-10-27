@@ -26,7 +26,7 @@ const typeDefs = gql`
       timestamp: String
       comment: String
       name: String
-      TestTableHashKey: String
+      CommentsTableHashKey: String
   }
 
   input NewComment {

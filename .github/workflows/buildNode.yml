@@ -220,6 +220,13 @@ jobs:
       ##############################
       # Create Lambda - START #
       ##############################
+      - name: zip graphql src
+        id: zip_graphql
+        run: |
+          echo "#######################"
+          ./gql_buildpackage.sh
+          echo "#######################"
+        working-directory: ./terraform_graphql/function
       # Always run format / validate and output commands but run apply only if files have changed
       - name: Terraform Format
         id: fmt
