@@ -6,7 +6,7 @@ import CustomCodeBlock from "../components/CodeBlock";
 import {useTheme} from "@emotion/react";
 import {postData}  from '../blogs/data';
 import NoMatch from '../components/NoMatch'
-// import Comments from '../components/Comments'
+import Comments from '../components/Comments'
 
 export const blogIssue = "https://github.com/arthurdayton116/arthurdayton116.github.io/issues/new"
 export const awsTFIssue = "https://github.com/arthurdayton116/aws-terraform/issues/new"

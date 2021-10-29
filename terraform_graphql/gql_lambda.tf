@@ -71,12 +71,21 @@ resource "aws_lambda_function" "gql_lambda" {
 
   environment {
     variables = {
-      ddb_table_name = local.dynamo_table_name
-      ddb_hash_key   = local.dynamo_hash_key
-      ddb_region     = local.region
+      ddb_table_name   = local.dynamo_table_name
+      ddb_hash_key     = local.dynamo_hash_key
+      ddb_region       = local.region
+      GRAPHQL_ENDPOINT = aws_api_gateway_domain_name.graphql.domain_name
 
     }
   }
+
+  tags = merge(
+    local.base_tags,
+    {
+      Name      = "${local.resource_prefix}_simple_gql_lambda_v"
+      directory = basename(path.cwd)
+    },
+  )
 }
 
 resource "aws_lambda_permission" "apigw" {

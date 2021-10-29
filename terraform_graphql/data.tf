@@ -22,6 +22,9 @@ locals {
   region            = data.terraform_remote_state.shared.outputs.region
   bucket_name       = data.terraform_remote_state.shared.outputs.base_domain
   alt_name          = "www.${data.terraform_remote_state.shared.outputs.base_domain}"
+  graphql_cert_arn  = data.terraform_remote_state.cert.outputs.graphql_cert_arn
+  zone_id           = data.terraform_remote_state.cert.outputs.zone_id
+  stage_name        = "dev_gql"
 }
 
 data "terraform_remote_state" "shared" {
@@ -45,4 +48,16 @@ data "terraform_remote_state" "dynamodb" {
     }
   }
 }
+
+data "terraform_remote_state" "cert" {
+  backend = "remote"
+
+  config = {
+    organization = "blog-site"
+    workspaces = {
+      name = "blog-dns-workspace"
+    }
+  }
+}
+
 

@@ -220,6 +220,13 @@ jobs:
       ##############################
       # Create Lambda - START #
       ##############################
+#      - name: run tests
+#        id: zip_graphql
+#        run: |
+#          yarn install
+#          yarn test
+#        working-directory: ./terraform_graphql/function/src
+
       - name: zip graphql src
         id: zip_graphql
         run: |
@@ -377,3 +384,5 @@ jobs:
       ##############################
       # Create CloudFront Distribution - END #
       ##############################
+
+

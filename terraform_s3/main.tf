@@ -20,6 +20,25 @@ resource "aws_s3_bucket" "a" {
   )
 }
 
+resource "aws_s3_bucket" "log" {
+  bucket = "logs-${local.bucket_name}"
+
+  force_destroy = true
+  tags = merge(
+    local.base_tags,
+    {
+      Name      = "${local.resource_prefix}-logs-${local.bucket_name}"
+      directory = basename(path.cwd)
+    },
+  )
+}
+
+resource "aws_s3_bucket_object" "log_query_folder" {
+  bucket = aws_s3_bucket.log.id
+  acl    = "private"
+  key    = "queryResults/"
+  source = "/dev/null"
+}
 // This ensures that bucket content can be read publicly
 // I like setting it up this way so it's easier to test changes
 // Check here for different setups  - https://aws.amazon.com/premiumsupport/knowledge-center/cloudfront-serve-static-website/

@@ -1,32 +1,53 @@
 const AWS = require("aws-sdk");
 const uuid4 = require("uuid4")
-const tablename = process.env.ddb_table_name || 'thats_not_it'
-const hashkey = process.env.ddb_hash_key || 'thats_not_it'
-const region = process.env.ddb_region || 'thats_not_it'
+
+const tablename = process.env.ddb_table_name || 'blog-site-comments'
+const hashkey = process.env.ddb_hash_key || '4eda778b-7785-03dc-d28b-eda04ee61328'
+const region = process.env.ddb_region || 'us-east-1'
+
 // // Set the AWS Region.
 AWS.config.update({ region: region });
 
-// This is for use locally
-// const credentials = new AWS.SharedIniFileCredentials();
-// AWS.config.credentials = credentials;
+// This is for use for local development - COMMENT THIS OUT BEFORE PUSHING
+if (!process.env.GITHUB_ACTIONS) {
+    const credentials = new AWS.SharedIniFileCredentials();
+    AWS.config.credentials = credentials;
+}
+
 
 // Create DynamoDB document client
 const docClient = new AWS.DynamoDB.DocumentClient({apiVersion: '2012-08-10'});
 
 //TODO - add env variables to handle this
 const params = {
+    ExpressionAttributeValues: {
+        ":postid": "9999"
+    },
+    KeyConditionExpression: "#postid = :postid",
+    ExpressionAttributeNames:{
+        "#postid": "postid"
+    },
     TableName: tablename,
-    Key: {'CommentsTableHashKey': hashkey}
+    IndexName: 'postid-timestamp-index'
 };
 
 
-docClient.get(params, function(err, data) {
-    if (err) {
-        console.log("Error", err);
-    } else {
-        console.log("Success", data.Item);
-    }
-});
+
+// docClient.query(params, function(err, data) {
+//     if (err) {
+//         console.log("Error", err);
+//     } else {
+//         data.Items.map((item) => {
+//             console.log("Success", {
+//                 postid: item.postid,
+//                 timestamp: item.timestamp,
+//                 comment: item.comment,
+//                 name: item.name,
+//                 CommentsTableHashKey: item.CommentsTableHashKey
+//             })
+//         })
+//     }
+// });
 
 module.exports = {
     Query: {
@@ -48,7 +69,12 @@ module.exports = {
             }
         },
         comment: async () => {
-            const { Item } = await docClient.get(params).promise()
+            const local_params = {
+                TableName: tablename,
+                Key: {'CommentsTableHashKey': hashkey}
+            };
+
+            const { Item } = await docClient.get(local_params).promise()
 
                    console.log("Item", Item)
                     return {
@@ -58,6 +84,35 @@ module.exports = {
                         name: Item.name,
                         CommentsTableHashKey: Item.CommentsTableHashKey
                     }
+        },
+        comments: async () => {
+
+            const local_params = {
+                ExpressionAttributeValues: {
+                    ":postid": "9999"
+                },
+                KeyConditionExpression: "#postid = :postid",
+                ExpressionAttributeNames:{
+                    "#postid": "postid"
+                },
+                TableName: tablename,
+                IndexName: 'postid-timestamp-index'
+            }
+
+            const { Items } = await docClient.query(local_params).promise()
+            const return_arr = [];
+
+            Items.map((item) => {
+                    return_arr.push({
+                        postid: item.postid,
+                        timestamp: item.timestamp,
+                        comment: item.comment,
+                        name: item.name,
+                        CommentsTableHashKey: item.CommentsTableHashKey
+                    })
+                })
+            return return_arr;
+
         }
     },
     Mutation: {

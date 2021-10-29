@@ -5,6 +5,57 @@ It's also Blog Content I use to blog to arthurdayton.com
 
 For simplicity I am taking a mono-repo approach and using GitHub actions for deployment and Terraform Cloud for state storage.
 
+Assumes you have .aws/credentials file set up
+https://registry.terraform.io/providers/hashicorp/aws/latest/docs#shared-credentials-file
+
+## Read logs
+
+https://aws.amazon.com/premiumsupport/knowledge-center/analyze-logs-athena/create 
+
+```create database blog_cloudfront_access_logs_db
+
+CREATE EXTERNAL TABLE IF NOT EXISTS blog_cloudfront_access_logs_db.arthurdaytonmybucket_logs (
+`date` DATE,
+time STRING,
+location STRING,
+bytes BIGINT,
+request_ip STRING,
+method STRING,
+host STRING,
+uri STRING,
+status INT,
+referrer STRING,
+user_agent STRING,
+query_string STRING,
+cookie STRING,
+result_type STRING,
+request_id STRING,
+host_header STRING,
+request_protocol STRING,
+request_bytes BIGINT,
+time_taken FLOAT,
+xforwarded_for STRING,
+ssl_protocol STRING,
+ssl_cipher STRING,
+response_result_type STRING,
+http_version STRING,
+fle_status STRING,
+fle_encrypted_fields INT,
+c_port INT,
+time_to_first_byte FLOAT,
+x_edge_detailed_result_type STRING,
+sc_content_type STRING,
+sc_content_len BIGINT,
+sc_range_start BIGINT,
+sc_range_end BIGINT
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY '\t'
+LOCATION 's3://logs-arthurdayton.com/blog-site/'
+TBLPROPERTIES ( 'skip.header.line.count'='2' )
+```
+
+
 ##
 
 ```
@@ -47,8 +98,24 @@ npx audit-ci --config vulns/audit-ci.json
 ```
 
 
-
+## GraphQL
+https://www.apollographql.com/docs/react/get-started/
 
 
 ## Maybe someday 
 Azure approach - https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-static-website
+
+
+## Concepts illustrated
+DevOps
+Team Topologies
+Scaling in enterprise context
+Growing across the stack
+GraphQL
+Serverless / S3 / Cloudfront / API Gateway
+React
+GitHub Actions CI/CD
+Terraform / Cloud / Workspaces / Remote State / Tagging
+Local development / Cloud development
+
+TODO - terratest

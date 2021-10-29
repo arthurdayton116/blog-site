@@ -4,6 +4,7 @@ variable "base_tags" {
     createdBy   = "terraform"
     environment = "development"
     billTo      = "study"
+    repo        = "https://github.com/arthurdayton116/blog-site"
   }
   description = "base resource tags"
   type        = map(string)

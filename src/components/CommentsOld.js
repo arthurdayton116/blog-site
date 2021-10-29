@@ -11,20 +11,20 @@ import {gql, useQuery} from "@apollo/client";
 // const maxPostNumber = 5
 
 
-const GET_COMMENTS = gql`
-    query GET_COMMENTS {
-        comments {
-            postid
-            timestamp
-            comment
-            name
+const EXAMPLE_QUERY = gql`
+    query ExampleQuery {
+        comment {
             CommentsTableHashKey
+            name
+            comment
+            timestamp
+            postid
         }
     }
 `;
 
 function ExampleQueryFetch() {
-    const { loading, error, data } = useQuery(GET_COMMENTS);
+    const { loading, error, data } = useQuery(EXAMPLE_QUERY);
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error :(</p>;
@@ -44,7 +44,16 @@ function ExampleQueryFetch() {
 }
 
 
-
+// const postCommentMock = (e) => new Promise((resolve, reject) => {
+//
+//         if (1===2) {
+//             reject('flame');
+//         } else {
+//             console.log("e=",e)
+//             resolve('yea');
+//         }
+// }
+// )
 
 const postComment = async (event, cb, obj) => {
 
@@ -86,15 +95,48 @@ const postComment = async (event, cb, obj) => {
 
 const Comments = (props) => {
     // eslint-disable-next-line
-    // const [error, setError] = useState(null);
-    // const [isLoaded, setIsLoaded] = useState(false);
-    // const [items, setItems] = useState([]);
-
-    const { loading, error, data } = useQuery(GET_COMMENTS);
+    const [error, setError] = useState(null);
+    const [isLoaded, setIsLoaded] = useState(false);
+    const [items, setItems] = useState([]);
 
 
 
-    // const { CommentsTableHashKey, postid, name, comment, timestamp } = data.comment;
+    useEffect(() => {
+        const getComments = (postID) => {
+            console.log("postID-",postID)
+            const commentList = [
+                {postID: 1, commentID: 1, commentText: "This is a comment", userName: "fred", dateTime: "Mon Aug 02 2021 14:29:44 GMT-0500 (Central Daylight Time)"},
+                {postID: 1, commentID: 2, commentText: "This is another comment", userName: "george", dateTime: "Mon Aug 02 2021 14:29:44 GMT-0500 (Central Daylight Time)"}
+            ]
+            setIsLoaded(true);
+            setItems(commentList);
+            return 'commentList';
+        }
+        // const hurl = "http://" + apiHost + "/sample"
+        // const fetchData = async () =>
+        // {
+        //     return fetch(hurl)
+        //         .then(res => res.json())
+        //         .then(
+        //             (result) => {
+        //                 setIsLoaded(true);
+        //                 setItems(result);
+        //                 return 'complete';
+        //             },
+        //             // Note: it's important to handle errors here
+        //             // instead of a catch() block so that we don't swallow
+        //             // exceptions from actual bugs in components.
+        //             (error) => {
+        //                 setIsLoaded(true);
+        //                 setError(error);
+        //             }
+        //         )
+        // }
+
+        const result = getComments(props.postID);
+        console.log(result)
+    }, [props.postID])
+
 
     const theme = useTheme()
     console.log("props",props)
@@ -102,17 +144,16 @@ const Comments = (props) => {
 
     if (error) {
         return <div>Error: {error.message}</div>;
-    } else if (loading) {
+    } else if (!isLoaded) {
         return <div>Loading...</div>;
     } else {
-        console.log(data.comments)
-        return data.comments.map(({ CommentsTableHashKey, postid, name, comment, timestamp }) =>
+        return (
             <div>
                 <Heading as={'h1'} sx={theme.h1Sx}>Comments</Heading>
-                <RBForm postID={postid}/>
+                <RBForm postID={props.postID}/>
                 <Box>
-                    {data.comments.map(({ CommentsTableHashKey, postid, name, comment, timestamp }) => (
-                        <Box key={postid}>
+                    {items.map(com => (
+                        <Box key={com.commentID}>
                             {/*<Box sx={theme.linkSXAlt1}>*/}
                             <Box width={1 / 3} px={0}>
                                 <hr/>
@@ -125,9 +166,9 @@ const Comments = (props) => {
                                             sx={{
                                                 border: 'none'
                                             }}
-                                            id={'date-'+CommentsTableHashKey}
+                                            id={'date-' + com.commentID}
                                             name='date'
-                                            defaultValue={timestamp}
+                                            defaultValue={com.dateTime}
                                             disabled
                                         />
                                     </Box>
@@ -136,9 +177,9 @@ const Comments = (props) => {
                                     <Box width={1 / 3} px={2}>
                                         <Label htmlFor='name'>Name</Label>
                                         <Input
-                                            id={'name-' + CommentsTableHashKey}
+                                            id={'name-' + com.commentID}
                                             name='name'
-                                            defaultValue={name}
+                                            defaultValue={com.userName}
                                             disabled
                                         />
                                     </Box>
@@ -147,9 +188,9 @@ const Comments = (props) => {
                                     <Box width={1 / 3} px={2}>
                                         <Label htmlFor='comment'>Comment</Label>
                                         <Textarea sx={theme.textArea}
-                                                  id={'comment-' + CommentsTableHashKey}
+                                                  id='comment'
                                                   name='comment'
-                                                  value={comment}
+                                                  value={com.commentText}
                                                   disabled
                                         />
                                     </Box>

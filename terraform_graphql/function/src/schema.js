@@ -5,6 +5,7 @@ const typeDefs = gql`
       hello: String
       checkContext: CheckContext
       comment: Comment
+      comments: [Comment]!
   }
   
   type Mutation {
@@ -20,7 +21,7 @@ const typeDefs = gql`
       logGroupName: String
       logStreamName: String
   }
-
+  
   type Comment {
       postid: String
       timestamp: String
