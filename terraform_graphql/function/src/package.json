@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@shelf/jest-dynamodb": "^2.1.0",
+    "@graphql-tools/schema": "^8.3.1",
     "apollo-server": "^3.3.0",
     "apollo-server-core": "^3.3.0",
     "apollo-server-express": "^3.3.0",
@@ -21,6 +21,9 @@
     "uuid4": "^2.0.2"
   },
   "devDependencies": {
+    "@aws-sdk/client-dynamodb": "^3.39.0",
+    "@shelf/jest-dynamodb": "^2.1.0",
+    "path": "^0.12.7",
     "supertest": "^6.1.6"
   }
 }

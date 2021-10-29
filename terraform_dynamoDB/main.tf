@@ -10,6 +10,25 @@ resource "aws_dynamodb_table" "i" {
     type = "S"
   }
 
+  attribute {
+    name = "postid"
+    type = "S"
+  }
+
+  attribute {
+    name = "timestamp"
+    type = "S"
+  }
+
+  global_secondary_index {
+    name            = "postid-timestamp-index"
+    hash_key        = "postid"
+    range_key       = "timestamp"
+    write_capacity  = 1
+    read_capacity   = 1
+    projection_type = "ALL"
+  }
+
   tags = merge(
     local.base_tags,
     {
