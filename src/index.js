@@ -6,9 +6,7 @@ import App from './App'
 import {
     ApolloClient,
     InMemoryCache,
-    ApolloProvider,
-    useQuery,
-    gql
+    ApolloProvider
 } from "@apollo/client";
 
 const GRAPHQL_ENDPOINT = process.env.GRAPHQL_ENDPOINT || 'http://localhost:4000/graphql'

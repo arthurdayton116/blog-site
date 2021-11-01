@@ -18,6 +18,7 @@
     "aws-sdk": "^2.1016.0",
     "express": "^4.17.1",
     "graphql": "^15.6.0",
+    "lodash": "^4.17.21",
     "uuid4": "^2.0.2"
   },
   "devDependencies": {

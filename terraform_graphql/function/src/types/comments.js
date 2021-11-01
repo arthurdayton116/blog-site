@@ -1,6 +1,6 @@
 const { gql } = require('apollo-server');
 const uuid4 = require("uuid4")
-const { docClientSetup } = require('../dbsetup.js')
+const { docClientSetup } = require('./dbSetup.js')
 
 docClient = docClientSetup()
 
@@ -9,7 +9,7 @@ const tablename = process.env.ddb_table_name || 'blog-site-comments'
 const typeDef = `
 extend type Query {
     comment: Comment
-    comments: [Comment]!
+    comments(postid: String!): [Comment]!
 }
 
  type Comment {
@@ -21,7 +21,7 @@ extend type Query {
   }
   
   type Mutation {
-      addComment(comment: NewComment) : Comment
+      addComment(comment: NewComment!) : Comment
   }
   
 input NewComment {
@@ -35,10 +35,11 @@ input NewComment {
 const resolvers = {
     Query: {
         comments: async (parent, args, context, info) => {
-            console.log('comments resolver')
+            console.log('comments resolver',args )
+            const postID = args.postid
             const local_params = {
                 ExpressionAttributeValues: {
-                    ":postid": "9999"
+                    ":postid": postID
                 },
                 KeyConditionExpression: "#postid = :postid",
                 ExpressionAttributeNames:{
@@ -81,34 +82,33 @@ const resolvers = {
         },
     },
     Mutation: {
-        addComment:  (parent, args, context, info) => {
+        addComment:  async (parent, args, context, info) => {
             //TODO - add env variables to handle this
+            const HKEY =uuid4();
             var params = {
                 TableName: tablename,
                 Item: {
-                    'CommentsTableHashKey': uuid4(),
-                    'comment': 'STRING_VALUE',
-                    'name': 'graphql',
-                    'postid': '100',
-                    'timestamp': '2021-10-06'
-                },
-                ReturnValues: "ALL_OLD"
+                    'CommentsTableHashKey': HKEY,
+                    'comment': args.comment.comment,
+                    'name': args.comment.name,
+                    'postid': args.comment.postid,
+                    'timestamp': new Date().toISOString()
+                }
             };
 
-            docClient.put(params, function(err, data) {
-                if (err) {
-                    console.log("Error", err);
-                } else {
-                    console.log("PUT Success", data);
-                }
-            });
+            await docClient.put(params).promise();
+
+            const {Item} = await docClient.get({TableName: tablename, Key: {CommentsTableHashKey: HKEY}}).promise();
 
             console.log("args", args)
+            console.log("Item", Item)
+
             return {
-                postid: args.comment.postid,
-                timestamp: args.comment.timestamp,
-                comment: args.comment.comment,
-                name: args.comment.name
+                postid: Item.postid,
+                timestamp: Item.timestamp,
+                comment: Item.comment,
+                name: Item.name,
+                CommentsTableHashKey: Item.CommentsTableHashKey
             }
         },
     },

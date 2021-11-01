@@ -31,7 +31,7 @@ data "aws_iam_policy_document" "gql_dynamoDb" {
       "dynamodb:DescribeTable"
     ]
     effect    = "Allow"
-    resources = [local.dynamo_arn]
+    resources = [local.dynamo_arn, "${local.dynamo_arn}/index/*"]
   }
 }
 

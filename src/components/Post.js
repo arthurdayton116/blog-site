@@ -92,7 +92,7 @@ export const Post = (props) => {
                 </Box>
                 </Box>
         </Box>
-        {/*<Comments postID={post.id}/>*/}
+        <Comments postID={post.id}/>
     </Box>
 
   )

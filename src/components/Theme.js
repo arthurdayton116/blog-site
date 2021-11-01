@@ -7,6 +7,7 @@ const primarytextdarkshade1 = '#566DB3'
 const primarytext = '#e9ecf5'
 const primarytexthover = '#ccd6eb'
 const primaryFontFamily = 'Arial, sans-serif'
+const commentBG = '#c7e8f3'
 
 const pw = 27.2
 const ph = 18.5
@@ -21,6 +22,7 @@ const theme_config =  {
         primary: '#007bff',
         background: '#e9ecf5',
         primaryBackground: primarybackground,
+        commentBG: commentBG,
     },
     navbar: {
         background: primarybackground,
