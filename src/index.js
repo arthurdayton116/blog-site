@@ -9,7 +9,7 @@ import {
     ApolloProvider
 } from "@apollo/client";
 
-const GRAPHQL_ENDPOINT = `https://${process.env.GRAPHQL_ENDPOINT}` || 'http://localhost:4000/graphql'
+const GRAPHQL_ENDPOINT = `https://${process.env.REACT_APP_GRAPHQL_ENDPOINT}` || 'http://localhost:4000/graphql'
 const client = new ApolloClient({
     uri: GRAPHQL_ENDPOINT,
     cache: new InMemoryCache()
