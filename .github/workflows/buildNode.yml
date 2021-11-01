@@ -220,6 +220,12 @@ jobs:
       ##############################
       # Create Lambda - START #
       ##############################
+      - name: run graphql source build
+        id: build_graphql
+        run: |
+          yarn install
+        working-directory: ./terraform_graphql/function/src
+
 #      - name: run tests
 #        id: zip_graphql
 #        run: |
@@ -242,18 +248,18 @@ jobs:
         working-directory: ./terraform_graphql
 
       # Init using workspace from Terraform Cloud
-      - name: Terraform Init
+      - name: Terraform Init - terraform_graphql
         id: init_gql
         run: terraform init
         working-directory: ./terraform_graphql
 
-      - name: Terraform Validate
+      - name: Terraform Validate - terraform_graphql
         id: validate_gql
         run: terraform validate -no-color
         working-directory: ./terraform_graphql
 
       # run conditionally
-      - name: Terraform Apply
+      - name: Terraform Apply - terraform_graphql
         id: apply_gql
         if: ${{ env.tf_dir_changed == 'true' || env.terraform_apply_override == 'true' }}
         run: terraform apply -auto-approve
@@ -268,25 +274,25 @@ jobs:
       # Create S3  Buckets - START #
       ##############################
       # Always run format / validate and output commands but run apply only if files have changed
-      - name: Terraform Format
+      - name: Terraform Format - terraform_s3
         id: fmt_s3
         run: |
           terraform fmt -check
         working-directory: ./terraform_s3
 
       # Init using workspace from Terraform Cloud
-      - name: Terraform Init
+      - name: Terraform Init - terraform_s3
         id: init_s3
         run: terraform init
         working-directory: ./terraform_s3
 
-      - name: Terraform Validate
+      - name: Terraform Validate - terraform_s3
         id: validate_s3
         run: terraform validate -no-color
         working-directory: ./terraform_s3
 
       # run conditionally
-      - name: Terraform Apply
+      - name: Terraform Apply - terraform_s3
         id: apply_s3
         if: ${{ env.tf_dir_changed == 'true' || env.terraform_apply_override == 'true' }}
         run: terraform apply -auto-approve
@@ -324,7 +330,7 @@ jobs:
           cache: 'yarn'
 
       # build React project
-      - name: Yarn Install
+      - name: React Yarn Install
         run: yarn install --frozen-lockfile
 
       - name: Check vulnerabilities
@@ -356,25 +362,25 @@ jobs:
       # Create CloudFront Distribution - START #
       ##############################
       # Always run format / validate and output commands but run apply only if files have changed
-      - name: Terraform Format
+      - name: Terraform Format - terraform_cf
         id: fmt_cf
         run: |
           terraform fmt -check
         working-directory: ./terraform_cf
 
       # Init using workspace from Terraform Cloud
-      - name: Terraform Init
+      - name: Terraform Init - terraform_cf
         id: init_cf
         run: terraform init
         working-directory: ./terraform_cf
 
-      - name: Terraform Validate
+      - name: Terraform Validate - terraform_cf
         id: validate_cf
         run: terraform validate -no-color
         working-directory: ./terraform_cf
 
       # run conditionally
-      - name: Terraform Apply
+      - name: Terraform Apply - terraform_cf
         id: apply_cf
         if: ${{ env.tf_dir_changed == 'true' || env.terraform_apply_override == 'true' }}
         run: terraform apply -auto-approve
