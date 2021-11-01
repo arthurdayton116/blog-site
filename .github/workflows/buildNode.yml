@@ -266,6 +266,13 @@ jobs:
         continue-on-error: false
         working-directory: ./terraform_graphql
 
+      - name: Set var from TF Output
+        id: setVarGraphQl
+        run: |
+          graphql_domain_endpoint=$(terraform output graphql_domain_endpoint)
+          echo "GRAPHQL_ENDPOINT=$graphql_domain_endpoint" >> $GITHUB_ENV
+        working-directory: ./terraform_graphql
+
       ##############################
       # Create GraphQL Lambda - END #
       ##############################
@@ -341,6 +348,8 @@ jobs:
       - name: Yarn build
         if: ${{ env.src_dir_changed == 'true' || env.react_build_override == 'true' }}
         run: yarn run build --if-present
+        env:
+          GRAPHQL_ENDPOINT: ${{ secrets.AWS_BUCKET_NAME }}
 #      - run: ls
 #      - run: ls ./build
 #     - run: npm test
