@@ -61,12 +61,12 @@ jobs:
         with:
           path: lastCommit
           files: |
-            terraform_s3
-            terraform_cf
-            terraform_shared
-            terraform_graphql
-            terraform_dynamodb
-            terraform_dns
+            terraform/terraform_s3
+            terraform/terraform_cf
+            terraform/terraform_shared
+            terraform/terraform_graphql
+            terraform/terraform_dynamodb
+            terraform/terraform_dns
 
       - name: Set tf_dir_changed var
         id: tfChanged_true
@@ -160,25 +160,25 @@ jobs:
         id: fmt_shared
         run: |
           terraform fmt -check
-        working-directory: ./terraform_shared
+        working-directory: ./terraform/terraform_shared
 
       # Init using workspace from Terraform Cloud
       - name: Terraform Init
         id: init_shared
         run: terraform init
-        working-directory: ./terraform_shared
+        working-directory: ./terraform/terraform_shared
 
       - name: Terraform Validate
         id: validate_shared
         run: terraform validate -no-color
-        working-directory: ./terraform_shared
+        working-directory: ./terraform/terraform_shared
 
       # run conditionally
       - name: Terraform Apply
         id: apply_shared
         run: terraform apply -auto-approve
         continue-on-error: false
-        working-directory: ./terraform_shared
+        working-directory: ./terraform/terraform_shared
 
       ##############################
       # Create Common - END #
@@ -192,18 +192,18 @@ jobs:
         id: fmt_ddb
         run: |
           terraform fmt -check
-        working-directory: ./terraform_dynamoDB
+        working-directory: ./terraform/terraform_dynamoDB
 
       # Init using workspace from Terraform Cloud
       - name: Terraform Init
         id: init_ddb
         run: terraform init
-        working-directory: ./terraform_dynamoDB
+        working-directory: ./terraform/terraform_dynamoDB
 
       - name: Terraform Validate
         id: validate_ddb
         run: terraform validate -no-color
-        working-directory: ./terraform_dynamoDB
+        working-directory: ./terraform/terraform_dynamoDB
 
       # run conditionally
       - name: Terraform Apply
@@ -211,7 +211,7 @@ jobs:
         if: ${{ env.tf_dir_changed == 'true' || env.terraform_apply_override == 'true' }}
         run: terraform apply -auto-approve
         continue-on-error: false
-        working-directory: ./terraform_dynamoDB
+        working-directory: ./terraform/terraform_dynamoDB
 
       ##############################
       # Create DynamoDB - END #
@@ -224,7 +224,7 @@ jobs:
         id: build_graphql
         run: |
           yarn install
-        working-directory: ./terraform_graphql/function/src
+        working-directory: ./terraform/terraform_graphql/function/src
 
 #      - name: run tests
 #        id: zip_graphql
@@ -239,24 +239,24 @@ jobs:
           echo "#######################"
           ./gql_buildpackage.sh
           echo "#######################"
-        working-directory: ./terraform_graphql/function
+        working-directory: ./terraform/terraform_graphql/function
       # Always run format / validate and output commands but run apply only if files have changed
       - name: Terraform Format
         id: fmt_gql
         run: |
           terraform fmt -check
-        working-directory: ./terraform_graphql
+        working-directory: ./terraform/terraform_graphql
 
       # Init using workspace from Terraform Cloud
       - name: Terraform Init - terraform_graphql
         id: init_gql
         run: terraform init
-        working-directory: ./terraform_graphql
+        working-directory: ./terraform/terraform_graphql
 
       - name: Terraform Validate - terraform_graphql
         id: validate_gql
         run: terraform validate -no-color
-        working-directory: ./terraform_graphql
+        working-directory: ./terraform/terraform_graphql
 
       # run conditionally
       - name: Terraform Apply - terraform_graphql
@@ -264,14 +264,14 @@ jobs:
         if: ${{ env.tf_dir_changed == 'true' || env.terraform_apply_override == 'true' }}
         run: terraform apply -auto-approve
         continue-on-error: false
-        working-directory: ./terraform_graphql
+        working-directory: ./terraform/terraform_graphql
 
       - name: Set var from TF Output
         id: setVarGraphQl
         run: |
           gqe=$(terraform output graphql_domain_endpoint)
           echo "REACT_APP_GRAPHQL_ENDPOINT=$gqe" >> $GITHUB_ENV
-        working-directory: ./terraform_graphql
+        working-directory: ./terraform/terraform_graphql
 
       ##############################
       # Create GraphQL Lambda - END #
@@ -285,18 +285,18 @@ jobs:
         id: fmt_s3
         run: |
           terraform fmt -check
-        working-directory: ./terraform_s3
+        working-directory: ./terraform/terraform_s3
 
       # Init using workspace from Terraform Cloud
       - name: Terraform Init - terraform_s3
         id: init_s3
         run: terraform init
-        working-directory: ./terraform_s3
+        working-directory: ./terraform/terraform_s3
 
       - name: Terraform Validate - terraform_s3
         id: validate_s3
         run: terraform validate -no-color
-        working-directory: ./terraform_s3
+        working-directory: ./terraform/terraform_s3
 
       # run conditionally
       - name: Terraform Apply - terraform_s3
@@ -304,7 +304,7 @@ jobs:
         if: ${{ env.tf_dir_changed == 'true' || env.terraform_apply_override == 'true' }}
         run: terraform apply -auto-approve
         continue-on-error: false
-        working-directory: ./terraform_s3
+        working-directory: ./terraform/terraform_s3
 
       # get bucket name from terraform state and set environment variable
       # thank you - https://blog.nillsf.com/index.php/2020/08/25/how-to-use-terraform-output-in-a-github-action/
@@ -313,7 +313,7 @@ jobs:
         run: |
           bucket_name=$(terraform output bucket_name)
           echo "bucket_name=$bucket_name" >> $GITHUB_ENV
-        working-directory: ./terraform_s3
+        working-directory: ./terraform/terraform_s3
 
       # bucket name is masked because it comes form a secret but values are passed to other steps
       - run: |
@@ -357,7 +357,7 @@ jobs:
         env:
           aws_bucket_name: ${{ secrets.AWS_BUCKET_NAME }}
         run: aws s3 sync ../build/ s3://"${{ env.bucket_name }}" --delete
-        working-directory: ./terraform_s3
+        working-directory: ./terraform/terraform_s3
 
       # TODO - Add Cypress tests
 
@@ -373,18 +373,18 @@ jobs:
         id: fmt_cf
         run: |
           terraform fmt -check
-        working-directory: ./terraform_cf
+        working-directory: ./terraform/terraform_cf
 
       # Init using workspace from Terraform Cloud
       - name: Terraform Init - terraform_cf
         id: init_cf
         run: terraform init
-        working-directory: ./terraform_cf
+        working-directory: ./terraform/terraform_cf
 
       - name: Terraform Validate - terraform_cf
         id: validate_cf
         run: terraform validate -no-color
-        working-directory: ./terraform_cf
+        working-directory: ./terraform/terraform_cf
 
       # run conditionally
       - name: Terraform Apply - terraform_cf
@@ -392,7 +392,7 @@ jobs:
         if: ${{ env.tf_dir_changed == 'true' || env.terraform_apply_override == 'true' }}
         run: terraform apply -auto-approve
         continue-on-error: false
-        working-directory: ./terraform_cf
+        working-directory: ./terraform/terraform_cf
 
       ##############################
       # Create CloudFront Distribution - END #

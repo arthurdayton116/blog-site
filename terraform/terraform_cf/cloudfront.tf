@@ -60,8 +60,7 @@ resource "aws_cloudfront_distribution" "s3_distribution_a" {
   tags = merge(
     local.base_tags,
     {
-      Name      = "${local.resource_prefix}-${local.bucket_name}"
-      directory = basename(path.cwd)
+      Name = "${local.resource_prefix}-${local.bucket_name}"
     },
   )
 

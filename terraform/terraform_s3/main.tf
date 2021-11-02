@@ -27,8 +27,7 @@ resource "aws_s3_bucket" "log" {
   tags = merge(
     local.base_tags,
     {
-      Name      = "${local.resource_prefix}-logs-${local.bucket_name}"
-      directory = basename(path.cwd)
+      Name = "${local.resource_prefix}-logs-${local.bucket_name}"
     },
   )
 }

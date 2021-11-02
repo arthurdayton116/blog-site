@@ -197,7 +197,8 @@ function RBForm (props){
     console.log("RBForm props = ", props.postID)
     // const [commentIsPosting, setCommentIsPosting] = useState(false);
 
-    const [addComment, { data, loading, error }] = useMutation(addCommentMutation);
+    const [addComment, { data, loading, error }] = useMutation(addCommentMutation,{
+        refetchQueries: [GET_COMMENTS]});
 
     const currentDateTime = Date().toLocaleString();
     const theme = useTheme()

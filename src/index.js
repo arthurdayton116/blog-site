@@ -9,8 +9,15 @@ import {
     ApolloProvider
 } from "@apollo/client";
 
-const RAW_GRAPHQL_ENDPOINT = process.env.REACT_APP_GRAPHQL_ENDPOINT.replace(/["]+/g, '')
-const GRAPHQL_ENDPOINT = `https://${RAW_GRAPHQL_ENDPOINT}` || 'http://localhost:4000/graphql'
+const gql_ep = () => {
+    let gurl = 'http://localhost:4000/graphql'
+    if (process.env.REACT_APP_GRAPHQL_ENDPOINT) {
+        gurl = `https://${process.env.REACT_APP_GRAPHQL_ENDPOINT.replace(/["]+/g, '')}`
+    }
+    return gurl
+}
+
+const GRAPHQL_ENDPOINT = gql_ep();
 
 const client = new ApolloClient({
     uri: GRAPHQL_ENDPOINT,
