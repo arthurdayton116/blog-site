@@ -1,5 +1,10 @@
 
 // attach policy to role
+resource "aws_iam_role_policy_attachment" "sns" {
+  role       = aws_iam_role.iam_for_lambda.name
+  policy_arn = aws_iam_policy.gql_sns.arn
+}
+
 resource "aws_iam_role_policy_attachment" "dynamoDb" {
   role       = aws_iam_role.iam_for_lambda.name
   policy_arn = aws_iam_policy.gql_dynamoDb.arn
@@ -32,6 +37,23 @@ data "aws_iam_policy_document" "gql_dynamoDb" {
     ]
     effect    = "Allow"
     resources = [local.dynamo_arn, "${local.dynamo_arn}/index/*"]
+  }
+}
+
+// create policy
+resource "aws_iam_policy" "gql_sns" {
+  name        = "${local.resource_prefix}-gql-sns"
+  description = "Policy for sns publish"
+  policy      = data.aws_iam_policy_document.gql_sns.json
+}
+
+data "aws_iam_policy_document" "gql_sns" {
+  statement {
+    actions = [
+      "sns:Publish"
+    ]
+    effect    = "Allow"
+    resources = [local.sns_arn]
   }
 }
 
