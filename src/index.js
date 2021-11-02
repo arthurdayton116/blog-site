@@ -8,8 +8,10 @@ import {
     InMemoryCache,
     ApolloProvider
 } from "@apollo/client";
+
 const RAW_GRAPHQL_ENDPOINT = process.env.REACT_APP_GRAPHQL_ENDPOINT.replace(/["]+/g, '')
-const GRAPHQL_ENDPOINT = RAW_GRAPHQL_ENDPOINT || 'http://localhost:4000/graphql'
+const GRAPHQL_ENDPOINT = `https://${RAW_GRAPHQL_ENDPOINT}` || 'http://localhost:4000/graphql'
+
 const client = new ApolloClient({
     uri: GRAPHQL_ENDPOINT,
     cache: new InMemoryCache()

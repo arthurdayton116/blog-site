@@ -269,8 +269,8 @@ jobs:
       - name: Set var from TF Output
         id: setVarGraphQl
         run: |
-          graphql_domain_endpoint=$(terraform output graphql_domain_endpoint)
-          echo "REACT_APP_GRAPHQL_ENDPOINT=$graphql_domain_endpoint" >> $GITHUB_ENV
+          gqe=$(terraform output graphql_domain_endpoint)
+          echo "REACT_APP_GRAPHQL_ENDPOINT=$gqe" >> $GITHUB_ENV
         working-directory: ./terraform_graphql
 
       ##############################
