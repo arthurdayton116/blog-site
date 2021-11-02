@@ -46,6 +46,7 @@ const resolvers = {
                 ExpressionAttributeNames:{
                     "#postid": "postid"
                 },
+                ScanIndexForward: false,
                 TableName: tablename,
                 IndexName: 'postid-timestamp-index'
             }
