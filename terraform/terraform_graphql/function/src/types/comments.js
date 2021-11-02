@@ -102,14 +102,23 @@ const resolvers = {
 
             const {Item} = await docClient.get({TableName: tablename, Key: {CommentsTableHashKey: HKEY}}).promise();
 
-            var sns = new AWS.SNS();
+            // var sns = new AWS.SNS();
 
             var params = {
-                Message: Item,
+                Message: JSON.stringify(Item),
                 Subject: "Comment Posted on Item.postid",
                 TopicArn: process.env.SNS_ARN || ""
             };
-            sns.publish(params, context.done);
+
+            var publishTextPromise = new AWS.SNS({apiVersion: '2010-03-31'}).publish(params).promise();
+            await publishTextPromise.then(
+                function(data) {
+                    console.log(`Message ${params.Message} sent to the topic ${params.TopicArn}`);
+                    console.log("MessageID is " + data.MessageId);
+                }).catch(
+                function(err) {
+                    console.error(err, err.stack);
+                });
 
             console.log("args", args)
             console.log("Item", Item)

@@ -35,6 +35,7 @@ data "aws_iam_policy_document" "gql_dynamoDb" {
   }
 }
 
+
 resource "aws_iam_role" "iam_for_lambda" {
   name = "${local.resource_prefix}_iam_for_gql_lambda"
 
