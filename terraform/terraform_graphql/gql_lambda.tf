@@ -75,6 +75,7 @@ resource "aws_lambda_function" "gql_lambda" {
       ddb_hash_key     = local.dynamo_hash_key
       ddb_region       = local.region
       GRAPHQL_ENDPOINT = aws_api_gateway_domain_name.graphql.domain_name
+      SNS_ARN          = local.sns_arn
 
     }
   }

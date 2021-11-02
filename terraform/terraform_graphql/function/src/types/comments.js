@@ -107,7 +107,7 @@ const resolvers = {
             var params = {
                 Message: Item,
                 Subject: "Comment Posted on Item.postid",
-                TopicArn: process.env.REACT_APP_SNS_ARN || ""
+                TopicArn: process.env.SNS_ARN || ""
             };
             sns.publish(params, context.done);
 

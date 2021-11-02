@@ -25,6 +25,7 @@ locals {
   graphql_cert_arn  = data.terraform_remote_state.cert.outputs.graphql_cert_arn
   zone_id           = data.terraform_remote_state.cert.outputs.zone_id
   stage_name        = "dev_gql"
+  sns_arn           = data.terraform_remote_state.sns.outputs.topic_arn
 }
 
 data "terraform_remote_state" "shared" {
@@ -60,4 +61,14 @@ data "terraform_remote_state" "cert" {
   }
 }
 
+data "terraform_remote_state" "sns" {
+  backend = "remote"
+
+  config = {
+    organization = "blog-site"
+    workspaces = {
+      name = "blog-sns-workspace"
+    }
+  }
+}
 
