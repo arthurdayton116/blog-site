@@ -1,6 +1,6 @@
 # Configure the AWS Provider
 provider "aws" {
-  region = var.region
+  region = local.region
 }
 
 terraform {
@@ -14,8 +14,7 @@ terraform {
     organization = "blog-site"
 
     workspaces {
-      name = "blog-shared-workspace"
+      name = "blog-sns-workspace"
     }
   }
-
 }

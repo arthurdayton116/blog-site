@@ -61,6 +61,7 @@ jobs:
         with:
           path: lastCommit
           files: |
+            terraform/terraform_sns
             terraform/terraform_s3
             terraform/terraform_cf
             terraform/terraform_shared
@@ -182,6 +183,45 @@ jobs:
 
       ##############################
       # Create Common - END #
+      ##############################
+
+      ##############################
+      # Create SNS - START #
+      ##############################
+      # Always run format / validate and output commands but run apply only if files have changed
+      - name: Terraform Format
+        id: fmt_sns
+        run: |
+          terraform fmt -check
+        working-directory: ./terraform/terraform_sns
+
+      # Init using workspace from Terraform Cloud
+      - name: Terraform Init
+        id: init_sns
+        run: terraform init
+        working-directory: ./terraform/terraform_sns
+
+      - name: Terraform Validate
+        id: validate_sns
+        run: terraform validate -no-color
+        working-directory: ./terraform/terraform_sns
+
+      # run conditionally
+      - name: Terraform Apply
+        id: apply_sns
+        if: ${{ env.tf_dir_changed == 'true' || env.terraform_apply_override == 'true' }}
+        run: terraform apply -auto-approve
+        continue-on-error: false
+        working-directory: ./terraform/terraform_sns
+
+      - name: Set var from TF Output
+        id: setVarSNS
+        run: |
+          snst=$(terraform output topic_arn)
+          echo "REACT_APP_SNS_ARN=$snst" >> $GITHUB_ENV
+        working-directory: ./terraform/terraform_graphql
+      ##############################
+      # Create SNS - END #
       ##############################
 
       ##############################

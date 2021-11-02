@@ -1,3 +1,4 @@
+const AWS = require("aws-sdk");
 const { gql } = require('apollo-server');
 const uuid4 = require("uuid4")
 const { docClientSetup } = require('./dbSetup.js')
@@ -99,6 +100,15 @@ const resolvers = {
             await docClient.put(params).promise();
 
             const {Item} = await docClient.get({TableName: tablename, Key: {CommentsTableHashKey: HKEY}}).promise();
+
+            var sns = new AWS.SNS();
+
+            var params = {
+                Message: Item,
+                Subject: "Comment Posted on Item.postid",
+                TopicArn: process.env.REACT_APP_SNS_ARN || ""
+            };
+            sns.publish(params, context.done);
 
             console.log("args", args)
             console.log("Item", Item)
