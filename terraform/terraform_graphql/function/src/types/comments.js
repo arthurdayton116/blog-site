@@ -40,12 +40,15 @@ const resolvers = {
             const postID = args.postid
             const local_params = {
                 ExpressionAttributeValues: {
-                    ":postid": postID
+                    ":postid": postID,
+                    ":okToShow": "true"
                 },
                 KeyConditionExpression: "#postid = :postid",
                 ExpressionAttributeNames:{
-                    "#postid": "postid"
+                    "#postid": "postid",
+                    "#okToShow": "okToShow"
                 },
+                FilterExpression: "#okToShow = :okToShow",
                 ScanIndexForward: false,
                 TableName: tablename,
                 IndexName: 'postid-timestamp-index'
@@ -94,7 +97,8 @@ const resolvers = {
                     'comment': args.comment.comment,
                     'name': args.comment.name,
                     'postid': args.comment.postid,
-                    'timestamp': new Date().toISOString()
+                    'timestamp': new Date().toISOString(),
+                    'okToShow': "false"
                 }
             };
 

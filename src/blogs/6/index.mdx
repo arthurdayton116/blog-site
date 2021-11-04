@@ -26,9 +26,15 @@ export const gaTerraform = "https://github.com/hashicorp/setup-terraform"
 
 #### Using GitHub Actions to continuously deploy a Serverless blog site
 
-In this post I am going to cover how to use GitHub Actions to continuously build and deploy a serverless blog site using Terraform, React, AWS S3, Route53, Certificate Manager and CloudFront.
+In this post I am going to cover how to use GitHub Actions to continuously build and deploy a serverless blog site using Terraform, React, GraphQL, and several AWS services including Lambda, API Gateway, S3, SNS, Route53, Certificate Manager and CloudFront.
+
+<br/>
+
 
 To set this up yourself you need an AWS account, a Terraform cloud account, a custom domain, basic React skills, basic Terraform skills, a working knowledge of GitHub Actions and of course the requisite amount of OCD needed to figure out the stuff I almost certainly left out because I wouldn't want to deny you the delicious pain of experience.
+
+<br/>
+
 
 So some background from around the internet:
 
@@ -46,7 +52,7 @@ So some background from around the internet:
 <br/>
 <br/>
 
-My objective is to build a blog site that is deployed around the world and updates automatically whenever I push changes to the main branch of my repository.
+My objective is to build a blog site that is deployed around the world and updates automatically whenever I push changes to the main branch of my repository.  I also have created a GraphQL endpoint for getting and submitting comments for each blog entry.
 <br/>
 
 Now lets take a look at what we are trying to build:
@@ -91,17 +97,20 @@ I have a hosted zone in Route53 that ties it all together.  Most important thing
 <br/>
 
 #### Buckets
+For this site I need 2 S3 buckets.  One for the site assets that we will use as a source for our CloudFront distribution and one for logs and Athena query results.
 
 #### Pipeline
+For my continuous integration I am using GitHub.  Right now I am using main and not a PR flow because it's just me and I can make it work with local dev and GitHub actions.  In a context any larger than myself I would set up a separate dev domain either within a VPC or locked down by IP address.
 
 #### Diagram
 
-#### Comments mechanism - preview
+#### Comments
+For a comments function I have used GraphQL running on Lambda, DynamoDB for storage and SNS to notify me of comments.
 ---
 
 #### Building Blog Site with Github actions
 
-This part is relatively easy assuming <Link p={0} href={Post1} target="_blank">this post</Link> makes sense.CloudFront
+This part is relatively easy assuming <Link p={0} href={Post1} target="_blank">this post</Link> makes sense.
 
 <br/>
 
@@ -115,21 +124,21 @@ TODO - Add S3 terraform discussion
 
 <br/>
 
-First www.arthurneedsadomain.com
+<!-- First www.arthurneedsadomain.com -->
 
-<br/>
+<!-- <br/> -->
 
-<Image p={4} verticalAlign='middle' src="/images/6/S3www.png" />
+<!-- <Image p={4} verticalAlign='middle' src="/images/6/S3www.png" /> -->
 
-<br/>
+<!-- <br/> -->
 
-which redirects to arthurneedsadomain.com that hosts the content
+<!-- which redirects to arthurneedsadomain.com that hosts the content -->
 
-<br/>
+<!-- <br/> -->
 
-<Image p={4} verticalAlign='middle' src="/images/6/S3domain.png" />
+<!-- <Image p={4} verticalAlign='middle' src="/images/6/S3domain.png" /> -->
 
-<br/>
+<!-- <br/> -->
 
 the key on this bucket is to set the index.html as both the index and the error document because we are using React Router which doesn't play nice with S3 but the error redirection hacks it back to where it needs to be.  <Link p={0} href={clientSideRoute} target="_blank">If you care why this explains it.</Link>
 

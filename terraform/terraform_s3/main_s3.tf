@@ -10,6 +10,10 @@ resource "aws_s3_bucket" "a" {
     error_document = "index.html"
   }
 
+  logging {
+    target_bucket = aws_s3_bucket.log.id
+    target_prefix = "s3-log/"
+  }
   force_destroy = true
   tags = merge(
     local.base_tags,
@@ -24,6 +28,26 @@ resource "aws_s3_bucket" "log" {
   bucket = "logs-${local.bucket_name}"
 
   force_destroy = true
+
+  grant {
+    type        = "Group"
+    permissions = ["READ_ACP", "WRITE"]
+    uri         = "http://acs.amazonaws.com/groups/s3/LogDelivery"
+  }
+
+  //CloudFront
+  grant {
+    id          = "c4c1ede66af53448b93c283ce9448c4ba468c9432aa01d700d3878632f77d2d0"
+    permissions = ["FULL_CONTROL", ]
+    type        = "CanonicalUser"
+  }
+
+  grant {
+    id          = data.aws_canonical_user_id.current_user.id
+    type        = "CanonicalUser"
+    permissions = ["FULL_CONTROL"]
+  }
+
   tags = merge(
     local.base_tags,
     {

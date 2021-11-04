@@ -59,7 +59,8 @@ resource "aws_dynamodb_table_item" "i" {
   "comment": {"S": "${random_string.one[count.index].result}"},
   "name": {"S": "Terraform"},
   "postid": {"S": "9999"},
-  "timestamp": {"S": "${timestamp()}"}
+  "timestamp": {"S": "${timestamp()}"},
+  "okToShow": {"S": "false"}
 }
 ITEM
 }

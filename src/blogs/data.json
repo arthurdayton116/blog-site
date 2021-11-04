@@ -6,7 +6,8 @@
       "postLink": "../blogs/1",
       "posted": "2021-02-15",
       "lastUpdated": "2021-02-15",
-      "technologies": ["React", "JavaScript","GitHub"]
+      "technologies": ["React", "JavaScript","GitHub"],
+      "order": 10
     },
     {
       "id": 2,
@@ -15,7 +16,8 @@
       "postLink": "../blogs/2",
       "posted": "2021-02-18",
       "lastUpdated": "2021-02-18",
-      "technologies": ["AWS", "Terraform"]
+      "technologies": ["AWS", "Terraform"],
+      "order": 10
     },
   {
     "id": 3,
@@ -24,7 +26,8 @@
     "postLink": "../blogs/3",
     "posted": "2021-02-28",
     "lastUpdated": "2021-02-28",
-    "technologies": ["AWS", "EC2", "Terraform", "Minecraft", "Systemctl", "Ubuntu"]
+    "technologies": ["AWS", "EC2", "Terraform", "Minecraft", "Systemctl", "Ubuntu"],
+    "order": 10
   },
   {
     "id": 4,
@@ -33,7 +36,8 @@
     "postLink": "../blogs/4",
     "posted": "2021-03-22",
     "lastUpdated": "021-03-22",
-    "technologies": ["Docker", "Terraform", "React"]
+    "technologies": ["Docker", "Terraform", "React"],
+    "order": 10
   },
   {
     "id": 5,
@@ -42,16 +46,18 @@
     "postLink": "../blogs/5",
     "posted": "2021-03-29",
     "lastUpdated": "021-03-29",
-    "technologies": ["Docker", "Terraform", "AWS"]
+    "technologies": ["Docker", "Terraform", "AWS"],
+    "order": 10
   },
   {
     "id": 6,
-    "title": "Deploying Blog on S3 as static site",
+    "title": "Deploying This Blog Site Using Serverless Technologies on AWS",
     "body": "Here comes some information",
     "postLink": "../blogs/6",
     "posted": "2021-10-29",
     "lastUpdated": "2021-10-29",
-    "technologies": ["React", "Terraform", "AWS"]
+    "technologies": ["React", "GraphQL", "Terraform", "AWS"],
+    "order": 1
   },
   {
     "id": 7,
@@ -60,6 +66,7 @@
     "postLink": "../blogs/7",
     "posted": "2021-03-29",
     "lastUpdated": "021-03-29",
-    "technologies": ["Docker", "Terraform", "AWS"]
+    "technologies": ["Docker", "Terraform", "AWS"],
+    "order": 10
   }
 ]

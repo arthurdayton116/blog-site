@@ -147,7 +147,7 @@ function RBForm (props){
     const currentDateTime = Date().toLocaleString();
     const theme = useTheme()
     return (
-        <Box p={2} >
+        <Box p={2} fontFamily='arial'>
         <Box
              as='form'
             onSubmit={async e => {
@@ -204,7 +204,7 @@ function RBForm (props){
             <Flex mx={-2} mb={3}>
             <Box width={1/3} px={2}>
                 <Label htmlFor='comment'>Comment</Label>
-                <Textarea
+                <Textarea fontFamily='arial'
                     id='comment'
                     name='comment'
                 />

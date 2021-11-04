@@ -3,7 +3,7 @@ const { makeExecutableSchema } = require('@graphql-tools/schema');
 const { merge } = require('lodash');
 
 const { typeDef: CommentsTypes, resolvers: CommentsResolvers} = require('./types/comments.js');
-
+const { typeDef: UtilityTypes, resolvers: UtilityResolvers} = require('./types/utilities.js');
 
 // These are base types that I don't want to break out into own files - START
 const Query = `
@@ -57,11 +57,14 @@ const baseResolvers = {
 const schema =makeExecutableSchema({
     typeDefs: [
         Query,
+        baseTypeDefs,
         CommentsTypes,
-        baseTypeDefs ],
+        UtilityTypes
+         ],
     resolvers: merge(
         baseResolvers,
-        CommentsResolvers
+        CommentsResolvers,
+        UtilityResolvers
     )
 });
 

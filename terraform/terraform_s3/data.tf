@@ -16,3 +16,5 @@ data "terraform_remote_state" "shared" {
   }
 }
 
+data "aws_canonical_user_id" "current_user" {}
+
