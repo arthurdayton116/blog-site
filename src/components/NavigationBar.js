@@ -14,6 +14,7 @@ export const NavigationBar = () => {
     const logout = async () => { await oktaAuth.signOut(); }
 
     // eslint-disable-next-line no-unused-vars
+    // noinspection JSUnusedLocalSymbols
     const [userInfo, setUserInfo] = useState(null);
 
     useEffect(() => {
