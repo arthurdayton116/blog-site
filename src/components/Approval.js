@@ -4,7 +4,7 @@ import {
     Box,
     Flex
 } from 'rebass';
-// eslint-disable-next-line no-unused-import
+// eslint-disable-next-line
 import {gql, useQuery, useMutation} from "@apollo/client";
 
 import {Input, Label, Textarea} from "@rebass/forms";

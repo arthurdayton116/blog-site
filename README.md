@@ -117,5 +117,21 @@ React
 GitHub Actions CI/CD
 Terraform / Cloud / Workspaces / Remote State / Tagging
 Local development / Cloud development
+Config management
+Cognitive load
+Authorization 
+API protection
 
 TODO - terratest
+
+Concept is that it is possible for people to understand all of this stuff but very hard to keep it all in memory and not become overly reliant on experts
+
+Setting up x as a service and enabling teams and platform, etc. is necessary
+
+Needs to be open and not black boxed but also usable without 
+
+Exploring the mono-repo
+
+Enabling local development
+
+This proves it can be done but also highlights the hard part that is the value you have to be able to deliver on
