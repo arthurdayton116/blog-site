@@ -11,11 +11,13 @@
   "license": "ISC",
   "dependencies": {
     "@graphql-tools/schema": "^8.3.1",
+    "@okta/jwt-verifier": "^2.3.0",
     "apollo-server": "^3.3.0",
     "apollo-server-core": "^3.3.0",
     "apollo-server-express": "^3.3.0",
     "apollo-server-lambda": "^3.3.0",
     "aws-sdk": "^2.1016.0",
+    "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "graphql": "^15.6.0",
     "lodash": "^4.17.21",

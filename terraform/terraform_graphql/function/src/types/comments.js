@@ -1,7 +1,8 @@
 const AWS = require("aws-sdk");
-const { gql } = require('apollo-server');
+const { gql, AuthenticationError } = require('apollo-server');
 const uuid4 = require("uuid4")
 const { docClientSetup } = require('./dbSetup.js')
+
 
 docClient = docClientSetup()
 
@@ -11,6 +12,7 @@ const typeDef = `
 extend type Query {
     comment: Comment
     comments(postid: String!): [Comment]!
+    unapprovedComments: [Comment]!
 }
 
  type Comment {
@@ -19,6 +21,7 @@ extend type Query {
       comment: String
       name: String
       CommentsTableHashKey: String
+      okToShow: String
   }
   
   type Mutation {
@@ -63,6 +66,54 @@ const resolvers = {
                     comment: item.comment,
                     name: item.name,
                     CommentsTableHashKey: item.CommentsTableHashKey
+                })
+            })
+            return return_arr;
+
+        },
+        unapprovedComments: async (parent, args, context, info) => {
+            // TODO - add try catch
+            // Show context object that is included via constructor in server definition
+            console.log('context', context)
+            const authorizedToUse =  await context.jwtVerifier()
+
+            // show expected claims object
+            console.log('authorizedToUse',authorizedToUse)
+
+            if (authorizedToUse === null  ) {
+                throw new AuthenticationError('Not Authorized to Access');
+            }
+            const { GroupsAccess } = authorizedToUse;
+
+            if (!GroupsAccess.includes('CommentApprover')) {
+                console.log('does not include CommentApprover group')
+                throw new AuthenticationError('Not Authorized to Access');
+            }
+
+            const local_params = {
+                ExpressionAttributeValues: {
+                    ":okToShow": "false"
+                },
+                ExpressionAttributeNames:{
+                    "#okToShow": "okToShow"
+                },
+                KeyConditionExpression: "#okToShow = :okToShow",
+                // FilterExpression: "#okToShow = :okToShow",
+                ScanIndexForward: false,
+                TableName: tablename,
+                IndexName: 'oktoshow-timestamp-index'
+            }
+
+            const { Items } = await docClient.query(local_params).promise()
+            const return_arr = [];
+            Items.map((item) => {
+                return_arr.push({
+                    postid: item.postid,
+                    timestamp: item.timestamp,
+                    comment: item.comment,
+                    name: item.name,
+                    CommentsTableHashKey: item.CommentsTableHashKey,
+                    okToShow: item.okToShow
                 })
             })
             return return_arr;

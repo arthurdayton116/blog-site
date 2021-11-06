@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React, {useState} from 'react'
 import ClipLoader from "react-spinners/ClipLoader";
 import {Box, Heading, Flex, Button } from 'rebass';
 import { Label, Input, Textarea } from '@rebass/forms'
@@ -141,7 +141,8 @@ function RBForm (props){
     console.log("RBForm props = ", props.postID)
     // const [commentIsPosting, setCommentIsPosting] = useState(false);
 
-    const [addComment, { data, loading, error }] = useMutation(addCommentMutation,{
+    // eslint-disable-next-line no-unused-vars
+    const [addComment, { _data, loading, _error }] = useMutation(addCommentMutation,{
         refetchQueries: [GET_COMMENTS]});
 
     const currentDateTime = Date().toLocaleString();
@@ -156,7 +157,7 @@ function RBForm (props){
                 const name = e.target[1].value
                 const comment = e.target[2].value
                 const postid = props.postID
-                const obj = {name, timeStamp, comment, postid}
+                // const obj = {name, timeStamp, comment, postid}
                 console.log(timeStamp)
                 console.log(name)
                 console.log(comment)

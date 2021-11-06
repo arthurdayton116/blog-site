@@ -94,11 +94,18 @@ resource "aws_lambda_function" "gql_lambda" {
 
   environment {
     variables = {
-      ddb_table_name   = local.dynamo_table_name
-      ddb_hash_key     = local.dynamo_hash_key
-      ddb_region       = local.region
-      GRAPHQL_ENDPOINT = aws_api_gateway_domain_name.graphql.domain_name
-      SNS_ARN          = local.sns_arn
+      ddb_table_name     = local.dynamo_table_name
+      ddb_hash_key       = local.dynamo_hash_key
+      ddb_region         = local.region
+      GRAPHQL_ENDPOINT   = aws_api_gateway_domain_name.graphql.domain_name
+      SNS_ARN            = local.sns_arn
+      OKTA_CLIENT_ID     = var.OKTA_CLIENT_ID
+      OKTA_CLIENT_SECRET = var.OKTA_CLIENT_SECRET
+      OKTA_DOMAIN        = var.OKTA_DOMAIN
+      OKTA_ISSUER_SUFFIX = var.OKTA_ISSUER_SUFFIX
+      OKTA_ISSUER        = local.OKTA_ISSUER
+      OKTA_AUDIENCE      = var.OKTA_AUDIENCE
+      APP_BASE_PORT      = 4000
 
     }
   }

@@ -20,9 +20,23 @@ resource "aws_dynamodb_table" "i" {
     type = "S"
   }
 
+  attribute {
+    name = "okToShow"
+    type = "S"
+  }
+
   global_secondary_index {
     name            = "postid-timestamp-index"
     hash_key        = "postid"
+    range_key       = "timestamp"
+    write_capacity  = 1
+    read_capacity   = 1
+    projection_type = "ALL"
+  }
+
+  global_secondary_index {
+    name            = "oktoshow-timestamp-index"
+    hash_key        = "okToShow"
     range_key       = "timestamp"
     write_capacity  = 1
     read_capacity   = 1
