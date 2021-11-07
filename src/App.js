@@ -40,7 +40,7 @@ const CALLBACK_PATH = process.env.REACT_APP_CALLBACK_PATH;
 
 const ISSUER = `https://${OKTA_DOMAIN}${OKTA_ISSUER}`;
 const HOST = window.location.host;
-const REDIRECT_URI = `http://${HOST}${CALLBACK_PATH}`;
+
 const SCOPES = 'openid profile email comment_approve';
 
 // construct graphql endpoint based on location
@@ -52,6 +52,16 @@ const gql_ep = () => {
     return gurl
 }
 
+// construct graphql endpoint based on location
+const redirect_ep = () => {
+    let gurl = `http://${HOST}${CALLBACK_PATH}`
+    if (process.env.REACT_APP_GRAPHQL_ENDPOINT) {
+        gurl = `https://${HOST}${CALLBACK_PATH}`
+    }
+    return gurl
+}
+
+const REDIRECT_URI = redirect_ep();
 const GRAPHQL_ENDPOINT = gql_ep();
 
 // for use by apollo client constructor - https://www.apollographql.com/docs/react/api/link/introduction/
