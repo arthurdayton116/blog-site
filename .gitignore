@@ -126,9 +126,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 /garbage/
-/terraform_s3/provider_override.tf
-/terraform_s3/local.auto.tfvars
-/terraform_dns/local.auto.tfvars
-/*/*.auto.tfvars
-/*/provider_override.tf
-/*/.terraform/
+*_override.tf
+.terraform*
+.terraform/
+*.auto.tfvars

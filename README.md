@@ -135,3 +135,7 @@ Exploring the mono-repo
 Enabling local development
 
 This proves it can be done but also highlights the hard part that is the value you have to be able to deliver on
+
+Configuring linters and code editors
+
+Begining to think about where team boundries might be

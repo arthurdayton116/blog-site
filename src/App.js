@@ -59,11 +59,11 @@ const httpLink = createHttpLink({
     uri: GRAPHQL_ENDPOINT,
 });
 
-// console.log('HOST - ', HOST)
-// console.log('OKTA_DOMAIN - ', OKTA_DOMAIN)
-// console.log('CALLBACK_PATH - ', CALLBACK_PATH)
-// console.log('ISSUER - ', ISSUER)
-// console.log('REDIRECT_URI - ', REDIRECT_URI)
+console.log('HOST - ', HOST)
+console.log('OKTA_DOMAIN - ', OKTA_DOMAIN)
+console.log('CALLBACK_PATH - ', CALLBACK_PATH)
+console.log('ISSUER - ', ISSUER)
+console.log('REDIRECT_URI - ', REDIRECT_URI)
 
 // okta config
 const config = {
