@@ -27,11 +27,11 @@ jobs:
       REACT_APP_OKTA_ISSUER_SUFFIX: ${{ secrets.REACT_APP_OKTA_ISSUER_SUFFIX }}
       REACT_APP_CLIENT_ID: ${{ secrets.REACT_APP_CLIENT_ID }}
       REACT_APP_CALLBACK_PATH: ${{ secrets.REACT_APP_CALLBACK_PATH }}
-      TF_VAR_OKTA_CLIENT_ID: ${{ secrets.TF_VAR_OKTA_CLIENT_ID }}
-      TF_VAR_OKTA_CLIENT_SECRET: ${{ secrets.TF_VAR_OKTA_CLIENT_SECRET }}
-      TF_VAR_OKTA_DOMAIN: ${{ secrets.TF_VAR_OKTA_DOMAIN }}
-      TF_VAR_OKTA_ISSUER_SUFFIX: ${{ secrets.TF_VAR_OKTA_ISSUER_SUFFIX }}
-      TF_VAR_OKTA_AUDIENCE: ${{ secrets.TF_VAR_OKTA_AUDIENCE }}
+      TF_VAR_okta_client_id: ${{ secrets.TF_VAR_OKTA_CLIENT_ID }}
+      TF_VAR_okta_client_secret: ${{ secrets.TF_VAR_OKTA_CLIENT_SECRET }}
+      TF_VAR_okta_domain: ${{ secrets.TF_VAR_OKTA_DOMAIN }}
+      TF_VAR_okta_issuer_suffix: ${{ secrets.TF_VAR_OKTA_ISSUER_SUFFIX }}
+      TF_VAR_okta_audience: ${{ secrets.TF_VAR_OKTA_AUDIENCE }}
 
     strategy:
       matrix:
