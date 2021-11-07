@@ -1,7 +1,3 @@
-const dotenv = require('dotenv')
-const dotenvExpand = require('dotenv-expand')
-const myEnv = dotenv.config()
-dotenvExpand(myEnv)
 const { ApolloServer } = require('apollo-server-express');
 const { ApolloServerPluginDrainHttpServer } = require('apollo-server-core');
 const express = require( 'express');
