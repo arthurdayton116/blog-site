@@ -23,6 +23,15 @@ jobs:
       react_build_override: 'true'
       terraform_apply_override: 'true'
       s3_deploy_override: 'true'
+      REACT_APP_OKTA_DOMAIN: ${{ secrets.REACT_APP_OKTA_DOMAIN }}
+      REACT_APP_OKTA_ISSUER_SUFFIX: ${{ secrets.REACT_APP_OKTA_ISSUER_SUFFIX }}
+      REACT_APP_CLIENT_ID: ${{ secrets.REACT_APP_CLIENT_ID }}
+      REACT_APP_CALLBACK_PATH: ${{ secrets.REACT_APP_CALLBACK_PATH }}
+      TF_VAR_OKTA_CLIENT_ID: ${{ secrets.TF_VAR_OKTA_CLIENT_ID }}
+      TF_VAR_OKTA_CLIENT_SECRET: ${{ secrets.TF_VAR_OKTA_CLIENT_SECRET }}
+      TF_VAR_OKTA_DOMAIN: ${{ secrets.TF_VAR_OKTA_DOMAIN }}
+      TF_VAR_OKTA_ISSUER_SUFFIX: ${{ secrets.TF_VAR_OKTA_ISSUER_SUFFIX }}
+      TF_VAR_OKTA_AUDIENCE: ${{ secrets.TF_VAR_OKTA_AUDIENCE }}
 
     strategy:
       matrix:
@@ -304,12 +313,6 @@ jobs:
         if: ${{ env.tf_dir_changed == 'true' || env.terraform_apply_override == 'true' }}
         run: terraform apply -auto-approve
         continue-on-error: false
-        env:
-          TF_VAR_OKTA_CLIENT_ID: ${{ secrets.TF_VAR_OKTA_CLIENT_ID }}
-          TF_VAR_OKTA_CLIENT_SECRET: ${{ secrets.TF_VAR_OKTA_CLIENT_SECRET }}
-          TF_VAR_OKTA_DOMAIN: ${{ secrets.TF_VAR_OKTA_DOMAIN }}
-          TF_VAR_OKTA_ISSUER_SUFFIX: ${{ secrets.TF_VAR_OKTA_ISSUER_SUFFIX }}
-          TF_VAR_OKTA_AUDIENCE: ${{ secrets.TF_VAR_OKTA_AUDIENCE }}
         working-directory: ./terraform/terraform_graphql
 
       - name: Set var from TF Output
@@ -394,11 +397,6 @@ jobs:
       - name: Yarn build
         if: ${{ env.src_dir_changed == 'true' || env.react_build_override == 'true' }}
         run: yarn run build --if-present
-        env:
-          REACT_APP_OKTA_DOMAIN: ${{ secrets.REACT_APP_OKTA_DOMAIN }}
-          REACT_APP_OKTA_ISSUER_SUFFIX: ${{ secrets.REACT_APP_OKTA_ISSUER_SUFFIX }}
-          REACT_APP_CLIENT_ID: ${{ secrets.REACT_APP_CLIENT_ID }}
-          REACT_APP_CALLBACK_PATH: ${{ secrets.REACT_APP_CALLBACK_PATH }}
 #      - run: ls
 #      - run: ls ./build
 #     - run: npm test
