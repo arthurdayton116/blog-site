@@ -99,12 +99,12 @@ resource "aws_lambda_function" "gql_lambda" {
       ddb_region         = local.region
       GRAPHQL_ENDPOINT   = aws_api_gateway_domain_name.graphql.domain_name
       SNS_ARN            = local.sns_arn
-      OKTA_CLIENT_ID     = var.OKTA_CLIENT_ID
-      OKTA_CLIENT_SECRET = var.OKTA_CLIENT_SECRET
-      OKTA_DOMAIN        = var.OKTA_DOMAIN
-      OKTA_ISSUER_SUFFIX = var.OKTA_ISSUER_SUFFIX
+      OKTA_CLIENT_ID     = var.okta_client_id
+      OKTA_CLIENT_SECRET = var.okta_client_secret
+      OKTA_DOMAIN        = var.okta_domain
+      OKTA_ISSUER_SUFFIX = var.okta_issuer_suffix
       OKTA_ISSUER        = local.OKTA_ISSUER
-      OKTA_AUDIENCE      = var.OKTA_AUDIENCE
+      OKTA_AUDIENCE      = var.okta_audience
       APP_BASE_PORT      = 4000
 
     }

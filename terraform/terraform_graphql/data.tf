@@ -26,7 +26,7 @@ locals {
   zone_id           = data.terraform_remote_state.cert.outputs.zone_id
   stage_name        = "dev_gql"
   sns_arn           = data.terraform_remote_state.sns.outputs.topic_arn
-  OKTA_ISSUER       = "https://${var.OKTA_DOMAIN}${var.OKTA_ISSUER_SUFFIX}"
+  OKTA_ISSUER       = "https://${var.okta_domain}${var.okta_issuer_suffix}"
 }
 
 data "terraform_remote_state" "shared" {
