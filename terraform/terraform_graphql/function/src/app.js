@@ -18,7 +18,7 @@ async function startApolloServer(schema, port) {
         plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
         context: ({ req }) => ({
             jwtVerifier: () => jwtVerifier(req),
-            authScope: req.headers.authorization
+            // authScope: req.headers.authorization
         }),
     });
     await server.start();

@@ -7,6 +7,7 @@ const oktaJwtVerifier = new OktaJwtVerifier({
 })
 
 module.exports = async (request) => {
+    console.log('oktaJwtVerifier', request.headers)
 const bad_request = null
     const { authorization } = request.headers;
     if (!authorization) {

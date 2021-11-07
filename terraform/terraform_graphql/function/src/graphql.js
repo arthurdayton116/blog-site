@@ -7,17 +7,17 @@ const server = new ApolloServer({
     schema,
     context: ({ event, context, express }) => {
         // console.log('EVENT LOG')
-        console.log('express.req', express.req)
+        console.log('ApolloServer express.req', express.req)
         // console.log('CONTEXT LOG')
-         console.log('context', context)
+         console.log('ApolloServer context', context)
 
         return ({
+            jwtVerifier: () => jwtVerifier(express.req),
         headers: event.headers,
         functionName: context.functionName,
         event,
         context,
         req: express.req,
-            jwtVerifier: () => jwtVerifier(express.req),
     })},
 });
 

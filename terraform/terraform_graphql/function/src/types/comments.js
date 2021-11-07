@@ -74,7 +74,7 @@ const resolvers = {
         unapprovedComments: async (parent, args, context, info) => {
             // TODO - add try catch
             // Show context object that is included via constructor in server definition
-            console.log('context', context)
+            console.log('unapprovedComments context', context)
             const authorizedToUse =  await context.jwtVerifier()
 
             // show expected claims object
