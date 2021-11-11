@@ -113,7 +113,7 @@ jobs:
         uses: tj-actions/changed-files@v10.1
         with:
           path: lastCommit
-          files: src
+          files: ui/src
 
       # set environment variable for determining if React build should run
       - name: Set src_dir_changed var
@@ -388,15 +388,18 @@ jobs:
       # build React project
       - name: React Yarn Install
         run: yarn install --frozen-lockfile
+        working-directory: ./ui
 
       - name: Check vulnerabilities
         id: chech_vulns
         run: npx audit-ci --config vulns/audit-ci.json
+        working-directory: ./ui
 
       # run conditionally
       - name: Yarn build
         if: ${{ env.src_dir_changed == 'true' || env.react_build_override == 'true' }}
         run: yarn run build --if-present
+        working-directory: ./ui
 #      - run: ls
 #      - run: ls ./build
 #     - run: npm test
@@ -405,7 +408,7 @@ jobs:
         if: ${{ env.src_dir_changed == 'true' || env.s3_deploy_override == 'true'}}
         env:
           aws_bucket_name: ${{ secrets.AWS_BUCKET_NAME }}
-        run: aws s3 sync ../../build/ s3://"${{ env.bucket_name }}" --delete
+        run: aws s3 sync ../../ui/build/ s3://"${{ env.bucket_name }}" --delete
         working-directory: ./terraform/terraform_s3
 
       # TODO - Add Cypress tests
