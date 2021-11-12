@@ -381,6 +381,7 @@ jobs:
       # set up to build React project
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
+        working-directory: ./ui
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'yarn'

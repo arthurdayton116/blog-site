@@ -14,14 +14,14 @@ export const Blogs = () => {
 
         return (
             <div>
-                <Flex flexWrap={'wrap'} alignItems='center' sx={theme.linkSXAlt1}>
+                <Flex id="posts" flexWrap={'wrap'} alignItems='center' sx={theme.linkSXAlt1}>
                     {data.filter(post =>  post.id <= maxPostNumber).sort(function (a, b) {
                         return a.order - b.order;
                     }).map(post => {
                         const textColor = post.order === 1 ? 'white' : 'black';
                         const bgColor = post.order === 1 ? 'black' : 'white';
                         return (
-                    <Box width={cardArr} height={'130px'}  m={2} bg={bgColor} key={post.id}
+                    <Box width={cardArr} height={'130px'}  m={2} bg={bgColor} id={`post_${post.id}`} key={post.id}
                          sx={{borderRadius: 20, alignContent: 'center', justifyContent: 'center',
                              borderWidth: '2px',
                              borderStyle: 'solid',
