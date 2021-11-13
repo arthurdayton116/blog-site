@@ -1,4 +1,5 @@
 import React, {Suspense} from 'react'
+import { useParams } from "react-router-dom";
 import { Box, Heading, Text, Link } from 'rebass';
 import blogContent from '../blogs/BlogMDX';
 import blogImages from '../blogs/images';
@@ -13,6 +14,8 @@ export const awsTFIssue = "https://github.com/arthurdayton116/aws-terraform/issu
 
 // Post component - renders individual blog posts
 export const Post = (props) => {
+    const { postid: postParam } = useParams();
+
     const theme = useTheme()
     // dynamic size arrays for different form factors
     const mlArr = [0,2,4]
@@ -41,19 +44,10 @@ export const Post = (props) => {
         </ol>
     }
 
-    // Gets post number
-    const pathArr = props.history.location.pathname.split('/').filter(function (el) {
-        return el !== "";
-    });
-
-    // console.log("pathArr", pathArr)
-
-    // extract post number from end of array
-    const dataIndex = pathArr[pathArr.length-1]
-
     // get post data from state property
-    const post = (typeof(props.history.location.state) != 'undefined') ? props.history.location.state.post : postData(dataIndex)
+    const post = postData(postParam)
 
+    console.log('post=', post)
     // Blog content and images
     const Content = post ? blogContent(post.id) : ''
     const Images = post ? blogImages(post.id) : ''
@@ -73,7 +67,7 @@ export const Post = (props) => {
 
     if (post)
         return (
-    <Box>
+    <Box id={`post_page_parent_${postParam}`}>
         <Box p={mlArr} fontFamily='arial'>
             <Box pl={mlArr} pt={mlArr} pb={mlArr} bg={theme.colors.pale}>
                 <Heading as={'h1'} sx={theme.h1Sx}>{post.title}</Heading>

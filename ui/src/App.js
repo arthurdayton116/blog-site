@@ -87,7 +87,7 @@ const config = {
 // create oktaAuth object for use by components
 const oktaAuth = new OktaAuth(config);
 
-function App() {
+function App(props) {
     // get the authentication token from reactive var if it exists
     // console.log('token', accessTokenContainer.authState.accessToken.accessToken);
     const accessTokenContainer = useReactiveVar(accessTokenVar)
@@ -131,7 +131,7 @@ function App() {
                           <Route exact path="/" component={Blogs} />
                           <Route path="/about" component={About} />
                           <Route path="/blog" component={Blogs} />
-                          <Route path="/post/*" component={Post} />
+                          <Route path="/post/:postid" exact={true} component={Post} />
                           { /* callback component provided by OKTA */ }
                           <Route path='/login/callback' component={LoginCallback}/>
                           { /* Protected by OKTA */ }

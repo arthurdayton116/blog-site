@@ -376,6 +376,19 @@ jobs:
       ##############################
 
       ##############################
+      # Run E2E - Start #
+      ##############################
+      - name: Cypress run
+        uses: cypress-io/github-action@v2
+        with:
+          spec: ui/cypress/integration/ui/blog_spec.js
+          project: ./ui
+
+      ##############################
+      # Run E2E  - End #
+      ##############################
+      -
+      ##############################
       # Build React Project - Start #
       ##############################
       # set up to build React project

@@ -39,10 +39,10 @@ export const NavigationBar = () => {
     const [displayVar, toggleDisplayVar] = useState('none')
 
     const LogOnOffButton = (props) => {
-        const logOnButton =<Link variant='nav' onClick={()=>login()} display={['none','block','block']} sx={theme.linkSX} >LogIn</Link>
+        const logOnButton =<Link id="logOnButton" variant='nav' onClick={()=>login()} display={['none','block','block']} sx={theme.linkSX} >LogIn</Link>
         const logOffButton =(<React.Fragment>
-            <Link variant='nav' href='/approval' display={['none','block','block']} sx={theme.linkSX} >Approval</Link>
-            <Link variant='nav' onClick={()=>logout()} display={['none','block','block']} sx={theme.linkSX} >LogOff</Link>
+            <Link id="approvalButton" variant='nav' href='/approval' display={['none','block','block']} sx={theme.linkSX} >Approval</Link>
+            <Link id="logOffButton" variant='nav' onClick={()=>logout()} display={['none','block','block']} sx={theme.linkSX} >LogOff</Link>
             </React.Fragment>)
 
 

@@ -31,13 +31,14 @@ const GET_UNAPPROVED_COMMENTS = gql`
      console.log("props",props)
 
      if (error) {
-         return <div>Error: {error.message}</div>;
+         return <div id="approvalError" >Error - Please contact your administrator</div>;
+         // <div>Error: {error.message}</div>;
      } else if (loading) {
-         return <div>Loading...</div>;
+         return <div id="approvalLoading" >Loading...</div>;
      } else {
          console.log(data.unapprovedComments)
          return (
-             <div>
+             <div id="approvalData">
                  <Box>
                      <Box>
                          {data.unapprovedComments.map(({CommentsTableHashKey, postid, name, comment, timestamp}) => {
