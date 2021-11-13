@@ -381,8 +381,7 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
-          spec: ui/cypress/integration/ui/blog_spec.js
-          project: ./ui
+          spec: cypress/integration/ui/blog_spec.js
           working-directory: ./ui
 
       ##############################
