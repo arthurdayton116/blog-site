@@ -32,6 +32,7 @@ jobs:
       TF_VAR_okta_domain: ${{ secrets.REACT_APP_OKTA_DOMAIN }}
       TF_VAR_okta_issuer_suffix: ${{ secrets.REACT_APP_OKTA_ISSUER_SUFFIX }}
       TF_VAR_okta_audience: ${{ secrets.OKTA_AUDIENCE }}
+      PORT: 3001
 
     strategy:
       matrix:
