@@ -21,13 +21,13 @@ dotenv.config()
 // eslint-disable-next-line no-unused-vars
 module.exports = (on, config) => {
 
-console.log('config=',config)
+// console.log('config=',config)
 
         // ...
-        config.env.auth_username_nonapprover = process.env.AUTH_USERNAME_NONAPPROVER
-        config.env.auth_password_nonapprover = process.env.AUTH_PASSWORD_NONAPPROVER
-        config.env.auth_username_approver = process.env.AUTH_USERNAME_APPROVER
-        config.env.auth_password_approver = process.env.AUTH_PASSWORD_APPROVER
+        config.env.auth_username_nonapprover = process.env.OKTA_AUTH_USERNAME_NONAPPROVER
+        config.env.auth_password_nonapprover = process.env.OKTA_AUTH_PASSWORD_NONAPPROVER
+        config.env.auth_username_approver = process.env.OKTA_AUTH_USERNAME_APPROVER
+        config.env.auth_password_approver = process.env.OKTA_AUTH_PASSWORD_APPROVER
         config.env.okta_domain = process.env.REACT_APP_OKTA_DOMAIN
         config.env.okta_client_id = process.env.REACT_APP_CLIENT_ID
 

@@ -23,6 +23,10 @@ jobs:
       react_build_override: 'true'
       terraform_apply_override: 'true'
       s3_deploy_override: 'true'
+      OKTA_AUTH_USERNAME_NONAPPROVER: ${{ secrets.OKTA_AUTH_USERNAME_NONAPPROVER }}
+      OKTA_AUTH_PASSWORD_NONAPPROVER: ${{ secrets.OKTA_AUTH_PASSWORD_NONAPPROVER }}
+      OKTA_AUTH_USERNAME_APPROVER: ${{ secrets.OKTA_AUTH_USERNAME_APPROVER }}
+      OKTA_AUTH_PASSWORD_APPROVER: ${{ secrets.OKTA_AUTH_PASSWORD_APPROVER }}
       REACT_APP_OKTA_DOMAIN: ${{ secrets.REACT_APP_OKTA_DOMAIN }}
       REACT_APP_OKTA_ISSUER_SUFFIX: ${{ secrets.REACT_APP_OKTA_ISSUER_SUFFIX }}
       REACT_APP_CLIENT_ID: ${{ secrets.REACT_APP_CLIENT_ID }}
