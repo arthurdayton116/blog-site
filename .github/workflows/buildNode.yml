@@ -177,15 +177,16 @@ jobs:
       - run: |
           docker network create --driver bridge graphql-net
 
+      - run: |
           docker run -p 8000:8000 \
             -w /home/dynamodblocal \
             -v /function/dynamodb:/home/dynamodblocal/data \
             --name localDynamoTestContainer \
             --network graphql-net \
-            -d  amazon/dynamodb-local:1.17.0;
+            -d  amazon/dynamodb-local:1.17.0
+        working-directory: ./terraform/terraform_graphql
 
-          console.log('first')
-
+      - run: |
           docker run -p 4000:4000 \
           -v /function/src:/src \
           -w /src \
@@ -197,13 +198,6 @@ jobs:
           --env DYNAMO_HOST=localDynamoTestContainer \
           --network graphql-net \
           -d node:16 node index.js
-
-          console.log('second')
-
-          curl --request POST \
-            --header 'content-type: application/json' \
-            --url http://localhost:4000/graphql \
-            --data '{"query":"query { __typename }"}'
 
         working-directory: ./terraform/terraform_graphql
 
