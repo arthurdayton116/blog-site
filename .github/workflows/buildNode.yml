@@ -175,14 +175,6 @@ jobs:
       ##############################
 
 
-
-      - run: |
-          curl --request POST \
-            --header 'content-type: application/json' \
-            --url http://localGraphQLTestContainer:4000/graphql \
-            --data '{"query":"query { __typename }"}'
-
-
       # Installs specified version of terraform - I like to pin versions - would make sense to use a variable at org level
       - uses: hashicorp/setup-terraform@v1
         with:
@@ -415,13 +407,25 @@ jobs:
       ##############################
       # Run E2E - Start #
       ##############################
+
+      # build React project
+      - name: React Yarn Install
+        run: yarn install --frozen-lockfile
+        working-directory: ./ui
+
+      - run: yarn start
+        working-directory: ./ui
+
+      - run: node index.js
+        working-directory: ./terraform/terraform_graphql/function/src
+
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
-          start: yarn start
-          wait-on: 'http://localhost:3001'
+          start: yarn start,
+          wait-on: 'http://localhost:3001, http://localhost:4000,'
           spec: cypress/integration/ui/blog_spec.js
-          working-directory: ./ui
+
 
       ##############################
       # Run E2E  - End #
