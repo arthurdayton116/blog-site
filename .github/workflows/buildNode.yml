@@ -207,7 +207,7 @@ jobs:
       - run: |
           curl --request POST \
             --header 'content-type: application/json' \
-            --url http://localhost:4000/graphql \
+            --url http://localGraphQLTestContainer:4000/graphql \
             --data '{"query":"query { __typename }"}'
 
 
