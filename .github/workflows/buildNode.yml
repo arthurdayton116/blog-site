@@ -32,6 +32,8 @@ jobs:
       OKTA_AUTH_PASSWORD_NONAPPROVER: ${{ secrets.OKTA_AUTH_PASSWORD_NONAPPROVER }}
       OKTA_AUTH_USERNAME_APPROVER: ${{ secrets.OKTA_AUTH_USERNAME_APPROVER }}
       OKTA_AUTH_PASSWORD_APPROVER: ${{ secrets.OKTA_AUTH_PASSWORD_APPROVER }}
+      OKTA_DOMAIN: ${{ secrets.OKTA_DOMAIN }}
+      OKTA_ISSUER_SUFFIX: ${{ secrets.OKTA_ISSUER_SUFFIX }}
       # sample users for testing authentication and groups with Cypress - END
       # variables used in React build - these are NOT secret (NOTHING in React code is) even though they are stored that way - START
       REACT_APP_OKTA_DOMAIN: ${{ secrets.REACT_APP_OKTA_DOMAIN }}
