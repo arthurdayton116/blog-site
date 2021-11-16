@@ -73,14 +73,10 @@ jobs:
       - run: |
           docker network create --driver bridge graphql-net
 
-      - run: |
-          docker run -p 8000:8000 \
-            -w /home/dynamodblocal \
-            -v /function/dynamodb:/home/dynamodblocal/data \
-            --name localDynamoTestContainer \
-            --network graphql-net \
-            -d  amazon/dynamodb-local:1.17.0
-        working-directory: ./terraform/terraform_graphql
+      - uses: addnab/docker-run-action@v3
+        with:
+          image: amazon/dynamodb-local:1.17.0
+          options: -p 8000:8000 -v /home/runner/work/blog-site/blog-site/terraform/terraform_graphql/dynamodb:/home/dynamodblocal/data  -w /home/dynamodblocal --name localDynamoTestContainer --network graphql-net -d
 
       - run: |
           docker run -p 4000:4000 \
