@@ -68,6 +68,34 @@ jobs:
     steps:
       # Checkout repo
       - uses: actions/checkout@v2
+
+
+      - run: |
+          docker network create --driver bridge graphql-net
+
+      - run: |
+          docker run -p 8000:8000 \
+            -w /home/dynamodblocal \
+            -v /function/dynamodb:/home/dynamodblocal/data \
+            --name localDynamoTestContainer \
+            --network graphql-net \
+            -d  amazon/dynamodb-local:1.17.0
+        working-directory: ./terraform/terraform_graphql
+
+      - run: |
+          docker run -p 4000:4000 \
+          -v /function/src:/src \
+          -w /src \
+          -v $HOME/.aws/credentials:/root/.aws/credentials \
+          --name localGraphQLTestContainer \
+          --env CYPRESS_GRAPHQL=true \
+          --env GRAPHQL_PORT=4000 \
+          --env JWT_OVERRIDE=true \
+          --env DYNAMO_HOST=localDynamoTestContainer \
+          --network graphql-net \
+          -d node:16 node index.js
+
+        working-directory: ./terraform/terraform_graphql
       # Checkout previous commit for compare
       # https://github.com/tj-actions/changed-files
       - name: Checkout into lastCommit
@@ -174,32 +202,7 @@ jobs:
       # CHANGED DIRECTORIES - END #
       ##############################
 
-      - run: |
-          docker network create --driver bridge graphql-net
 
-      - run: |
-          docker run -p 8000:8000 \
-            -w /home/dynamodblocal \
-            -v /function/dynamodb:/home/dynamodblocal/data \
-            --name localDynamoTestContainer \
-            --network graphql-net \
-            -d  amazon/dynamodb-local:1.17.0
-        working-directory: ./terraform/terraform_graphql
-
-      - run: |
-          docker run -p 4000:4000 \
-          -v /function/src:/src \
-          -w /src \
-          -v $HOME/.aws/credentials:/root/.aws/credentials \
-          --name localGraphQLTestContainer \
-          --env CYPRESS_GRAPHQL=true \
-          --env GRAPHQL_PORT=4000 \
-          --env JWT_OVERRIDE=true \
-          --env DYNAMO_HOST=localDynamoTestContainer \
-          --network graphql-net \
-          -d node:16 node index.js
-
-        working-directory: ./terraform/terraform_graphql
 
       - run: |
           curl --request POST \
