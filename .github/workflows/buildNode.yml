@@ -182,7 +182,9 @@ jobs:
             -v /function/dynamodb:/home/dynamodblocal/data \
             --name localDynamoTestContainer \
             --network graphql-net \
-            -d  amazon/dynamodb-local:1.17.0
+            -d  amazon/dynamodb-local:1.17.0;
+
+          console.log('first')
 
           docker run -p 4000:4000 \
           -v /function/src:/src \
@@ -196,8 +198,21 @@ jobs:
           --network graphql-net \
           -d node:16 node index.js
 
+          console.log('second')
+
+          curl --request POST \
+            --header 'content-type: application/json' \
+            --url http://localhost:4000/graphql \
+            --data '{"query":"query { __typename }"}'
+
+
         working-directory: ./terraform/terraform_graphql
 
+      -run: |
+        curl --request POST \
+            --header 'content-type: application/json' \
+            --url http://localhost:4000/graphql \
+            --data '{"query":"query { __typename }"}'
 
 
       # Installs specified version of terraform - I like to pin versions - would make sense to use a variable at org level
