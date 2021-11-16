@@ -51,12 +51,12 @@ jobs:
       # Sets port for React when run for tests - END
 
     # https://docs.github.com/en/actions/learn-github-actions/workflow-syntax-for-github-actions#jobsjob_idservices
-#    services:
-#      localDynamoTestContainer:
-#        image: amazon/dynamodb-local:1.17.0
-#        ports:
-#          - 8000:8000
-#        options: -v /home/runner/work/blog-site/blog-site/terraform/terraform_graphql/dynamodb:/home/dynamodblocal/data  -w /home/dynamodblocal
+    services:
+      localDynamoTestContainer:
+        image: amazon/dynamodb-local:1.17.0
+        ports:
+          - 8000:8000
+        options: -v /home/runner/work/blog-site/dynamodb:/home/dynamodblocal/data  -w /home/dynamodblocal
 
 
     strategy:
@@ -68,30 +68,6 @@ jobs:
     steps:
       # Checkout repo
       - uses: actions/checkout@v2
-
-
-      - run: |
-          docker network create --driver bridge graphql-net
-
-      - uses: addnab/docker-run-action@v3
-        with:
-          image: amazon/dynamodb-local:1.17.0
-          options: -p 8000:8000 -v /home/runner/work/blog-site/blog-site/terraform/terraform_graphql/dynamodb:/home/dynamodblocal/data  -w /home/dynamodblocal --name localDynamoTestContainer --network graphql-net -d
-
-      - run: |
-          docker run -p 4000:4000 \
-          -v /function/src:/src \
-          -w /src \
-          -v $HOME/.aws/credentials:/root/.aws/credentials \
-          --name localGraphQLTestContainer \
-          --env CYPRESS_GRAPHQL=true \
-          --env GRAPHQL_PORT=4000 \
-          --env JWT_OVERRIDE=true \
-          --env DYNAMO_HOST=localDynamoTestContainer \
-          --network graphql-net \
-          -d node:16 node index.js
-
-        working-directory: ./terraform/terraform_graphql
       # Checkout previous commit for compare
       # https://github.com/tj-actions/changed-files
       - name: Checkout into lastCommit
