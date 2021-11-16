@@ -87,7 +87,7 @@ docker run -p 3001:3001 \
  
  docker rm localDynamoTestContainer; 
  
- rm -f dynamodb/*;
+ rm -f dynamodb/*.db;
  
  docker stop localGraphQLTestContainer; 
  
