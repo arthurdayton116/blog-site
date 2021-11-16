@@ -57,7 +57,7 @@ jobs:
         ports:
           - 8000:8000
         volumes:
-          - "${GITHUB_WORKSPACE}/terraform/terraform_graphql/dynamodb:/home/dynamodblocal/data"
+          - ${GITHUB_WORKSPACE}/terraform/terraform_graphql/dynamodb:/home/dynamodblocal/data
         options: -w /home/dynamodblocal
 
 
