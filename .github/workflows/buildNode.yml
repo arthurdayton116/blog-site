@@ -24,7 +24,7 @@ jobs:
       TF_VAR_base_domain: ${{ secrets.BASE_DOMAIN }}
       # override variables for conditionally run steps in this workflow file - START
       react_build_override: 'true'
-      terraform_apply_override: 'true'
+      terraform_apply_override: 'false'
       s3_deploy_override: 'true'
       # override variables for conditionally run steps in this workflow file - END
       # sample users for testing authentication and groups with Cypress - START
@@ -413,7 +413,7 @@ jobs:
         run: yarn install --frozen-lockfile
         working-directory: ./ui
 
-      - run: yarn start
+      - run: yarn start &
         working-directory: ./ui
 
       - run: node index.js
