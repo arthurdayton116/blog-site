@@ -1,3 +1,4 @@
+# Deploys application to AWS
 name: Build and Deploy Blog Site
 
 on:
@@ -9,42 +10,62 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Specifies environment to use on GitHub - under Settings
     environment:
       name: development
       url: https://development
     # set environment variables
     env:
-      # Setting CI to "" avoids issue with react scripts treating  warnings as errors - probably should make this specific to GitHub environment
+      # Setting CI to "" avoids issue with react scripts treating warnings as errors - probably should make this specific to GitHub environment
       # https://github.com/facebook/create-react-app/issues/3657
       CI: ""
       # var for what domain I'm using
+      # secrets are from environment
       TF_VAR_base_domain: ${{ secrets.BASE_DOMAIN }}
-      # override variables for conditionally run steps
+      # override variables for conditionally run steps in this workflow file - START
       react_build_override: 'true'
       terraform_apply_override: 'true'
       s3_deploy_override: 'true'
+      # override variables for conditionally run steps in this workflow file - END
+      # sample users for testing authentication and groups with Cypress - START
       OKTA_AUTH_USERNAME_NONAPPROVER: ${{ secrets.OKTA_AUTH_USERNAME_NONAPPROVER }}
       OKTA_AUTH_PASSWORD_NONAPPROVER: ${{ secrets.OKTA_AUTH_PASSWORD_NONAPPROVER }}
       OKTA_AUTH_USERNAME_APPROVER: ${{ secrets.OKTA_AUTH_USERNAME_APPROVER }}
       OKTA_AUTH_PASSWORD_APPROVER: ${{ secrets.OKTA_AUTH_PASSWORD_APPROVER }}
+      # sample users for testing authentication and groups with Cypress - END
+      # variables used in React build - these are NOT secret (NOTHING in React code is) even though they are stored that way - START
       REACT_APP_OKTA_DOMAIN: ${{ secrets.REACT_APP_OKTA_DOMAIN }}
       REACT_APP_OKTA_ISSUER_SUFFIX: ${{ secrets.REACT_APP_OKTA_ISSUER_SUFFIX }}
       REACT_APP_CLIENT_ID: ${{ secrets.REACT_APP_CLIENT_ID }}
       REACT_APP_CALLBACK_PATH: ${{ secrets.REACT_APP_CALLBACK_PATH }}
+      # variables used in React build - these are NOT (NOTHING in React code is) secret even though they are stored that way - END
+      # variables used in graphql lambda function - these ARE secret because they are only visible and used server(function) side - START
       TF_VAR_okta_client_id: ${{ secrets.OKTA_CLIENT_ID }}
       TF_VAR_okta_client_secret: ${{ secrets.OKTA_CLIENT_SECRET }}
       TF_VAR_okta_domain: ${{ secrets.REACT_APP_OKTA_DOMAIN }}
       TF_VAR_okta_issuer_suffix: ${{ secrets.REACT_APP_OKTA_ISSUER_SUFFIX }}
       TF_VAR_okta_audience: ${{ secrets.OKTA_AUDIENCE }}
+      # variables used in graphql lambda function - these ARE secret because they are only visible and used server(function) side - END
+      # Sets port for React when run for tests - START
       PORT: 3001
+      # Sets port for React when run for tests - END
+
+    services:
+      localDynamoTestContainer:
+        image: amazon/dynamodb-local:1.17.0
+        ports: 8000:8000
+        volumes: `pwd`/dynamodb:/home/dynamodblocal/data
+        options: -w /home/dynamodblocal
+
 
     strategy:
       matrix:
+        # this can be run for multiple versions of node if needed
         node-version: [14.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-      # Checkout
+      # Checkout repo
       - uses: actions/checkout@v2
       # Checkout previous commit for compare
       # https://github.com/tj-actions/changed-files
@@ -168,7 +189,7 @@ jobs:
           aws-region: 'us-east-1'
 
       ##############################
-      # Create Shared - START #
+      # Create shared variables used by all terraform directories - START #
       ##############################
       # Always run
       - name: Terraform Format - terraform_shared
@@ -196,7 +217,7 @@ jobs:
         working-directory: ./terraform/terraform_shared
 
       ##############################
-      # Create Common - END #
+      # Create shared - END #
       ##############################
 
       ##############################
@@ -228,7 +249,8 @@ jobs:
         continue-on-error: false
         working-directory: ./terraform/terraform_sns
 
-      - name: Set var from TF Output - terraform_graphql
+      # sets runner environment variable that can be used by subsequent steps
+      - name: Set var from TF Output - terraform_sns
         id: setVarSNS
         run: |
           snst=$(terraform output topic_arn)

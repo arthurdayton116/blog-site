@@ -1,106 +1,43 @@
 # What's here
-This is a repo that demonstrates how to build and deploy a React based blog site to S3 and CloudFront.
+This is a repo that demonstrates how to build and deploy a Serverless application.
 
-It's also Blog Content I use to blog to arthurdayton.com
+It uses React to create a blog site deployed into an S3 bucket fronted by CloudFront.
+
+You can see a working example, including an explanation of how I designed and built it, at arthurdayton.com
 
 For simplicity I am taking a mono-repo approach and using GitHub actions for deployment and Terraform Cloud for state storage.
 
-Assumes you have .aws/credentials file set up
-https://registry.terraform.io/providers/hashicorp/aws/latest/docs#shared-credentials-file
+## Folder Structure
 
-## Read logs
+### .github/workflows
+Contains workflpw file for GitHub Actions
 
-https://aws.amazon.com/premiumsupport/knowledge-center/analyze-logs-athena/create 
+### ui
+Contains React project for deploying UI
 
-```create database blog_cloudfront_access_logs_db
+### Terraform
+Contains multiple subfolders for deploying infrastructure needed to deploy and run blog site on AWS
 
-CREATE EXTERNAL TABLE IF NOT EXISTS blog_cloudfront_access_logs_db.arthurdaytonmybucket_logs (
-`date` DATE,
-time STRING,
-location STRING,
-bytes BIGINT,
-request_ip STRING,
-method STRING,
-host STRING,
-uri STRING,
-status INT,
-referrer STRING,
-user_agent STRING,
-query_string STRING,
-cookie STRING,
-result_type STRING,
-request_id STRING,
-host_header STRING,
-request_protocol STRING,
-request_bytes BIGINT,
-time_taken FLOAT,
-xforwarded_for STRING,
-ssl_protocol STRING,
-ssl_cipher STRING,
-response_result_type STRING,
-http_version STRING,
-fle_status STRING,
-fle_encrypted_fields INT,
-c_port INT,
-time_to_first_byte FLOAT,
-x_edge_detailed_result_type STRING,
-sc_content_type STRING,
-sc_content_len BIGINT,
-sc_range_start BIGINT,
-sc_range_end BIGINT
-)
-ROW FORMAT DELIMITED
-FIELDS TERMINATED BY '\t'
-LOCATION 's3://logs-arthurdayton.com/blog-site/'
-TBLPROPERTIES ( 'skip.header.line.count'='2' )
-```
+#### terraform_cf
+Contains code for deploying cloudfront distribution of site
 
+##### terraform_dns
+Contains code for deploying dns records and certificate 
 
-##
+#### terraform_dynamoDB
+Contains code for deploying DynamoDB table and indexes.
 
-```
-yarn build
-```
+#### terraform_grahql
+Contains code for building and deploying graphql server on lambda.
 
-Run - 
-```
-yarn start 
+#### terraform_s3
+Contains code for deploying S3 bucket used as source for cloud front distribution.
 
-or 
+#### terraform_shared
+Contains code for creating remote state outputs used by other terraform directories.
 
-nodemon --watch src start
-```
-Audit - 
-
-
-to check vulns - https://classic.yarnpkg.com/en/docs/cli/audit/
-
-```
-yarn audit --groups dependencies
-```
-
-
-put react-scripts is in dev dependencies - https://github.com/facebook/create-react-app/issues/11102
-
-### This seems way better for managing vulns in React code and CI runs
-https://github.com/IBM/audit-ci
-
-Install - 
-```
-yarn add -D audit-ci
-
-```
-
-Use - 
-```
-npx audit-ci --config vulns/audit-ci.json
-
-```
-
-
-## GraphQL
-https://www.apollographql.com/docs/react/get-started/
-
+#### terraform_sns
+Contains code for creating simple notification topic.
 
 ## Maybe someday 
 Azure approach - https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-static-website
@@ -116,26 +53,26 @@ Serverless / S3 / Cloudfront / API Gateway
 React
 GitHub Actions CI/CD
 Terraform / Cloud / Workspaces / Remote State / Tagging
-Local development / Cloud development
+Local development w/ Docker / Cloud development
+Automated testing w/ Cypress
 Config management
 Cognitive load
-Authorization 
+Authorization w/ Okta
 API protection
 
 TODO - terratest
 
-Concept is that it is possible for people to understand all of this stuff but very hard to keep it all in memory and not become overly reliant on experts
+- It is possible for people to understand all of this stuff but very hard to keep it all in memory and not become overly reliant on experts.
+- This proves it can be done but also highlights the hard part that is the value you have to be able to deliver on
 
-Setting up x as a service and enabling teams and platform, etc. is necessary
+- Setting up x as a service and enabling teams and platform, etc. is necessary
 
-Needs to be open and not black boxed but also usable without 
+- Needs to be open and not black boxed but also usable without 
 
-Exploring the mono-repo
+- Exploring the mono-repo
 
-Enabling local development
+- Enabling local development
 
-This proves it can be done but also highlights the hard part that is the value you have to be able to deliver on
+- Configuring linters and code editors
 
-Configuring linters and code editors
-
-Begining to think about where team boundries might be
+- Where are fracture plane and team boundries

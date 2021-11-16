@@ -1,6 +1,6 @@
 const {resolve} = require('path');
 
-// Define path of project level config - extension not required as file will be imporated via `require(process.env.JEST_DYNAMODB_CONFIG)`
+// Define path of project level config - extension not required as file will be imported via `require(process.env.JEST_DYNAMODB_CONFIG)`
 process.env.JEST_DYNAMODB_CONFIG = resolve(__dirname, './jest-dynamodb-config');
 
 module.exports = {

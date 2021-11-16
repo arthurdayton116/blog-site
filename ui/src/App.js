@@ -46,9 +46,15 @@ const SCOPES = 'openid profile email comment_approve';
 // construct graphql endpoint based on location
 const gql_ep = () => {
     let gurl = 'http://localhost:4000/graphql'
+
+    if (process.env.DOCKER_GRAPHQL_ENDPOINT) {
+        gurl = `http://${process.env.DOCKER_GRAPHQL_ENDPOINT.replace(/["]+/g, '')}`
+    }
+
     if (process.env.REACT_APP_GRAPHQL_ENDPOINT) {
         gurl = `https://${process.env.REACT_APP_GRAPHQL_ENDPOINT.replace(/["]+/g, '')}`
     }
+
     return gurl
 }
 

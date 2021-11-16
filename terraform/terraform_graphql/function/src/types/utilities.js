@@ -1,9 +1,9 @@
 const AWS = require("aws-sdk");
 const { gql } = require('apollo-server');
 const uuid4 = require("uuid4")
-const { docClientSetup } = require('./dbSetup.js')
-
-docClient = docClientSetup()
+// const { docClientSetup } = require('./dbSetup.js')
+//
+// docClient = docClientSetup()
 
 const tablename = process.env.ddb_table_name || 'blog-site-comments'
 
@@ -52,7 +52,7 @@ const resolvers = {
                         TableName: `${tablename}`,
                         UpdateExpression: `SET ${args.attribute.attribute} = :daVal`,
                     };
-                    calls.push(docClient.update(params).promise());
+                    calls.push(context.docClient.update(params).promise());
                 });
                 let response;
                 try{
@@ -66,7 +66,7 @@ const resolvers = {
                 let dynamoContents = [];
                 let items;
                 do{
-                    items =  await docClient.scan(params).promise();
+                    items =  await context.docClient.scan(params).promise();
                     items.Items.forEach((item) => dynamoContents.push(item));
                     params.ExclusiveStartKey  = items.LastEvaluatedKey;
                 }while(typeof items.LastEvaluatedKey != "undefined");

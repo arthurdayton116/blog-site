@@ -1,10 +1,10 @@
 const AWS = require("aws-sdk");
 const { gql, AuthenticationError } = require('apollo-server');
 const uuid4 = require("uuid4")
-const { docClientSetup } = require('./dbSetup.js')
-
-
-docClient = docClientSetup()
+// const { docClientSetup } = require('./dbSetup.js')
+//
+//
+// docClient = docClientSetup()
 
 const tablename = process.env.ddb_table_name || 'blog-site-comments'
 
@@ -26,6 +26,7 @@ extend type Query {
   
   type Mutation {
       addComment(comment: NewComment!) : Comment
+      setUpTest: Comment
   }
   
 input NewComment {
@@ -57,7 +58,7 @@ const resolvers = {
                 IndexName: 'postid-timestamp-index'
             }
 
-            const { Items } = await docClient.query(local_params).promise()
+            const { Items } = await context.docClient.query(local_params).promise()
             const return_arr = [];
             Items.map((item) => {
                 return_arr.push({
@@ -75,7 +76,7 @@ const resolvers = {
             // TODO - add try catch
             // Show context object that is included via constructor in server definition
             console.log('unapprovedComments context', context)
-            const authorizedToUse =  await context.jwtVerifier()
+            const authorizedToUse =  process.env.JWT_OVERRIDE || await context.jwtVerifier()
 
             // show expected claims object
             console.log('authorizedToUse',authorizedToUse)
@@ -83,7 +84,7 @@ const resolvers = {
             if (authorizedToUse === null  ) {
                 throw new AuthenticationError('Not Authorized to Access');
             }
-            const { GroupsAccess } = authorizedToUse;
+            const { GroupsAccess } = process.env.JWT_OVERRIDE ? {GroupsAccess:['CommentApprover']}: authorizedToUse;
 
             if (!GroupsAccess.includes('CommentApprover')) {
                 console.log('does not include CommentApprover group')
@@ -104,7 +105,7 @@ const resolvers = {
                 IndexName: 'oktoshow-timestamp-index'
             }
 
-            const { Items } = await docClient.query(local_params).promise()
+            const { Items } = await context.docClient.query(local_params).promise()
             const return_arr = [];
             Items.map((item) => {
                 return_arr.push({
@@ -125,7 +126,7 @@ const resolvers = {
                 Key: {'CommentsTableHashKey': hashkey}
             };
 
-            const { Item } = await docClient.get(local_params).promise()
+            const { Item } = await context.docClient.get(local_params).promise()
 
                    console.log("Item", Item)
                     return {
@@ -153,9 +154,9 @@ const resolvers = {
                 }
             };
 
-            await docClient.put(params).promise();
+            await context.docClient.put(params).promise();
 
-            const {Item} = await docClient.get({TableName: tablename, Key: {CommentsTableHashKey: HKEY}}).promise();
+            const {Item} = await context.docClient.get({TableName: tablename, Key: {CommentsTableHashKey: HKEY}}).promise();
 
             // var sns = new AWS.SNS();
 
@@ -186,6 +187,40 @@ const resolvers = {
                 CommentsTableHashKey: Item.CommentsTableHashKey
             }
         },
+        setUpTest: async (parent, args, context, info) => {
+            console.log('FIRE setUpTest')
+
+            const DDB_DATESTAMP = new Date().toISOString()
+            const DDB_HASHKEY = uuid4()
+            const DDB_HASHKEY2 = uuid4()
+            const DDB_TABLE = 'blog-site-comments'
+            const DDB_NAME = 'GraphQL Method'
+            const DDB_POSTID = '9999'
+            const DDB_COMMENT = 'This is a test comment'
+            const DDB_OK_TO_SHOW = 'false'
+
+            await context.docClient.put({TableName: DDB_TABLE,
+                Item: {
+                    CommentsTableHashKey: DDB_HASHKEY,
+                    comment: DDB_COMMENT,
+                    name: DDB_NAME,
+                    postid: DDB_POSTID,
+                    timestamp: DDB_DATESTAMP,
+                    okToShow: DDB_OK_TO_SHOW
+                }}).promise();
+
+            console.log('FIRE put')
+            const {Item} = await context.docClient.get({TableName: DDB_TABLE, Key: {CommentsTableHashKey: DDB_HASHKEY}}).promise();
+
+            return {
+                postid: Item.postid,
+                timestamp: Item.timestamp,
+                comment: Item.comment,
+                name: Item.name,
+                CommentsTableHashKey: Item.CommentsTableHashKey,
+                okToShow: Item.okToShow
+            }
+        }
     },
 };
 
