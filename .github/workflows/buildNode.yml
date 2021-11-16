@@ -50,10 +50,12 @@ jobs:
       PORT: 3001
       # Sets port for React when run for tests - END
 
+    # https://docs.github.com/en/actions/learn-github-actions/workflow-syntax-for-github-actions#jobsjob_idservices
     services:
       localDynamoTestContainer:
         image: amazon/dynamodb-local:1.17.0
-        ports: 8000:8000
+        ports:
+          - 8000:8000
         volumes: $GITHUB_WORKSPACE/terraform/terraform_graphql/dynamodb:/home/dynamodblocal/data
         options: -w /home/dynamodblocal
 
