@@ -56,7 +56,7 @@ jobs:
         image: amazon/dynamodb-local:1.17.0
         ports:
           - 8000:8000
-        volumes: ${{ env.GITHUB_WORKSPACE }}/terraform/terraform_graphql/dynamodb:/home/dynamodblocal/data
+        volumes: "${{ env.GITHUB_WORKSPACE }}/terraform/terraform_graphql/dynamodb:/home/dynamodblocal/data"
         options: -w /home/dynamodblocal
 
 
