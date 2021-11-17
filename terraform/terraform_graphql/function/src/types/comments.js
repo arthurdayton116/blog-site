@@ -1,46 +1,67 @@
 const AWS = require("aws-sdk");
 const { gql, AuthenticationError } = require('apollo-server');
+// generates unique identifiers
 const uuid4 = require("uuid4")
-// const { docClientSetup } = require('./dbSetup.js')
-//
-//
-// docClient = docClientSetup()
 
+// The DynamoDB table name to use for queries
 const tablename = process.env.ddb_table_name || 'blog-site-comments'
 
-const typeDef = `
+const typeDef = gql`
 extend type Query {
+    """
+    Returns a single comment - :( need to fix
+    """
     comment: Comment
+    """
+    Returns an array of comments based on postid that have been approved
+    """
     comments(postid: String!): [Comment]!
+    """
+    Returns an array of comments that have not been approved - requires authentication
+    """
     unapprovedComments: [Comment]!
 }
 
+ """A comment object"""
  type Comment {
+      """The blog post id the comment is associated with """
       postid: String
+      """ Time comment was made """
       timestamp: String
+      """Comment text """
       comment: String
+      """Name associated with comment """
       name: String
+      """ Primary key of comment """
       CommentsTableHashKey: String
+      """Flag for approved comments """
       okToShow: String
   }
-  
+  """Basic type for modifying data"""
   type Mutation {
+      """Adds a new unapproved comment to DynamoDB"""   
       addComment(comment: NewComment!) : Comment
+      """Creates test data when running tests"""
       setUpTest: Comment
   }
-  
-input NewComment {
+ """Input type used for submitting a new comment""" 
+ input NewComment {
+  """The blog post id the comment is associated with """
   postid: String
+  """Time comment was made """
   timestamp: String
+  """Comment text """
   comment: String
+  """Name associated with comment """
   name: String
-}
+ }
 `;
 
 const resolvers = {
     Query: {
         comments: async (parent, args, context, info) => {
-            console.log('comments resolver',args )
+            console.log('comments resolver xxx',args )
+            console.log('parent',parent )
             const postID = args.postid
             const local_params = {
                 ExpressionAttributeValues: {

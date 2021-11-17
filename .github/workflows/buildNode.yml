@@ -427,7 +427,7 @@ jobs:
         with:
           start: yarn start,
           wait-on: 'http://localhost:3001, http://localhost:4000,'
-          spec: cypress/integration/ui/blog_spec.js
+          spec: ui/cypress/integration/ui/blog_spec.js
 
 
       ##############################

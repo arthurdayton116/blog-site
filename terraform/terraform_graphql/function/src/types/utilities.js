@@ -7,15 +7,17 @@ const uuid4 = require("uuid4")
 
 const tablename = process.env.ddb_table_name || 'blog-site-comments'
 
-const typeDef = `
+const typeDef = gql`
+  """Message object"""
   type Message {
     message: String
   }
   
   type Mutation {
+      """Adds a new attribute to DynamoDB table"""  
       addAttribute(attribute: NewAttribute!) : Message
   }
-  
+"""Input type for new attribute to add to DynamoDB table"""
 input NewAttribute {
   attribute: String
   value: String

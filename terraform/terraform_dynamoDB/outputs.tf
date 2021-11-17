@@ -14,3 +14,4 @@ output "dynamo_db_table_name" {
 output "dynamo_db_hash_key" {
   value = local.hash_key_val
 }
+

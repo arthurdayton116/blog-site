@@ -59,7 +59,7 @@ docker network ls
 ##Check running
  docker ps
 
-## Start local graphql 
+## Start local graphql and use local dynamodb (CYPRESS_GRAPHQL=true & DYNAMO_HOST=localDynamoTestContainer)
 docker run -p 4000:4000 \
 -v `pwd`/src:/src \
 -w /src \
@@ -71,6 +71,17 @@ docker run -p 4000:4000 \
 --env DYNAMO_HOST=localDynamoTestContainer \
 --network graphql-net \
 -d node:16 node index.js
+
+## Start local graphql and use online dynamodb
+docker run -p 4000:4000 \
+-v `pwd`/src:/src \
+-w /src \
+-v $HOME/.aws/credentials:/root/.aws/credentials \
+--name localGraphQLTestContainer \
+--env GRAPHQL_PORT=4000 \
+--env JWT_OVERRIDE=true \
+--network graphql-net \
+-it node:16 npm install nodemon -g, nodemon index.js
 
 # Start local React
 docker run -p 3001:3001 \
