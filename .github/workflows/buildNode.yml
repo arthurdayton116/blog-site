@@ -419,7 +419,7 @@ jobs:
       - run: yarn start &
         working-directory: ./ui
 
-      - run: node index.js
+      - run: node index.js &
         working-directory: ./terraform/terraform_graphql/function/src
 
       - name: Cypress run
@@ -446,9 +446,9 @@ jobs:
           cache-dependency-path: ui/yarn.lock
 
       # build React project
-      - name: React Yarn Install
-        run: yarn install --frozen-lockfile
-        working-directory: ./ui
+#      - name: React Yarn Install
+#        run: yarn install --frozen-lockfile
+#        working-directory: ./ui
 
       - name: Check vulnerabilities
         id: chech_vulns
