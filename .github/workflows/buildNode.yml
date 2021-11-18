@@ -430,7 +430,6 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
-          start: yarn start,
           wait-on: 'http://localhost:3001, http://localhost:4000,'
           config-file: ui/cypress.json
 
