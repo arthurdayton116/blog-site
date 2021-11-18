@@ -435,18 +435,19 @@ jobs:
           sleep 20 &&
               curl --request POST --header 'content-type: application/json' --url http://localhost:4000/graphql --data '{"query":"query Query {\n  hello\n}"}'
 
-      - name: Test 3001
-        run: |
-          sleep 20 &&
-          curl http://localhost:3001
-
+#      - name: Test 3001
+#        run: |
+#          sleep 20 &&
+#          curl http://localhost:3001
       # run tests
       # https://docs.cypress.io/guides/continuous-integration/github-actions
       # https://github.com/marketplace/actions/cypress-io
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
-          config-file: ui/cypress.json
+          wait-on: 'http://localhost:3001'
+          wait-on-timeout: 120
+          config-file: cypress.json
           working-directory: ./ui
 
 
