@@ -425,6 +425,8 @@ jobs:
       # start test ui server
       - run: yarn start &
         working-directory: ./ui
+        env:
+          CYPRESS_CI_LOCAL_HOST: true
 
       # start test graphql server
       - run: node index.js &
@@ -435,10 +437,7 @@ jobs:
           sleep 20 &&
               curl --request POST --header 'content-type: application/json' --url http://localhost:4000/graphql --data '{"query":"query Query {\n  hello\n}"}'
 
-#      - name: Test 3001
-#        run: |
-#          sleep 20 &&
-#          curl http://localhost:3001
+
       # run tests
       # https://docs.cypress.io/guides/continuous-integration/github-actions
       # https://github.com/marketplace/actions/cypress-io

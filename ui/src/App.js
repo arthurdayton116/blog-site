@@ -47,6 +47,10 @@ const SCOPES = 'openid profile email comment_approve';
 const gql_ep = () => {
     let gurl = 'http://localhost:4000/graphql'
 
+    if (process.env.CYPRESS_CI_LOCAL_HOST) {
+        return gurl;
+    }
+
     if (process.env.DOCKER_GRAPHQL_ENDPOINT) {
         gurl = `http://${process.env.DOCKER_GRAPHQL_ENDPOINT.replace(/["]+/g, '')}`
     }
@@ -61,6 +65,11 @@ const gql_ep = () => {
 // construct graphql endpoint based on location
 const redirect_ep = () => {
     let gurl = `http://${HOST}${CALLBACK_PATH}`
+
+    if (process.env.CYPRESS_CI_LOCAL_HOST) {
+        return gurl;
+    }
+
     if (process.env.REACT_APP_GRAPHQL_ENDPOINT) {
         gurl = `https://${HOST}${CALLBACK_PATH}`
     }
