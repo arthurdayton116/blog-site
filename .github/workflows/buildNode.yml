@@ -448,6 +448,7 @@ jobs:
           wait-on-timeout: 120
           config-file: cypress.json
           working-directory: ./ui
+          continue-on-error: true
 
 
 
