@@ -61,6 +61,8 @@ module.exports = { typeDef, resolvers }
 const comments_by_user = async (parent, args, context) => {
     // TODO - add try catch
     // Show context object that is included via constructor in server definition
+
+    // this shows that parent resolver could be used as parameter to this function even though I'm no using it for now
     console.log('comments_by_user parent', parent)
 
 const local_params = {
@@ -89,6 +91,7 @@ Items.map((item) => {
         okToShow: item.okToShow
     })
 })
+
     console.log("##########################")
 return return_arr;
 

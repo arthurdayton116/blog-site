@@ -38,28 +38,74 @@ okta_audience="http://localhost:4000"
 To run locally using a local version of dynamodb (from within function/docker):
 
 ```
-#Start
+########################
+Delete Docker Network
+########################
+
+docker network rm graphql-net;
+
+######################## 
 ## Create a network for containers
+########################
+
 docker network create --driver bridge graphql-net
 
+########################
 ## Check it exists
+########################
+
 docker network ls
 
+########################
+
+########################
 ## Start local dynamo db
 ## https://hub.docker.com/r/amazon/dynamodb-local
 ## https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html
+
+## run command from terraform/terraform_graphql/function
+######################## 
+#Stop - and delete data file - Dynamo
+######################## 
+ docker stop localDynamoTestContainer; 
+ 
+ docker rm localDynamoTestContainer; 
+
+ rm -f dynamodb/*.db;
+
+######################## 
+#Start
+######################## 
 
  docker run -p 8000:8000 \
   -w /home/dynamodblocal \
   -v `pwd`/dynamodb:/home/dynamodblocal/data \
   --name localDynamoTestContainer \
   --network graphql-net \
-  -d  amazon/dynamodb-local:1.17.0 
- 
+  -it  amazon/dynamodb-local:1.17.0 
+
+######################## 
 ##Check running
  docker ps
 
-## Start local graphql and use local dynamodb (CYPRESS_GRAPHQL=true & DYNAMO_HOST=localDynamoTestContainer)
+######################## 
+
+#########################
+# Stop and delete 
+#########################
+
+ docker stop localGraphQLTestContainer; 
+ 
+ docker rm localGraphQLTestContainer; 
+ 
+#########################
+
+#########################  
+## Start local graphql and use local dynamodb and bypass auth(CYPRESS_GRAPHQL=true & DYNAMO_HOST=localDynamoTestContainer & JWT_OVERRIDE=true)
+#########################
+## run command from terraform/terraform_graphql/function
+#########################
+
 docker run -p 4000:4000 \
 -v `pwd`/src:/src \
 -w /src \
@@ -70,9 +116,28 @@ docker run -p 4000:4000 \
 --env JWT_OVERRIDE=true \
 --env DYNAMO_HOST=localDynamoTestContainer \
 --network graphql-net \
--d node:16 node index.js
+-it node:16 /bin/bash -c "npm install nodemon -g; nodemon index.js"
 
+######################## 
+## OR DON'T Bypass Auth
+######################## 
+
+docker run -p 4000:4000 \
+-v `pwd`/src:/src \
+-w /src \
+-v $HOME/.aws/credentials:/root/.aws/credentials \
+--name localGraphQLTestContainer \
+--env CYPRESS_GRAPHQL=true \
+--env GRAPHQL_PORT=4000 \
+--env DYNAMO_HOST=localDynamoTestContainer \
+--network graphql-net \
+-it node:16 /bin/bash -c "npm install nodemon -g; nodemon index.js"
+
+######################## 
+## OR
+######################## 
 ## Start local graphql and use online dynamodb
+#########################
 docker run -p 4000:4000 \
 -v `pwd`/src:/src \
 -w /src \
@@ -81,32 +146,31 @@ docker run -p 4000:4000 \
 --env GRAPHQL_PORT=4000 \
 --env JWT_OVERRIDE=true \
 --network graphql-net \
--it node:16 npm install nodemon -g, nodemon index.js
+-it node:16 /bin/bash -c "npm install nodemon -g; nodemon index.js"
+######################## 
 
+#########################
+# Stop and delete - React container
+#########################
+
+ docker stop localReactTestContainer;
+ 
+ docker rm localReactTestContainer;
+ 
+######################## 
 # Start local React
+######################## 
+
 docker run -p 3001:3001 \
 -v `pwd`:/src \
 -w /src \
 --name localReactTestContainer \
 --env DOCKER_GRAPHQL_ENDPOINT=localGraphQLTestContainer \
 --network graphql-net \
--it node:16 /bin/bash
+-it node:16 yarn start
+
+######################## 
 
  
-#Stop - and delete data file
- docker stop localDynamoTestContainer; 
- 
- docker rm localDynamoTestContainer; 
- 
- rm -f dynamodb/*.db;
- 
- docker stop localGraphQLTestContainer; 
- 
- docker rm localGraphQLTestContainer; 
- 
- docker stop localReactTestContainer;
- 
- docker rm localReactTestContainer;
- 
- docker network rm graphql-net;
+
 ```

@@ -37,12 +37,14 @@ extend type Query {
       """Flag for approved comments """
       okToShow: String
   }
-  """Basic type for modifying data"""
-  type Mutation {
+  
+  extend type Mutation {
       """Adds a new unapproved comment to DynamoDB"""   
       addComment(comment: NewComment!) : Comment
       """Creates test data when running tests"""
-      setUpTest: Comment
+      setUpTest: [Comment]
+      """Deletes test data when running tests"""
+      deleteTest: [Comment]
   }
  """Input type used for submitting a new comment""" 
  input NewComment {
@@ -197,9 +199,6 @@ const resolvers = {
                     console.error(err, err.stack);
                 });
 
-            console.log("args", args)
-            console.log("Item", Item)
-
             return {
                 postid: Item.postid,
                 timestamp: Item.timestamp,
@@ -212,35 +211,98 @@ const resolvers = {
             console.log('FIRE setUpTest')
 
             const DDB_DATESTAMP = new Date().toISOString()
-            const DDB_HASHKEY = uuid4()
-            const DDB_HASHKEY2 = uuid4()
             const DDB_TABLE = 'blog-site-comments'
-            const DDB_NAME = 'GraphQL Method'
-            const DDB_POSTID = '9999'
+            const DDB_NAME = 'setUpTest resolver'
             const DDB_COMMENT = 'This is a test comment'
-            const DDB_OK_TO_SHOW = 'false'
 
-            await context.docClient.put({TableName: DDB_TABLE,
-                Item: {
-                    CommentsTableHashKey: DDB_HASHKEY,
-                    comment: DDB_COMMENT,
-                    name: DDB_NAME,
-                    postid: DDB_POSTID,
-                    timestamp: DDB_DATESTAMP,
-                    okToShow: DDB_OK_TO_SHOW
-                }}).promise();
+                var itemsArray = [];
 
-            console.log('FIRE put')
-            const {Item} = await context.docClient.get({TableName: DDB_TABLE, Key: {CommentsTableHashKey: DDB_HASHKEY}}).promise();
+                for (i = 0; i < 10; i++) {
+                    var item = {
+                        PutRequest: {
+                            Item: {
+                                CommentsTableHashKey: (i*10).toString(),
+                                comment: `${DDB_COMMENT} - ${i}`,
+                                name: DDB_NAME,
+                                postid: i.toString(),
+                                timestamp: DDB_DATESTAMP,
+                                okToShow: i%2>0 ? "true" : "false"
+                            }
+                        }
+                    };
 
-            return {
-                postid: Item.postid,
-                timestamp: Item.timestamp,
-                comment: Item.comment,
-                name: Item.name,
-                CommentsTableHashKey: Item.CommentsTableHashKey,
-                okToShow: Item.okToShow
+                    if (item) {
+                        itemsArray.push(item);
+                    }
+
+                }
+
+                var params = {
+                    RequestItems: {
+                        [tablename]: itemsArray
+                    }
+                };
+
+                await context.docClient.batchWrite(params, function(err, data) {
+
+                    if (err) {
+                        console.log(err);
+                    }
+                    else  {
+                        console.log('Added ' + itemsArray.length + ' items to DynamoDB');
+                        console.log(itemsArray);
+                    }
+                });
+
+             const returnArr = [];
+
+             for (i = 0; i < itemsArray.length; i++) {
+                 returnArr.push(itemsArray[i].PutRequest.Item)
+             }
+
+            return returnArr;
+        },
+        deleteTest: async (parent, args, context, info) => {
+
+            var itemsArray = [];
+
+            for (i = 0; i < 10; i++) {
+                var item = {
+                    DeleteRequest: {
+                        Key: { CommentsTableHashKey: (i*10).toString() }
+                    }
+                };
+
+                if (item) {
+                    itemsArray.push(item);
+                }
+
             }
+
+            var params = {
+                RequestItems: {
+                    [tablename]: itemsArray
+                }
+            };
+
+            await context.docClient.batchWrite(params, function(err, data) {
+
+                if (err) {
+                    console.log(err);
+                }
+                else  {
+                    console.log('Deleted ' + itemsArray.length + ' items to DynamoDB');
+                    console.log(itemsArray);
+                }
+            });
+
+            const returnArr = [];
+
+            for (i = 0; i < itemsArray.length; i++) {
+                returnArr.push(itemsArray[i].DeleteRequest.Key)
+            }
+
+            return returnArr;
         }
     },
 };

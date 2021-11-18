@@ -416,18 +416,23 @@ jobs:
         run: yarn install --frozen-lockfile
         working-directory: ./ui
 
+      # start test ui server
       - run: yarn start &
         working-directory: ./ui
 
+      # start test graphql server
       - run: node index.js &
         working-directory: ./terraform/terraform_graphql/function/src
 
+      # run tests
+      # https://docs.cypress.io/guides/continuous-integration/github-actions
+      # https://github.com/marketplace/actions/cypress-io
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
           start: yarn start,
           wait-on: 'http://localhost:3001, http://localhost:4000,'
-          spec: ui/cypress/integration/ui/blog_spec.js
+          config-file: ui/cypress.json
 
 
       ##############################

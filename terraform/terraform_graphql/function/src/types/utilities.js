@@ -13,7 +13,7 @@ const typeDef = gql`
     message: String
   }
   
-  type Mutation {
+  extend type Mutation {
       """Adds a new attribute to DynamoDB table"""  
       addAttribute(attribute: NewAttribute!) : Message
   }
@@ -75,7 +75,7 @@ const resolvers = {
                 return dynamoContents;
             };
 
-            main();
+            // main();
 
             // await docClient.put(params).promise();
 

@@ -30,6 +30,9 @@ const baseTypeDefs = gql`
         """This is only used when deployed on Lambda to confirm it is working"""
       checkContext: CheckContext
   }
+    """Basic type for modifying data""" 
+    type Mutation
+    
   """This is only used when deployed on Lambda to confirm it is working"""
   type CheckContext {
       """Name of Lambda function"""
