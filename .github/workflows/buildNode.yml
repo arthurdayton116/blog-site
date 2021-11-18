@@ -432,7 +432,7 @@ jobs:
         with:
           wait-on: 'http://localhost:3001, http://localhost:4000,'
           config-file: ui/cypress.json
-          project: ui
+          project: ./ui
 
 
 
