@@ -431,6 +431,8 @@ jobs:
       # start test graphql server
       - run: node index.js &
         working-directory: ./terraform/terraform_graphql/function/src
+        env:
+          CYPRESS_GRAPHQL: true
 
       - name: Test gql
         run: |
@@ -448,7 +450,7 @@ jobs:
           wait-on-timeout: 120
           config-file: cypress.json
           working-directory: ./ui
-          continue-on-error: true
+        continue-on-error: true
 
 
 

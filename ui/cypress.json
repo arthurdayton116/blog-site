@@ -2,5 +2,6 @@
   "testFiles": [
     "ui/blog_authenticated_spec.js",
     "ui/blog_unauthenticated_spec.js"
-  ]
+  ],
+  "chromeWebSecurity": false
 }
