@@ -436,7 +436,8 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
-          wait-on: 'http://localhost:3001, http://localhost:4000,'
+          wait-on: 'http://localhost:3001, http://localhost:4000'
+          wait-on-timeout: 120
           config-file: ui/cypress.json
           working-directory: ./ui
 
