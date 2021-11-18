@@ -473,6 +473,7 @@ jobs:
         id: chech_vulns
         run: npx audit-ci --config vulns/audit-ci.json
         working-directory: ./ui
+        continue-on-error: true
 
       # run conditionally
       - name: Yarn build
@@ -489,8 +490,6 @@ jobs:
           aws_bucket_name: ${{ secrets.AWS_BUCKET_NAME }}
         run: aws s3 sync ../../ui/build/ s3://"${{ env.bucket_name }}" --delete
         working-directory: ./terraform/terraform_s3
-
-      # TODO - Add Cypress tests
 
       ##############################
       # Build React Project - END #
