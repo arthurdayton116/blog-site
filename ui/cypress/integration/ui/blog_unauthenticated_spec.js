@@ -28,15 +28,15 @@ describe('Blog Non Authenticated Tests', () => {
         )
     })
 
-    it('Check graphql unapproved query has results', () => {
-        cy.request('POST', 'http://localhost:4000/graphql', unApprovedQryStr).then(
-            (response) => {
-                // response.body is automatically serialized into JSON
-                console.log(response)
-                expect(response.body.data.unapprovedComments).lengthOf(5) // true
-            }
-        )
-    })
+    // it('Check graphql unapproved query has results', () => {
+    //     cy.request('POST', 'http://localhost:4000/graphql', unApprovedQryStr).then(
+    //         (response) => {
+    //             // response.body is automatically serialized into JSON
+    //             console.log(response)
+    //             expect(response.body.data.unapprovedComments).lengthOf(5) // true
+    //         }
+    //     )
+    // })
 
     it('Check graphql user query has results', () => {
         cy.request('POST', 'http://localhost:4000/graphql', userQryStr).then(
