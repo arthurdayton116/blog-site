@@ -15,6 +15,7 @@ export const NavigationBar = () => {
 
     // eslint-disable-next-line no-unused-vars
     // noinspection JSUnusedLocalSymbols
+    // eslint-disable-next-line
     const [userInfo, setUserInfo] = useState(null);
 
     useEffect(() => {
