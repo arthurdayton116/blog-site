@@ -423,7 +423,7 @@ jobs:
         working-directory: ./ui
 
       # start test ui server
-      - run: yarn start
+      - run: yarn start &
         working-directory: ./ui
 
       # start test graphql server
@@ -435,23 +435,17 @@ jobs:
           sleep 20 &&
               curl --request POST --header 'content-type: application/json' --url http://localhost:4000/graphql --data '{"query":"query Query {\n  hello\n}"}'
 
-#      - name: Test 3000
-#        run: |
-#          sleep 20 &&
-#          curl http://localhost:3000
-
       - name: Test 3001
         run: |
           sleep 20 &&
           curl http://localhost:3001
+
       # run tests
       # https://docs.cypress.io/guides/continuous-integration/github-actions
       # https://github.com/marketplace/actions/cypress-io
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
-          wait-on: 'http://localhost:3001, http://localhost:4000'
-          wait-on-timeout: 120
           config-file: ui/cypress.json
           working-directory: ./ui
 
