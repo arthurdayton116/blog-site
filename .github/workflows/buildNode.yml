@@ -410,6 +410,12 @@ jobs:
       ##############################
       # Run E2E - Start #
       ##############################
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'yarn'
+          cache-dependency-path: ui/yarn.lock
 
       # build React project
       - name: React Yarn Install
@@ -444,12 +450,7 @@ jobs:
       # Build React Project - Start #
       ##############################
       # set up to build React project
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'yarn'
-          cache-dependency-path: ui/yarn.lock
+
 
       # build React project
 #      - name: React Yarn Install
