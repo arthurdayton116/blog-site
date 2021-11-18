@@ -423,7 +423,7 @@ jobs:
         working-directory: ./ui
 
       # start test ui server
-      - run: yarn start &
+      - run: yarn start
         working-directory: ./ui
 
       # start test graphql server
