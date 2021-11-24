@@ -76,3 +76,6 @@ TODO - terratest
 - Configuring linters and code editors
 
 - Where are fracture plane and team boundries
+
+
+

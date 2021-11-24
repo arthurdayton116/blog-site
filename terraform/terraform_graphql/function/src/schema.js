@@ -7,20 +7,6 @@ const { typeDef: UtilityTypes, resolvers: UtilityResolvers} = require('./types/u
 const { typeDef: UserTypes, resolvers: UserResolvers} = require('./types/user.js');
 
 // These are base types that I don't want to break out into own files - START
-// const Query = `
-//   """Basic type for fetching data"""
-//   type Query {
-//       hello: String
-//       checkContext: CheckContext
-//   }
-// `;
-
-// const Mutation = `
-// """Basic type for modifying data"""
-//     type Mutation {
-//         hello: String
-//     }
-// `;
 
 const baseTypeDefs = gql`
     """Basic type for fetching data"""  

@@ -1,0 +1,36 @@
+version: "3.9"  # optional since v1.27.0
+services:
+  react:
+    image: node:16
+    command: yarn start
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./ui:/src
+    working_dir: /src
+    environment:
+      DOCKER_GRAPHQL_ENDPOINT: graphql
+  dynamodb:
+    image: amazon/dynamodb-local:1.17.0
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./terraform/terraform_graphql/function/dynamodb:/home/dynamodblocal/data
+    working_dir: /home/dynamodblocal
+  graphql:
+    image: node:16
+    command: /bin/bash -c "ls & npm install nodemon -g && nodemon index.js"
+    depends_on:
+      - dynamodb
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./terraform/terraform_graphql/function/src:/src
+      - $HOME/.aws/credentials:/root/.aws/credentials
+    working_dir: /src
+    environment:
+      CYPRESS_GRAPHQL: true
+      GRAPHQL_PORT: 4000
+      JWT_OVERRIDE: true
+      DYNAMO_HOST: dynamodb
+

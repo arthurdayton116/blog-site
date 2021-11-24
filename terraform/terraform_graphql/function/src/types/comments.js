@@ -24,23 +24,29 @@ extend type Query {
 
  """A comment object"""
  type Comment {
-      """The blog post id the comment is associated with """
+      """The blog post id the comment is associated with"""
       postid: String
-      """ Time comment was made """
+      """ Time comment was made"""
       timestamp: String
-      """Comment text """
+      """Comment text"""
       comment: String
-      """Name associated with comment """
+      """Name associated with comment"""
       name: String
-      """ Primary key of comment """
+      """ Primary key of comment"""
       CommentsTableHashKey: String
-      """Flag for approved comments """
+      """Flag for approved comments"""
       okToShow: String
+      """Approver name associated with comment"""
+      approverName: String
+      """ Time comment was approved"""
+      approvalTimestamp: String
   }
   
   extend type Mutation {
       """Adds a new unapproved comment to DynamoDB"""   
       addComment(comment: NewComment!) : Comment
+      """Updates comment to approved in DynamoDB"""
+      approveComment(comment: NewApproval!) : Comment
       """Creates test data when running tests"""
       setUpTest: [Comment]
       """Deletes test data when running tests"""
@@ -57,6 +63,18 @@ extend type Query {
   """Name associated with comment """
   name: String
  }
+
+"""Input type used for submitting a new comment"""
+input NewApproval {
+    """The hash key the comment is associated with """
+    CommentsTableHashKey: String
+    """Time approval was made """
+    timestamp: String
+    """Approver name associated with comment """
+    approverName: String
+    """Flag for approved comments """
+    okToShow: String
+}
 `;
 
 const resolvers = {
@@ -64,7 +82,9 @@ const resolvers = {
         comments: async (parent, args, context, info) => {
             console.log('comments resolver xxx',args )
             console.log('parent',parent )
+
             const postID = args.postid
+
             const local_params = {
                 ExpressionAttributeValues: {
                     ":postid": postID,
@@ -82,7 +102,9 @@ const resolvers = {
             }
 
             const { Items } = await context.docClient.query(local_params).promise()
+
             const return_arr = [];
+
             Items.map((item) => {
                 return_arr.push({
                     postid: item.postid,
@@ -122,7 +144,6 @@ const resolvers = {
                     "#okToShow": "okToShow"
                 },
                 KeyConditionExpression: "#okToShow = :okToShow",
-                // FilterExpression: "#okToShow = :okToShow",
                 ScanIndexForward: false,
                 TableName: tablename,
                 IndexName: 'oktoshow-timestamp-index'
@@ -206,6 +227,54 @@ const resolvers = {
                 name: Item.name,
                 CommentsTableHashKey: Item.CommentsTableHashKey
             }
+        },
+        approveComment: async (parent, args, context, info) => {
+            const {CommentsTableHashKey, okToShow, approverName } = args.comment
+
+            console.log(args)
+            let okToShowParam = "true"
+            if (okToShow !== "true") {
+                okToShowParam = "false"
+            }
+
+            var params = {
+                TableName:tablename,
+                Key:{
+                    'CommentsTableHashKey': CommentsTableHashKey
+                },
+                UpdateExpression: "set okToShow= :okToShow, approvalTimestamp= :approvalTimestamp, approverName= :approverName",
+                ExpressionAttributeValues:{
+                    ":okToShow":okToShowParam,
+                    ":approvalTimestamp": new Date().toISOString(),
+                    ":approverName": approverName
+                },
+                ReturnValues:"UPDATED_NEW"
+            };
+
+            console.log("Updating the item...");
+
+            const {UpdatedItem} = await context.docClient.update(params, function(err, data) {
+                if (err) {
+                    console.error("Unable to update item. Error JSON:", JSON.stringify(err, null, 2));
+                } else {
+                    console.log("UpdateItem succeeded:", JSON.stringify(data, null, 2));
+                }
+            });
+
+            const {Item} = await context.docClient.get({TableName: tablename, Key: {CommentsTableHashKey: CommentsTableHashKey}}).promise();
+
+            console.log(Item)
+            return {
+                postid: Item.postid,
+                timestamp: Item.timestamp,
+                comment: Item.comment,
+                name: Item.name,
+                CommentsTableHashKey: Item.CommentsTableHashKey,
+                okToShow: Item.okToShow,
+                approverName: Item.approverName,
+                approvalTimestamp: Item.approvalTimestamp
+            }
+
         },
         setUpTest: async (parent, args, context, info) => {
             console.log('FIRE setUpTest')

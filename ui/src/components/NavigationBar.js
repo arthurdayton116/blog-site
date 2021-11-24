@@ -4,7 +4,7 @@ import { Image, Flex, Box, Link } from 'rebass';
 import logo from '../assets/ObservatoryPark.jpg';
 import {useTheme} from "@emotion/react";
 import {FaBars} from 'react-icons/fa';
-import { accessTokenVar } from '../cache';
+import { accessTokenVar, userVar } from '../cache';
 
 export const NavigationBar = () => {
 // TODO - add user profile
@@ -24,10 +24,12 @@ export const NavigationBar = () => {
             console.log("null auth")
             setUserInfo(null);
             accessTokenVar({})
+            userVar({})
         } else {
             oktaAuth.getUser().then((info) => {
                 console.log("non null auth")
                 accessTokenVar({authState: authState});
+                userVar({user: info})
                 setUserInfo(info);
                 console.log("info", info)
             }).catch((err) => {
