@@ -9,11 +9,13 @@ import {postData}  from '../blogs/data';
 import NoMatch from '../components/NoMatch'
 import Comments from '../components/Comments'
 
+
 export const blogIssue = "https://github.com/arthurdayton116/arthurdayton116.github.io/issues/new"
 export const awsTFIssue = "https://github.com/arthurdayton116/aws-terraform/issues/new"
 
 // Post component - renders individual blog posts
 export const Post = (props) => {
+
     const { postid: postParam } = useParams();
 
     const theme = useTheme()
@@ -42,6 +44,7 @@ export const Post = (props) => {
         </ul>,
         ol: props => <ol { ...props} >
         </ol>
+
     }
 
     // get post data from state property

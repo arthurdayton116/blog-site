@@ -5,6 +5,7 @@
   "dependencies": {
     "@apollo/client": "^3.4.16",
     "@emotion/react": "^11.5.0",
+    "@mdx-js/react": "^1.6.22",
     "@okta/okta-auth-js": "^5.8.0",
     "@okta/okta-react": "^6.3.0",
     "@okta/okta-signin-widget": "^5.13.0",

@@ -1,15 +1,16 @@
 import { React } from 'react'
 import { NavLink } from "react-router-dom";
-import {Flex, Box, Card, Heading} from 'rebass';
+import {Flex, Box, Card, Heading, Text} from 'rebass';
 import data from '../blogs/data.json';
 import {useTheme} from "@emotion/react";
+
 const maxPostNumber = 6
 const cardArr = [ 1, 1/2, 1/4 ]
-// const plArr = [0,2,3]
+const plArr = [0,2,3]
 
 
 
-export const Blogs = () => {
+export const Blogs = (props) => {
     const theme = useTheme()
 
         return (

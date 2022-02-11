@@ -21,7 +21,7 @@
     },
   {
     "id": 3,
-    "title": "Automated Infrastructure Creation for Ephemeral Workloads Requiring Distributed Access and Persisted State Using Terraform and AWS (i.e., A Minecraft server for my kids)",
+    "title": "A Minecraft server for my kids",
     "body": "Here comes some AWS information",
     "postLink": "../blogs/3",
     "posted": "2021-02-28",
@@ -51,7 +51,7 @@
   },
   {
     "id": 6,
-    "title": "The beautiful simplicity and maddening complexity of DevOps",
+    "title": "Deploying This Blog Site Using Serverless Technologies on AWS",
     "body": "Here comes some information",
     "postLink": "../blogs/6",
     "posted": "2021-10-29",

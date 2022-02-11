@@ -24,9 +24,38 @@ For some basic terminology we can look at docs from AWS  - <Link href={vpcConcep
 
 ---
 
-Text of post
 
-The following are the key concepts for VPCs:
+Using GitHub Actions to continuously build and deploy a serverless blog site using Terraform, React, GraphQL, and several AWS services including Lambda, API Gateway, S3, SNS, Route53, Certificate Manager and CloudFront it is relatively "simple" for one person to build an end to end globally deployed, highly scalable web application.
+
+<br/>
+
+Where it gets more challenging is when we imagine deploying several of these applications within an enterprise context.  Managing versions of Terraform, access to state files, code vulnerabilities, feature development, bug fixes, the various iterations of AWS services and the Terraform providers that expose their associated functionality, IAM roles and policies, pipeline functionality and development and the associated integrations with everything not to mention observability and threat monitoring and you quickly spiral beyond the cognitive capacity of any one team.
+
+<br/>
+
+This doesn't mean that one team cannot build, deploy and operate an application whilst utilizing all of the above but we must logically divide the responsibility of providing these capabilities in a way that allows independent teams to deliver them, as much as possible, as a service.
+Many PaaS / SaaS offerings simplify this a great deal but there is usually a not insignificant amount of work needed to use the "primitives" provided by Cloud providers, and other SaaS services, to compose an abstracted version of the needed capability for other teams to use.  This could be as simple as some boiler plate code or as complex as Terraform Modules exposed as API's delivering entire environments via Service Now requests.
+
+<br/>
+
+This is where the maddening complexity rears its ugly head and where the competitive advantage of agility goes to die.  A lot of organizations when confronted with the reality of needing to engage and coordinate multiple teams in the delivery of applications composed of multiple underlying complex services will revert to "old behaviors".  This usually manifests itself in silos of like skilled resources being concentrated into groups and locking down capabilities that then require begging to modify.
+
+<br/>
+
+The contrast to this approach, but equally as futile, is when one team (usually really smart and capable) is given complete independence and heads off into the wilderness to DevOps a trail for the rest of the organization to follow which of course will be so brilliantly conceived and implemented that all who come upon it will need only to git clone to be instantly bathed in the productivity healing light of automation.  What normally happens is the brilliance of their solution collapses under the weight of confusion of the people trying to follow them and some other team goes and implements the same thing on whatever cloud provider the original team isn't using because the original solution was "dumb".
+
+<br/>
+
+So it seems that organizations are caught between the rock of moving to quickly and having a solution that is poorly suited to scale and the hard place of moving to slowly in developing a solution that can scale.
+
+<br/>
+
+Research appears to clearly show that the highest performing organizations are those that can reliably and consistently deploy the quickest.
+
+<br/>
+
+Being able to do this means that you need to be able to assure yourself within acceptable limits that your code does what it's supposed to.
+
 
 ---
 

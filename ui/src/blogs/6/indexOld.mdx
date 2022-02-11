@@ -24,16 +24,21 @@ export const prodBuild = "https://create-react-app.dev/docs/production-build"
 
 export const gaTerraform = "https://github.com/hashicorp/setup-terraform"
 
-#### Using GitHub Actions to continuously deploy a Serverless blog site
+#### Deploying an application is beautifully "simple" using the tools available
 
-In this post I am going to cover how to use GitHub Actions to continuously build and deploy a serverless blog site using Terraform, React, GraphQL, and several AWS services including Lambda, API Gateway, S3, SNS, Route53, Certificate Manager and CloudFront.
+Let's imagine a "simple" application that deploys a personal blog site (this site 🙂) on AWS using a serverless approach
+
 
 <br/>
 
-Here's a diagram of what we are trying to build:
 
 <Image p={4} verticalAlign='middle' src="/images/6/ArchitectureDiagram.png" />
 
+
+
+
+
+<br/>
 
 
 To set this up yourself you need an AWS account, a Terraform cloud account, a custom domain, basic React skills, basic Terraform skills, a working knowledge of GitHub Actions and of course the requisite amount of OCD needed to figure out the stuff I almost certainly left out because I wouldn't want to deny you the delicious pain of experience.
@@ -62,7 +67,7 @@ My objective is to build a blog site that is deployed around the world and updat
 
 Now lets take a look at what we are trying to build:
 
-<Image p={4} verticalAlign='middle' src="/images/6/hostedzone3.png" />
+<Image p={4} verticalAlign='middle' src="/images/6/hostedzone.png" />
 
 
 With S3 and CloudFront I have a highly scalable easy to use setup cached around the world.
@@ -80,7 +85,7 @@ I will need a domain and a certificate and because it's a mostly a one time set 
 #### Certificate
 Using Amazon Certificate Manager you can create a certificate for your domain and have it automatically validate by creating records in your hosted zone
 
-<Image p={4} verticalAlign='middle' src="/images/6/acm2.png" />
+<Image p={4} verticalAlign='middle' src="/images/6/acm.png" />
 <br/>
 <br/>
 
@@ -103,22 +108,6 @@ I have a hosted zone in Route53 that ties it all together.  Most important thing
 
 #### Buckets
 For this site I need 2 S3 buckets.  One for the site assets that we will use as a source for our CloudFront distribution and one for logs and Athena query results.
-
-<h3>Buckets</h3>
-<Image p={4} verticalAlign='middle' src="/images/6/S3list.png" />
-
-<br/>
-
-<h3>Site assets from react build</h3>
-<Image p={4} verticalAlign='middle' src="/images/6/S3assets.png" />
-
-<br/>
-
-<h3>Properties for site assets bucket</h3>
-<Image p={4} verticalAlign='middle' src="/images/6/S3domain.png" />
-<Image p={4} verticalAlign='middle' src="/images/6/S3www.png" />
-<br/>
-<br/>
 
 #### Pipeline
 For my continuous integration I am using GitHub.  Right now I am using main and not a PR flow because it's just me and I can make it work with local dev and GitHub actions.  In a context any larger than myself I would set up a separate dev domain either within a VPC or locked down by IP address.

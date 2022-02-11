@@ -2,7 +2,7 @@ version: "3.9"  # optional since v1.27.0
 services:
   react:
     image: node:16
-    command: yarn start
+    command: /bin/bash -c "ls & npm install nodemon -g && nodemon --watch src start"
     ports:
       - "3001:3001"
     volumes:
