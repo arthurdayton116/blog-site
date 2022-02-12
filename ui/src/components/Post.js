@@ -44,7 +44,6 @@ export const Post = (props) => {
         </ul>,
         ol: props => <ol { ...props} >
         </ol>
-
     }
 
     // get post data from state property
@@ -82,7 +81,7 @@ export const Post = (props) => {
             </Box>
             <Box pt={2} pl={mlArr}>
                 <Suspense fallback={<div>Loading...</div>}>
-                    <Content components={components} post={post} images={Images}/>
+                    <Content components={components} post={post} images={Images} theme={theme}/>
                 </Suspense>
                 <Box pt={2} pl={mlArr}>
                 Comments or questions create an issue on <Link href={blogIssue} target="_blank">blog repo</Link> or <Link href={awsTFIssue} target="_blank">code repo</Link>.

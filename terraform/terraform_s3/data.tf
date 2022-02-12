@@ -3,6 +3,7 @@ locals {
   resource_prefix = data.terraform_remote_state.shared.outputs.resource_prefix
   region          = data.terraform_remote_state.shared.outputs.region
   bucket_name     = data.terraform_remote_state.shared.outputs.base_domain
+  cf
 }
 
 data "terraform_remote_state" "shared" {
@@ -16,5 +17,6 @@ data "terraform_remote_state" "shared" {
   }
 }
 
+// The Canonical User ID data source allows access to the canonical user ID for the effective account in which Terraform is working.
 data "aws_canonical_user_id" "current_user" {}
 

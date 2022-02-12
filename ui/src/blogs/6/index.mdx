@@ -8,11 +8,14 @@ import {
     Link
 } from 'rebass';
 
+
+
+
 export const staticSiteSetup = "https://docs.aws.amazon.com/AmazonS3/latest/userguide/HostingWebsiteOnS3Setup.html"
 
 export const cloudFrontSetup = "https://aws.amazon.com/premiumsupport/knowledge-center/cloudfront-serve-static-website/"
 
-export const Repo = "https://github.com/arthurdayton116/arthurdayton116.github.io"
+export const Repo = "https://github.com/arthurdayton116/blog-site"
 
 export const Post1 = "https://arthurdayton116.github.io/post/1/"
 
@@ -24,88 +27,444 @@ export const prodBuild = "https://create-react-app.dev/docs/production-build"
 
 export const gaTerraform = "https://github.com/hashicorp/setup-terraform"
 
+
+
 #### Using GitHub Actions to continuously deploy a Serverless blog site
 
 In this post I am going to cover how to use GitHub Actions to continuously build and deploy a serverless blog site using Terraform, React, GraphQL, and several AWS services including Lambda, API Gateway, S3, SNS, Route53, Certificate Manager and CloudFront.
 
 <br/>
 
-Here's a diagram of what we are trying to build:
+<details open style={{paddingLeft: props.theme.detail.paddingLeft}}>
+    <summary><strong>Diagram of what we are trying to build:</strong></summary>
+
 
 <Image p={4} verticalAlign='middle' src="/images/6/ArchitectureDiagram.png" />
 
+</details>
 
+<br/>
 
 To set this up yourself you need an AWS account, a Terraform cloud account, a custom domain, basic React skills, basic Terraform skills, a working knowledge of GitHub Actions and of course the requisite amount of OCD needed to figure out the stuff I almost certainly left out because I wouldn't want to deny you the delicious pain of experience.
 
 <br/>
 
+<details open style={{paddingLeft: props.theme.detail.paddingLeft}}><summary><strong>Background from around the internet:</strong></summary>
 
-So some background from around the internet:
-
+<br/>
 <br/>
 
 <Link p={4} href={staticSiteSetup} target="_blank">S3 Static Site Setup</Link>
+
 <br/>
+
+React makes using S3 a no-brainer because the React build process creates static assets and S3 is cheap and easily integrates with lots of other AWS resources such as Cloudfront.  It cost me around 3 cents last month so that seems reasonable.
+
 <br/>
 
 <Link p={4} href={cloudFrontSetup} target="_blank">CloudFront Setup</Link>
+
 <br/>
+
+Cloudfront is a CDN which allows us to easily cache content around the world and as mentioned above easily integrates with S3 and Route53 so we can easily map our domain to our content.
+
 <br/>
 
 <Link p={4} href={goodExp} target="_blank">This post explains it all pretty good</Link>
-<br/>
-<br/>
-
-My objective is to build a blog site that is deployed around the world and updates automatically whenever I push changes to the main branch of my repository.  I also have created a GraphQL endpoint for getting and submitting comments for each blog entry.
-<br/>
-
-Now lets take a look at what we are trying to build:
-
-<Image p={4} verticalAlign='middle' src="/images/6/hostedzone3.png" />
-
-
-With S3 and CloudFront I have a highly scalable easy to use setup cached around the world.
 
 <br/>
 
-There is a lot going on here as I am adopting GitHub Actions for deployment and Terraform Cloud for state storage.
+</details>
 
-<br/>
-
-I will need a domain and a certificate and because it's a mostly a one time set up I'm not going to get into the automation of that portion for now.
-
-<br/>
-
-#### Certificate
-Using Amazon Certificate Manager you can create a certificate for your domain and have it automatically validate by creating records in your hosted zone
-
-<Image p={4} verticalAlign='middle' src="/images/6/acm2.png" />
 <br/>
 <br/>
 
-#### Cloudfront
-After creating a cloudfront distribution for my S3 buckets I can point the name records in S3 at Cloudfront
+My objective is to build a blog site that is deployed around the world and updates automatically whenever I push changes to the main branch of my repository.  I also have created a GraphQL endpoint for getting and submitting comments for each blog entry.  I'll back that with a Lambda function and DynamoDB so my site is essentially free to deploy at low volume usage and will autoscale to any degree of usage.
+<br/>
 
-<Image p={4} verticalAlign='middle' src="/images/6/cloudfront.png" />
+<h2>Building out components of architecture diagram</h2>
+
+<br/>
+
+<Link p={4} href={Repo} target="_blank">Code Here</Link>
+
 <br/>
 <br/>
 
-#### Hosted Zone
+<!-- ######################### Hosted Zone ################################## -->
 
-I have a hosted zone in Route53 that ties it all together.  Most important thing to remember is that when you are sure it's not DNS it's probably DNS.
+<details style={{paddingLeft: props.theme.detail.paddingLeft}}>
+<summary><h2 style={{display: 'inline'}}>Hosted Zone</h2>
+
+
+My hosted zone in Route53 will route traffic to my cloudfront distributions for my React site and my GraphQL endpoint.  I will have needed to create those distributions of course, which i show below. As I go along I will be creating Terraform files for the creation of all of these resources so that I can easily create and destroy these resources as well as make the process automated and reusable.
+</summary>
+<br/>
+
+
+
+<details style={{paddingLeft: props.theme.detail.paddingLeft}}>
+    <summary><strong>Basic Terraform code looks like this:</strong></summary>
+
+```json
+// hosted zone
+resource "aws_route53_zone" "main" {
+  name = local.bucket_name
+}
+
+// gmail record
+resource "aws_route53_record" "gmail_mx" {
+  zone_id = aws_route53_zone.main.zone_id
+  name    = local.bucket_name
+  type    = "MX"
+
+  records = [
+    "1  ASPMX.L.GOOGLE.COM",
+    "5  ALT1.ASPMX.L.GOOGLE.COM",
+    "5  ALT2.ASPMX.L.GOOGLE.COM",
+    "10 ALT3.ASPMX.L.GOOGLE.COM",
+    "10 ALT4.ASPMX.L.GOOGLE.COM",
+  ]
+
+  ttl = "300"
+}
+```
+</details>
+
+<br/>
+
+The most important thing to remember if you are switching what your domain points at is that when you are sure it's not DNS it's probably DNS.
 
 
 <Image p={4} verticalAlign='middle' src="/images/6/hostedzone.png" />
 <Image p={4} verticalAlign='middle' src="/images/6/hostedzone2.png" />
+<Image p={4} verticalAlign='middle' src="/images/6/hzrecord.png" />
 <br/>
 <br/>
 
-#### Buckets
+
+</details>
+
+<br/>
+
+<!-- ######################### Certificate ################################## -->
+
+<details style={{paddingLeft: props.theme.detail.paddingLeft}}>
+<summary><h2 style={{display: 'inline'}}>Certificate</h2>
+
+Using Amazon Certificate Manager you can create a certificate for your domain and have it automatically validate by creating records in your hosted zone
+</summary>
+
+<Image p={4} verticalAlign='middle' src="/images/6/acm2.png" />
+<Image p={4} verticalAlign='middle' src="/images/6/certrecord.png" />
+<br/>
+<br/>
+
+<details style={{paddingLeft: props.theme.detail.paddingLeft}}>
+    <summary><strong>Terraform code:</strong></summary>
+
+```json
+//domain certificate
+resource "aws_acm_certificate" "a" {
+  domain_name               = local.bucket_name
+  subject_alternative_names = ["www.${local.bucket_name}"]
+  validation_method         = "DNS"
+}
+
+// validate that we have control over domain so our certificate is trusted
+resource "aws_acm_certificate_validation" "example" {
+  certificate_arn         = aws_acm_certificate.a.arn
+  // loop route records which are the domain name and subject_alternative_names from aws_acm_certificate resource
+  validation_record_fqdns = [for record in aws_route53_record.example : record.fqdn]
+}
+
+
+resource "aws_route53_record" "example" {
+  for_each = {
+    for dvo in aws_acm_certificate.a.domain_validation_options : dvo.domain_name => {
+      name    = dvo.resource_record_name
+      record  = dvo.resource_record_value
+      type    = dvo.resource_record_type
+      zone_id = aws_route53_zone.main.zone_id
+    }
+  }
+
+  allow_overwrite = true
+  name            = each.value.name
+  records         = [each.value.record]
+  ttl             = 60
+  type            = each.value.type
+  zone_id         = each.value.zone_id
+}
+
+// graphql certificate
+resource "aws_acm_certificate" "graphql" {
+  domain_name               = local.bucket_name
+  subject_alternative_names = ["graphql.${local.bucket_name}"]
+  validation_method         = "DNS"
+}
+
+resource "aws_acm_certificate_validation" "graphql" {
+  certificate_arn         = aws_acm_certificate.graphql.arn
+  validation_record_fqdns = [for record in aws_route53_record.graphql : record.fqdn]
+}
+
+
+resource "aws_route53_record" "graphql" {
+  for_each = {
+    for dvo in aws_acm_certificate.graphql.domain_validation_options : dvo.domain_name => {
+      name    = dvo.resource_record_name
+      record  = dvo.resource_record_value
+      type    = dvo.resource_record_type
+      zone_id = aws_route53_zone.main.zone_id
+    }
+  }
+
+  allow_overwrite = true
+  name            = each.value.name
+  records         = [each.value.record]
+  ttl             = 60
+  type            = each.value.type
+  zone_id         = each.value.zone_id
+}
+
+```
+</details>
+</details>
+
+<!-- ######################### Cloudfront ################################## -->
+
+<details style={{paddingLeft: props.theme.detail.paddingLeft}}>
+<summary><h2 style={{display: 'inline'}}>Cloudfront</h2>
+
+After creating a cloudfront distribution for my S3 bucket, that I set as an origin, I can point the name records in Route53 at Cloudfront which I showed in Hosted Zone section above.
+</summary>
+
+<Image p={4} verticalAlign='middle' src="/images/6/cloudfront.png" />
+<Image p={4} verticalAlign='middle' src="/images/6/cloudfront2.png" />
+<Image p={4} verticalAlign='middle' src="/images/6/cloudfront3.png" />
+<br/>
+<br/>
+
+<details style={{paddingLeft: props.theme.detail.paddingLeft}}>
+    <summary><strong>Terraform code:</strong></summary>
+
+```json
+locals {
+  s3_origin_id = "${local.resource_prefix}_${local.bucket_name}_a"
+}
+
+resource "aws_cloudfront_distribution" "s3_distribution_a" {
+  origin {
+    domain_name = local.s3_web_endpoint
+    origin_id   = local.s3_origin_id
+
+    // https://github.com/hashicorp/terraform-provider-aws/issues/7847
+    custom_origin_config {
+      http_port              = "80"
+      https_port             = "443"
+      origin_protocol_policy = "http-only"
+      origin_ssl_protocols   = ["TLSv1", "TLSv1.1", "TLSv1.2"]
+    }
+  }
+
+  enabled         = true
+  is_ipv6_enabled = true
+  //  comment             = ""
+  default_root_object = "index.html"
+
+  logging_config {
+    include_cookies = false
+    bucket          = local.log_bucket_name
+    prefix          = local.resource_prefix
+  }
+
+  aliases = [local.bucket_name, local.alt_name]
+
+  default_cache_behavior {
+    allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+    cached_methods   = ["GET", "HEAD"]
+    target_origin_id = local.s3_origin_id
+
+    forwarded_values {
+      query_string = false
+
+      cookies {
+        forward = "none"
+      }
+    }
+
+    viewer_protocol_policy = "https-only"
+    min_ttl                = 0
+    default_ttl            = 3600
+    max_ttl                = 86400
+  }
+
+  price_class = "PriceClass_All"
+
+  restrictions {
+
+    geo_restriction {
+      restriction_type = "none"
+    }
+  }
+
+  tags = merge(
+    local.base_tags,
+    {
+      Name = "${local.resource_prefix}-${local.bucket_name}"
+    },
+  )
+
+  viewer_certificate {
+    acm_certificate_arn = local.cert_arn
+    ssl_support_method  = "sni-only"
+  }
+}
+
+// Create subdomain A record pointing to Cloudfront distribution
+resource "aws_route53_record" "www" {
+  zone_id = local.zone_id
+  name    = "www.${local.bucket_name}"
+  type    = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.s3_distribution_a.domain_name
+    zone_id                = aws_cloudfront_distribution.s3_distribution_a.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+// Create domain A record pointing to Cloudfront distribution
+resource "aws_route53_record" "a" {
+  zone_id = local.zone_id
+  name    = local.bucket_name
+  type    = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.s3_distribution_a.domain_name
+    zone_id                = aws_cloudfront_distribution.s3_distribution_a.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+```
+</details>
+</details>
+
+
+<!-- ######################### Buckets ################################## -->
+
+<details style={{paddingLeft: props.theme.detail.paddingLeft}}>
+<summary><h2 style={{display: 'inline'}}>S3 Buckets</h2>
+
 For this site I need 2 S3 buckets.  One for the site assets that we will use as a source for our CloudFront distribution and one for logs and Athena query results.
 
-<h3>Buckets</h3>
+</summary>
+
 <Image p={4} verticalAlign='middle' src="/images/6/S3list.png" />
+
+<details style={{paddingLeft: props.theme.detail.paddingLeft}}>
+    <summary><strong>Terraform code:</strong></summary>
+
+```json
+// root domain bucket and policy
+
+// Clean up bucket for destroy aws s3 rm s3://bucketname --recursive
+resource "aws_s3_bucket" "a" {
+  bucket = local.bucket_name
+
+  // For a React site the index needs to be error document as well and React needs to handle errors
+  website {
+    index_document = "index.html"
+    error_document = "index.html"
+  }
+
+  logging {
+    target_bucket = aws_s3_bucket.log.id
+    target_prefix = "s3-log/"
+  }
+  force_destroy = true
+  tags = merge(
+    local.base_tags,
+    {
+      Name      = "${local.resource_prefix}-${local.bucket_name}"
+      directory = basename(path.cwd)
+    },
+  )
+}
+
+resource "aws_s3_bucket" "log" {
+  bucket = "logs-${local.bucket_name}"
+
+  force_destroy = true
+
+  grant {
+    type        = "Group"
+    permissions = ["READ_ACP", "WRITE"]
+    uri         = "http://acs.amazonaws.com/groups/s3/LogDelivery"
+  }
+
+  //CloudFront
+  // Permissions required to configure standard logging and to access your log files
+  // https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/AccessLogs.html
+  grant {
+    id          = "c4c1ede66af53448b93c283ce9448c4ba468c9432aa01d700d3878632f77d2d0"
+    permissions = ["FULL_CONTROL", ]
+    type        = "CanonicalUser"
+  }
+
+  grant {
+    id          = data.aws_canonical_user_id.current_user.id
+    type        = "CanonicalUser"
+    permissions = ["FULL_CONTROL"]
+  }
+
+  tags = merge(
+    local.base_tags,
+    {
+      Name = "${local.resource_prefix}-logs-${local.bucket_name}"
+    },
+  )
+}
+
+resource "aws_s3_bucket_object" "log_query_folder" {
+  bucket = aws_s3_bucket.log.id
+  acl    = "private"
+  key    = "queryResults/"
+  source = "/dev/null"
+}
+// This ensures that bucket content can be read publicly
+// I like setting it up this way so it's easier to test changes
+// Check here for different setups  - https://aws.amazon.com/premiumsupport/knowledge-center/cloudfront-serve-static-website/
+// Policy limits to specific bucket
+resource "aws_s3_bucket_policy" "a" {
+  bucket = aws_s3_bucket.a.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Id      = "${local.resource_prefix}-${local.bucket_name}-policy"
+    Statement = [
+      {
+        Sid       = "PublicRead"
+        Effect    = "Allow"
+        Principal = "*"
+        Action = [
+          "s3:GetObject",
+          "s3:GetObjectVersion"
+        ]
+        Resource = [
+          aws_s3_bucket.a.arn,
+          "${aws_s3_bucket.a.arn}/*",
+        ]
+      },
+    ]
+  })
+}
+
+```
+
+</details>
+
 
 <br/>
 
@@ -117,76 +476,327 @@ For this site I need 2 S3 buckets.  One for the site assets that we will use as 
 <h3>Properties for site assets bucket</h3>
 <Image p={4} verticalAlign='middle' src="/images/6/S3domain.png" />
 <Image p={4} verticalAlign='middle' src="/images/6/S3www.png" />
+
+</details>
+
+<!-- ######################### Github Actions ################################## -->
+
+<details style={{paddingLeft: props.theme.detail.paddingLeft}}>
+<summary><h2 style={{display: 'inline'}}>Github Actions</h2>
+
+For my continuous integration I am using GitHub.  Right now I am using the main branch and not a PR flow because it's just me and I can make it work with local dev and GitHub actions.  In a context any larger than myself I would set up a separate dev domain either within a VPC or locked down by IP address.
+
+</summary>
+
+<h3>Environment</h3>
+First thing I needed to do was set up an environment in Actions so I can store secrets
+
+<Image p={4} verticalAlign='middle' src="/images/6/actionsenv.png" />
+
+<h3>Actions Workflow</h3>
+
+Then I can set up the yaml file that will define my workflow that runs whenever I commit code.  Github has a default location for the file:
+
+<Image p={4} verticalAlign='middle' src="/images/6/actionslocation.png" />
+
+I reference my environment and then can pull secrets into build job securely:
+
+<Image p={4} verticalAlign='middle' src="/images/6/yaml1.png" />
+
+Now we can create all the steps needed to build this application from top to bottom.
+
+<h4>Set up dynamodb container for automated tests</h4>
+<Image p={4} verticalAlign='middle' src="/images/6/yaml2.png" />
+
+<h4>Check out previous commit so we can see what files have changed and only run certain steps</h4>
+<Image p={4} verticalAlign='middle' src="/images/6/yaml3.png" />
+<Image p={4} verticalAlign='middle' src="/images/6/yaml4.png" />
+<Image p={4} verticalAlign='middle' src="/images/6/yaml5.png" />
+
+<h4>Set up Terraform</h4>
+<Image p={4} verticalAlign='middle' src="/images/6/yaml6.png" />
+
+<h4>Run Terraform apply if files have changed and set and environment variables needed for following steps</h4>
+<Image p={4} verticalAlign='middle' src="/images/6/yaml7.png" />
+
+<h4>Build graphql code, zip for Lambda and create Lambda</h4>
+<Image p={4} verticalAlign='middle' src="/images/6/yaml8.png" />
+
+<details style={{paddingLeft: props.theme.detail.paddingLeft}}>
+    <summary><strong>API Gateway Terraform:</strong></summary>
+
+```json
+# Create an API endpoint for graphql lambda
+resource "aws_api_gateway_rest_api" "gql" {
+  name        = "BlogGraphql"
+  description = "Terraform Serverless GraphQL Example"
+}
+
+resource "aws_api_gateway_account" "gql" {
+  cloudwatch_role_arn = aws_iam_role.cloudwatch.arn
+}
+
+resource "aws_iam_role" "cloudwatch" {
+  name = "${local.resource_prefix}-api_gateway_cloudwatch_global_gql"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    "Statement" : [
+      {
+        Sid : "",
+        Effect : "Allow",
+        Principal : {
+          Service : "apigateway.amazonaws.com"
+        },
+        Action : "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "cloudwatch_gql" {
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+  role       = aws_iam_role.cloudwatch.name
+}
+
+// Creates method in api gateway for graphql
+// https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
+resource "aws_api_gateway_resource" "gql_method" {
+  rest_api_id = aws_api_gateway_rest_api.gql.id
+  parent_id   = aws_api_gateway_rest_api.gql.root_resource_id
+  path_part   = "graphql"
+}
+
+resource "aws_api_gateway_method" "proxy" {
+  rest_api_id   = aws_api_gateway_rest_api.gql.id
+  resource_id   = aws_api_gateway_resource.gql_method.id
+  http_method   = "POST"
+  authorization = "NONE"
+}
+
+// point api to lambda for execution
+resource "aws_api_gateway_integration" "lambda" {
+  rest_api_id = aws_api_gateway_rest_api.gql.id
+  resource_id = aws_api_gateway_method.proxy.resource_id
+  http_method = aws_api_gateway_method.proxy.http_method
+
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.gql_lambda.invoke_arn
+}
+
+resource "aws_api_gateway_integration" "lambda_root" {
+  rest_api_id = aws_api_gateway_rest_api.gql.id
+  resource_id = aws_api_gateway_method.proxy_root.resource_id
+  http_method = aws_api_gateway_method.proxy_root.http_method
+
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.gql_lambda.invoke_arn
+}
+
+resource "aws_api_gateway_deployment" "gql" {
+  depends_on = [
+    aws_api_gateway_integration.lambda,
+    aws_api_gateway_integration.lambda_root,
+  ]
+
+  rest_api_id = aws_api_gateway_rest_api.gql.id
+  stage_name  = local.stage_name
+}
+
+resource "aws_api_gateway_method" "proxy_root" {
+  rest_api_id   = aws_api_gateway_rest_api.gql.id
+  resource_id   = aws_api_gateway_rest_api.gql.root_resource_id
+  http_method   = "ANY"
+  authorization = "NONE"
+}
+
+// Create a custom domain for api
+resource "aws_api_gateway_domain_name" "graphql" {
+  certificate_arn = local.graphql_cert_arn
+  domain_name     = "graphql.${local.bucket_name}"
+}
+
+// This creates an A record in Route 53 for graphql subdomain
+resource "aws_route53_record" "graphql" {
+  name    = aws_api_gateway_domain_name.graphql.domain_name
+  type    = "A"
+  zone_id = local.zone_id
+
+  alias {
+    evaluate_target_health = true
+    name                   = aws_api_gateway_domain_name.graphql.cloudfront_domain_name
+    zone_id                = aws_api_gateway_domain_name.graphql.cloudfront_zone_id
+  }
+}
+
+// this maps the custom domain to the api
+resource "aws_api_gateway_base_path_mapping" "example" {
+  api_id      = aws_api_gateway_rest_api.gql.id
+  stage_name  = local.stage_name
+  domain_name = aws_api_gateway_domain_name.graphql.domain_name
+}
+
+```
+</details>
+
+
+<details style={{paddingLeft: props.theme.detail.paddingLeft}}>
+    <summary><strong>Lambda Terraform:</strong></summary>
+
+```json
+
+// attach policy to role
+resource "aws_iam_role_policy_attachment" "sns" {
+  role       = aws_iam_role.iam_for_lambda.name
+  policy_arn = aws_iam_policy.gql_sns.arn
+}
+
+resource "aws_iam_role_policy_attachment" "dynamoDb" {
+  role       = aws_iam_role.iam_for_lambda.name
+  policy_arn = aws_iam_policy.gql_dynamoDb.arn
+}
+
+resource "aws_iam_role_policy_attachment" "basic" {
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+  role       = aws_iam_role.iam_for_lambda.name
+}
+
+// create policy
+resource "aws_iam_policy" "gql_dynamoDb" {
+  name        = "${local.resource_prefix}-gql-dynamodb"
+  description = "Policy for dynamo db access"
+  policy      = data.aws_iam_policy_document.gql_dynamoDb.json
+}
+
+// create policy document
+data "aws_iam_policy_document" "gql_dynamoDb" {
+  statement {
+    actions = [
+      "dynamodb:BatchGetItem",
+      "dynamodb:GetItem",
+      "dynamodb:Query",
+      "dynamodb:Scan",
+      "dynamodb:BatchWriteItem",
+      "dynamodb:PutItem",
+      "dynamodb:UpdateItem",
+      "dynamodb:DescribeTable"
+    ]
+    effect    = "Allow"
+    resources = [local.dynamo_arn, "${local.dynamo_arn}/index/*"]
+  }
+}
+
+// create policy
+resource "aws_iam_policy" "gql_sns" {
+  name        = "${local.resource_prefix}-gql-sns"
+  description = "Policy for sns publish"
+  policy      = data.aws_iam_policy_document.gql_sns.json
+}
+
+data "aws_iam_policy_document" "gql_sns" {
+  statement {
+    actions = [
+      "sns:Publish"
+    ]
+    effect    = "Allow"
+    resources = [local.sns_arn]
+  }
+}
+
+
+resource "aws_iam_role" "iam_for_lambda" {
+  name = "${local.resource_prefix}_iam_for_gql_lambda"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Sid    = ""
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+      },
+    ]
+    }
+  )
+
+}
+
+// create lambda function
+resource "aws_lambda_function" "gql_lambda" {
+  filename      = "./function/function.zip"
+  function_name = "${local.resource_prefix}_simple_gql_lambda_v"
+  role          = aws_iam_role.iam_for_lambda.arn
+  handler       = "graphql.graphqlHandler"
+
+  # The filebase64sha256() function is available in Terraform 0.11.12 and later
+  # For Terraform 0.11.11 and earlier, use the base64sha256() function and the file() function:
+  # source_code_hash = "${base64sha256(file("lambda_function_payload.zip"))}"
+  source_code_hash = filebase64sha256("./function/function.zip")
+
+  runtime = "nodejs14.x"
+
+  environment {
+    variables = {
+      ddb_table_name     = local.dynamo_table_name
+      ddb_hash_key       = local.dynamo_hash_key
+      ddb_region         = local.region
+      GRAPHQL_ENDPOINT   = aws_api_gateway_domain_name.graphql.domain_name
+      SNS_ARN            = local.sns_arn
+      OKTA_CLIENT_ID     = var.okta_client_id
+      OKTA_CLIENT_SECRET = var.okta_client_secret
+      OKTA_DOMAIN        = var.okta_domain
+      OKTA_ISSUER_SUFFIX = var.okta_issuer_suffix
+      OKTA_ISSUER        = local.OKTA_ISSUER
+      OKTA_AUDIENCE      = var.okta_audience
+      APP_BASE_PORT      = 4000
+
+    }
+  }
+
+  tags = merge(
+    local.base_tags,
+    {
+      Name      = "${local.resource_prefix}_simple_gql_lambda_v"
+      directory = basename(path.cwd)
+    },
+  )
+}
+
+resource "aws_lambda_permission" "apigw" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.gql_lambda.function_name
+  principal     = "apigateway.amazonaws.com"
+
+  # The "/*/*" portion grants access from any method on any resource
+  # within the API Gateway REST API.
+  source_arn = "${aws_api_gateway_rest_api.gql.execution_arn}/*/*"
+}
+
+```
+</details>
+</details>
+
+<!-- ######################### Test React and GraphQL ################################## -->
+
+<details style={{paddingLeft: props.theme.detail.paddingLeft}}>
+<summary><h2 style={{display: 'inline'}}>Test React and GraphQL</h2>
+</summary>
+<h4>Test React and GraphQL</h4>
+<Image p={4} verticalAlign='middle' src="/images/6/yaml9.png" />
+
+<h4>Build React and update files in S3 bucket</h4>
+<Image p={4} verticalAlign='middle' src="/images/6/yaml10.png" />
+
+<h4>Update Cloud Front</h4>
+<Image p={4} verticalAlign='middle' src="/images/6/yaml11.png" />
+
+</details>
+
 <br/>
-<br/>
-
-#### Pipeline
-For my continuous integration I am using GitHub.  Right now I am using main and not a PR flow because it's just me and I can make it work with local dev and GitHub actions.  In a context any larger than myself I would set up a separate dev domain either within a VPC or locked down by IP address.
-
-#### Diagram
-
-#### Comments
-For a comments function I have used GraphQL running on Lambda, DynamoDB for storage and SNS to notify me of comments.
----
-
-#### Building Blog Site with Github actions
-
-This part is relatively easy assuming <Link p={0} href={Post1} target="_blank">this post</Link> makes sense.
-
-<br/>
-
-Key differences is the 404.html page no longer matters.
-
-<br/>
-
-We use two S3 buckets to accomplish static website hosting.
-
-TODO - Add S3 terraform discussion
-
-<br/>
-
-<!-- First www.arthurneedsadomain.com -->
-
-<!-- <br/> -->
-
-<!-- <Image p={4} verticalAlign='middle' src="/images/6/S3www.png" /> -->
-
-<!-- <br/> -->
-
-<!-- which redirects to arthurneedsadomain.com that hosts the content -->
-
-<!-- <br/> -->
-
-<!-- <Image p={4} verticalAlign='middle' src="/images/6/S3domain.png" /> -->
-
-<!-- <br/> -->
-
-the key on this bucket is to set the index.html as both the index and the error document because we are using React Router which doesn't play nice with S3 but the error redirection hacks it back to where it needs to be.  <Link p={0} href={clientSideRoute} target="_blank">If you care why this explains it.</Link>
-
-<br/>
-
-Once you have the bucket setup right then all you need to do is deploy your built content into it.
-
-<br/>
-
-Now that we have the mechanism set up to deploy our
-
-React (really Webpack) ultimately "compiles" the JavaScript you write into a bunch of files that are your deployment artifacts.  You can read more <Link p={0} href={prodBuild} target="_blank">here</Link>
-
-<br/>
-
-Setting up GitHub actions
-
-TODO - Add pipeline discussion
-
-
-<br/>
-
-<br/>
-
-<Link p={4} href={Repo} target="_blank">Code located here</Link>
-
-<br/>
-<br/>
-
 <br/>

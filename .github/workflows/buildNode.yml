@@ -301,18 +301,18 @@ jobs:
       ##############################
       # Create Lambda - START #
       ##############################
+      #      - name: run tests
+      #        id: zip_graphql
+      #        run: |
+      #          yarn install
+      #          yarn test
+      #        working-directory: ./terraform_graphql/function/src
+
       - name: run graphql source build
         id: build_graphql
         run: |
           yarn install
         working-directory: ./terraform/terraform_graphql/function/src
-
-#      - name: run tests
-#        id: zip_graphql
-#        run: |
-#          yarn install
-#          yarn test
-#        working-directory: ./terraform_graphql/function/src
 
       - name: zip graphql src
         id: zip_graphql
@@ -438,7 +438,6 @@ jobs:
         run: |
           sleep 20 &&
               curl --request POST --header 'content-type: application/json' --url http://localhost:4000/graphql --data '{"query":"query Query {\n  hello\n}"}'
-
 
       # run tests
       # https://docs.cypress.io/guides/continuous-integration/github-actions

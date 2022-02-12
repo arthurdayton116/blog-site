@@ -14,6 +14,9 @@ const ph = 18.5
 
 const theme_config =  {
     breakpoints: ['599px','900px','1200px'],
+    detail: {
+        paddingLeft: '1em'
+    },
     fontSizes: [
         12, 14, 16, 24, 32, 48, 64
     ],
