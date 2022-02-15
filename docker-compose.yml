@@ -1,19 +1,26 @@
 version: "3.9"  # optional since v1.27.0
 services:
+  # UI container - uses command from package.json file to start
+  # need to install nodemon
   react:
     image: node:16
-    command: /bin/bash -c "ls & npm install nodemon -g && nodemon --watch src start"
+    command: /bin/bash -c "ls & npm install nodemon -g && yarn start:nodemon"
     ports:
       - "3001:3001"
     volumes:
       - ./ui:/src
     working_dir: /src
+    # This variable is used in App.js, if it exists then it points to this endpoint
+    # with docker network the service name (graphql) is all we need to route
+    # ui should be running at http://localhost:3001/
     environment:
       DOCKER_GRAPHQL_ENDPOINT: graphql
+
   dynamodb:
     image: amazon/dynamodb-local:1.17.0
     ports:
       - "8000:8000"
+    # gives container a drive to mount
     volumes:
       - ./terraform/terraform_graphql/function/dynamodb:/home/dynamodblocal/data
     working_dir: /home/dynamodblocal
@@ -28,9 +35,13 @@ services:
       - ./terraform/terraform_graphql/function/src:/src
       - $HOME/.aws/credentials:/root/.aws/credentials
     working_dir: /src
+    # graphql should be running at http://localhost:4000/graphql
     environment:
-      CYPRESS_GRAPHQL: true
+      # This value tells graphql to point at local version of dynamodb if it exists
+      CYPRESS_GRAPHQL: "true"
       GRAPHQL_PORT: 4000
-      JWT_OVERRIDE: true
+      # If exists tells graphql to ignore the need for authentication
+      JWT_OVERRIDE: "Exists"
+      # points to service running above
       DYNAMO_HOST: dynamodb
 

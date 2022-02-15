@@ -39,6 +39,12 @@ To run locally using a local version of dynamodb (from within function/docker):
 
 ```
 ########################
+Preferred method is to use docker-compose up
+########################
+
+otherwise you can do individual containers
+
+########################
 Delete Docker Network
 ########################
 

@@ -54,8 +54,8 @@
     "title": "Deploying This Blog Site Using Serverless Technologies on AWS",
     "body": "Here comes some information",
     "postLink": "../blogs/6",
-    "posted": "2021-10-29",
-    "lastUpdated": "2021-10-29",
+    "posted": "2022-02-15",
+    "lastUpdated": "2022-02-15",
     "technologies": ["React", "GraphQL", "Terraform", "AWS"],
     "order": 1
   },

@@ -433,7 +433,7 @@ jobs:
         working-directory: ./terraform/terraform_graphql/function/src
         env:
           CYPRESS_GRAPHQL: true
-
+      # this hangs out and waits for it to be alive
       - name: Test gql
         run: |
           sleep 20 &&

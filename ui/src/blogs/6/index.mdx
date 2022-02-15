@@ -17,7 +17,7 @@ export const cloudFrontSetup = "https://aws.amazon.com/premiumsupport/knowledge-
 
 export const Repo = "https://github.com/arthurdayton116/blog-site"
 
-export const Post1 = "https://arthurdayton116.github.io/post/1/"
+export const Post1 = "https://arthurdayton.com/post/1/"
 
 export const clientSideRoute = "https://create-react-app.dev/docs/deployment#serving-apps-with-client-side-routing"
 
@@ -31,12 +31,12 @@ export const gaTerraform = "https://github.com/hashicorp/setup-terraform"
 
 #### Using GitHub Actions to continuously deploy a Serverless blog site
 
-In this post I am going to cover how to use GitHub Actions to continuously build and deploy a serverless blog site using Terraform, React, GraphQL, and several AWS services including Lambda, API Gateway, S3, SNS, Route53, Certificate Manager and CloudFront.
+In this post I am going to cover how to use GitHub Actions to continuously build and deploy a serverless web application (this site) using Terraform, React, GraphQL, and several AWS services including Lambda, API Gateway, S3, SNS, Route53, Certificate Manager and CloudFront.
 
 <br/>
 
 <details open style={{paddingLeft: props.theme.detail.paddingLeft}}>
-    <summary><strong>Diagram of what we are trying to build:</strong></summary>
+    <summary><strong>Diagram of what I am implementing:</strong></summary>
 
 
 <Image p={4} verticalAlign='middle' src="/images/6/ArchitectureDiagram.png" />
@@ -47,9 +47,11 @@ In this post I am going to cover how to use GitHub Actions to continuously build
 
 To set this up yourself you need an AWS account, a Terraform cloud account, a custom domain, basic React skills, basic Terraform skills, a working knowledge of GitHub Actions and of course the requisite amount of OCD needed to figure out the stuff I almost certainly left out because I wouldn't want to deny you the delicious pain of experience.
 
+I started with the Create React App and built off of it <a href="https://arthurdayton.com/post/1/" target="_blank">How to set up a Git Hub Pages Blog Site Using React and MDX</a>.  The approach for using S3 to serve the static site assets is essentially the same as using GitHub pages but when you start to think about putting an API on the back end I think it's "easier" to use AWS.
+
 <br/>
 
-<details open style={{paddingLeft: props.theme.detail.paddingLeft}}><summary><strong>Background from around the internet:</strong></summary>
+<details open style={{paddingLeft: props.theme.detail.paddingLeft}}><summary><strong>A little background reading from around the internet:</strong></summary>
 
 <br/>
 <br/>
@@ -58,7 +60,7 @@ To set this up yourself you need an AWS account, a Terraform cloud account, a cu
 
 <br/>
 
-React makes using S3 a no-brainer because the React build process creates static assets and S3 is cheap and easily integrates with lots of other AWS resources such as Cloudfront.  It cost me around 3 cents last month so that seems reasonable.
+S3 (Simple Storage Service) is the OG of AWS.  It's cheap, easy to use, and easily integrates with lots of other AWS resources, such as Cloudfront.  It cost me around 3 cents last month so that seems very reasonable.
 
 <br/>
 
@@ -66,11 +68,11 @@ React makes using S3 a no-brainer because the React build process creates static
 
 <br/>
 
-Cloudfront is a CDN which allows us to easily cache content around the world and as mentioned above easily integrates with S3 and Route53 so we can easily map our domain to our content.
+Cloudfront is a CDN which allows users to easily cache content around the world and as mentioned above easily integrates with S3 and Route53 so we can easily map our domain to our content.
 
 <br/>
 
-<Link p={4} href={goodExp} target="_blank">This post explains it all pretty good</Link>
+<Link p={4} href={goodExp} target="_blank">This post does a great job of explaining how to integrate S3 and Cloudfront</Link>
 
 <br/>
 
@@ -79,10 +81,11 @@ Cloudfront is a CDN which allows us to easily cache content around the world and
 <br/>
 <br/>
 
-My objective is to build a blog site that is deployed around the world and updates automatically whenever I push changes to the main branch of my repository.  I also have created a GraphQL endpoint for getting and submitting comments for each blog entry.  I'll back that with a Lambda function and DynamoDB so my site is essentially free to deploy at low volume usage and will autoscale to any degree of usage.
-<br/>
 
 <h2>Building out components of architecture diagram</h2>
+
+
+My objective is to build a blog site that is deployed around the world and updates automatically whenever I push changes to the main branch of my repository.  I also want to create an API, using GraphQL, for getting and submitting comments for each blog entry.  I'll use a Lambda function to run GraphQL and DynamoDB as my data store so that my site is essentially free to deploy at low volume usage and will autoscale to any degree of usage.
 
 <br/>
 
@@ -97,11 +100,9 @@ My objective is to build a blog site that is deployed around the world and updat
 <summary><h2 style={{display: 'inline'}}>Hosted Zone</h2>
 
 
-My hosted zone in Route53 will route traffic to my cloudfront distributions for my React site and my GraphQL endpoint.  I will have needed to create those distributions of course, which i show below. As I go along I will be creating Terraform files for the creation of all of these resources so that I can easily create and destroy these resources as well as make the process automated and reusable.
+If I want to reach the world with my brilliant musings then I'm going to need a domain and it will need to support SSL/TLS certificates so I'm using Route53 and ACM (Amazon Certificate Manager) to purchase and renew both.  My hosted zone in Route53 will route traffic to my Cloudfront distributions for my React site and my GraphQL endpoint.  I will need to create those Cloudfront distributions of course, which I show below. As I go along, I will be creating Terraform files for the creation of all resources so that I can easily create and destroy on demand as well as make the process of deploying my site automated and reusable.
 </summary>
 <br/>
-
-
 
 <details style={{paddingLeft: props.theme.detail.paddingLeft}}>
     <summary><strong>Basic Terraform code looks like this:</strong></summary>
@@ -135,9 +136,16 @@ resource "aws_route53_record" "gmail_mx" {
 
 The most important thing to remember if you are switching what your domain points at is that when you are sure it's not DNS it's probably DNS.
 
+This shows my hosted zone in AWS Console:
 
 <Image p={4} verticalAlign='middle' src="/images/6/hostedzone.png" />
+
+These are the records pointing to my cloudfront distributions:
+
 <Image p={4} verticalAlign='middle' src="/images/6/hostedzone2.png" />
+
+This shows the record detail and how to point to a Cloudfront distribution (I use Terrraform to create these when I deploy to Cloudfront below):
+
 <Image p={4} verticalAlign='middle' src="/images/6/hzrecord.png" />
 <br/>
 <br/>
@@ -152,10 +160,14 @@ The most important thing to remember if you are switching what your domain point
 <details style={{paddingLeft: props.theme.detail.paddingLeft}}>
 <summary><h2 style={{display: 'inline'}}>Certificate</h2>
 
-Using Amazon Certificate Manager you can create a certificate for your domain and have it automatically validate by creating records in your hosted zone
+Using ACM(Amazon Certificate Manager) you can create a certificate for your domain and have it automatically validate by creating records in your hosted zone
 </summary>
 
+This shows the certificate status and domain validation status in ACM panel:
+
 <Image p={4} verticalAlign='middle' src="/images/6/acm2.png" />
+
+This shows the records created by the validation process (we can use Terraform for this as well):
 <Image p={4} verticalAlign='middle' src="/images/6/certrecord.png" />
 <br/>
 <br/>
@@ -232,16 +244,25 @@ resource "aws_route53_record" "graphql" {
 </details>
 </details>
 
+<br/>
+
 <!-- ######################### Cloudfront ################################## -->
 
 <details style={{paddingLeft: props.theme.detail.paddingLeft}}>
 <summary><h2 style={{display: 'inline'}}>Cloudfront</h2>
 
-After creating a cloudfront distribution for my S3 bucket, that I set as an origin, I can point the name records in Route53 at Cloudfront which I showed in Hosted Zone section above.
+After creating a Cloudfront distribution for my S3 bucket, that I set as an origin, I can point the name records in Route53 at Cloudfront which I showed in Hosted Zone section above.  As with everything else we can automate and manage these with Terraform.
 </summary>
+
+<br/>
+
+This shows my distribution for site assets:
 
 <Image p={4} verticalAlign='middle' src="/images/6/cloudfront.png" />
 <Image p={4} verticalAlign='middle' src="/images/6/cloudfront2.png" />
+
+This shows the configured S3 bucket origin where my React build artifacts are pushed from the Gitthub Actions pipeline that runs when I commit to my repository:
+
 <Image p={4} verticalAlign='middle' src="/images/6/cloudfront3.png" />
 <br/>
 <br/>
@@ -351,17 +372,30 @@ resource "aws_route53_record" "a" {
 </details>
 </details>
 
+<br/>
+
 
 <!-- ######################### Buckets ################################## -->
 
 <details style={{paddingLeft: props.theme.detail.paddingLeft}}>
 <summary><h2 style={{display: 'inline'}}>S3 Buckets</h2>
 
-For this site I need 2 S3 buckets.  One for the site assets that we will use as a source for our CloudFront distribution and one for logs and Athena query results.
+For this site I'm using 2 S3 buckets.  One for the site assets that we will use as a source for our CloudFront distribution and one for logs and Athena query results.
 
 </summary>
 
+This shows the buckets:
+
 <Image p={4} verticalAlign='middle' src="/images/6/S3list.png" />
+
+This shows the site assets from react build:
+
+<Image p={4} verticalAlign='middle' src="/images/6/S3assets.png" />
+
+This shows relevant properties for site assets bucket:
+
+<Image p={4} verticalAlign='middle' src="/images/6/S3domain.png" />
+<Image p={4} verticalAlign='middle' src="/images/6/S3www.png" />
 
 <details style={{paddingLeft: props.theme.detail.paddingLeft}}>
     <summary><strong>Terraform code:</strong></summary>
@@ -464,32 +498,21 @@ resource "aws_s3_bucket_policy" "a" {
 ```
 
 </details>
-
-
-<br/>
-
-<h3>Site assets from react build</h3>
-<Image p={4} verticalAlign='middle' src="/images/6/S3assets.png" />
-
-<br/>
-
-<h3>Properties for site assets bucket</h3>
-<Image p={4} verticalAlign='middle' src="/images/6/S3domain.png" />
-<Image p={4} verticalAlign='middle' src="/images/6/S3www.png" />
-
 </details>
+
+<br/>
 
 <!-- ######################### Github Actions ################################## -->
 
 <details style={{paddingLeft: props.theme.detail.paddingLeft}}>
 <summary><h2 style={{display: 'inline'}}>Github Actions</h2>
 
-For my continuous integration I am using GitHub.  Right now I am using the main branch and not a PR flow because it's just me and I can make it work with local dev and GitHub actions.  In a context any larger than myself I would set up a separate dev domain either within a VPC or locked down by IP address.
+For my continuous integration I am using GitHub.  Right now I am using the main branch and not a PR flow because it's just me and I can make it work with local dev and GitHub actions.  In a context any larger than myself I would set up a separate dev domain either within a VPC or locked down by IP address.  GitHub Actions is pretty awesome and it's been exciting watching it mature towards being an Enterprise ready tool.  Care and feeding of architecture is painful and having this capability delivered right to my Github repository is awesome!  If you've used Azure Devops (lately) then it will look and feel very familiar.
 
 </summary>
 
 <h3>Environment</h3>
-First thing I needed to do was set up an environment in Actions so I can store secrets
+First thing I needed to do was set up an environment in Actions so I can store secrets:
 
 <Image p={4} verticalAlign='middle' src="/images/6/actionsenv.png" />
 
@@ -499,11 +522,11 @@ Then I can set up the yaml file that will define my workflow that runs whenever 
 
 <Image p={4} verticalAlign='middle' src="/images/6/actionslocation.png" />
 
-I reference my environment and then can pull secrets into build job securely:
+I reference my environment and then can pull secrets into my build job runs securely:
 
 <Image p={4} verticalAlign='middle' src="/images/6/yaml1.png" />
 
-Now we can create all the steps needed to build this application from top to bottom.
+Now I can create all the steps needed to build this application from top to bottom:
 
 <h4>Set up dynamodb container for automated tests</h4>
 <Image p={4} verticalAlign='middle' src="/images/6/yaml2.png" />
@@ -782,18 +805,86 @@ resource "aws_lambda_permission" "apigw" {
 </details>
 </details>
 
+<br/>
+
 <!-- ######################### Test React and GraphQL ################################## -->
 
 <details style={{paddingLeft: props.theme.detail.paddingLeft}}>
-<summary><h2 style={{display: 'inline'}}>Test React and GraphQL</h2>
+<summary><h2 style={{display: 'inline'}}>Testing React and GraphQL</h2>
+
+We need to build automated testing into our code, even if you start small.  My favorite testing tool is <a href="https://www.cypress.io/ " target="_blank">Cypress.io</a> and I like to use a docker-compose file to set up a local development environment of networked containers that have my local code mounted as directories.  This allows me to continuously build and test with a stable environment that should be the same no matter where I run it.  Cypress provides both a desktop tool, where you can watch tests run in real time and observe the state of the browser as it was at any time during the test, and a command line utility that easily integrates into your favorite pipleline tool.
+
 </summary>
-<h4>Test React and GraphQL</h4>
+
+<details style={{paddingLeft: props.theme.detail.paddingLeft}}>
+<summary><strong>Compose File</strong></summary>
+
+```yaml
+    version: "3.9"  # optional since v1.27.0
+    services:
+    # UI container - uses command from package.json file to start
+    # need to install nodemon
+    react:
+    image: node:16
+    command: /bin/bash -c "ls & npm install nodemon -g && yarn start:nodemon"
+    ports:
+    - "3001:3001"
+    volumes:
+    - ./ui:/src
+    working_dir: /src
+    # This variable is used in App.js, if it exists then it points to this endpoint
+    # with docker network the service name (graphql) is all we need to route
+    # ui should be running at http://localhost:3001/
+    environment:
+    DOCKER_GRAPHQL_ENDPOINT: graphql
+
+    dynamodb:
+    image: amazon/dynamodb-local:1.17.0
+    ports:
+    - "8000:8000"
+    # gives container a drive to mount
+    volumes:
+    - ./terraform/terraform_graphql/function/dynamodb:/home/dynamodblocal/data
+    working_dir: /home/dynamodblocal
+    graphql:
+    image: node:16
+    command: /bin/bash -c "ls & npm install nodemon -g && nodemon index.js"
+    depends_on:
+    - dynamodb
+    ports:
+    - "4000:4000"
+    volumes:
+    - ./terraform/terraform_graphql/function/src:/src
+    - $HOME/.aws/credentials:/root/.aws/credentials
+    working_dir: /src
+    # graphql should be running at http://localhost:4000/graphql
+    environment:
+    # This value tells graphql to point at local version of dynamodb if it exists
+    CYPRESS_GRAPHQL: "true"
+    GRAPHQL_PORT: 4000
+    # Tells graphql to ignore the need for authentication
+    JWT_OVERRIDE: "true"
+    # points to service running above
+    DYNAMO_HOST: dynamodb
+
+```
+
+</details>
+
+<br/>
+
+
+Here the pipeline runs Cypress tests that cover ui and graphql
+
 <Image p={4} verticalAlign='middle' src="/images/6/yaml9.png" />
 
-<h4>Build React and update files in S3 bucket</h4>
+This part builds the React project and uploads it to S3 bucket:
+
 <Image p={4} verticalAlign='middle' src="/images/6/yaml10.png" />
 
-<h4>Update Cloud Front</h4>
+
+This conditionally updates the Cloudfront distribution if Terraform files have changed:
+
 <Image p={4} verticalAlign='middle' src="/images/6/yaml11.png" />
 
 </details>

@@ -38,6 +38,7 @@ describe('Blog Non Authenticated Tests', () => {
     //     )
     // })
 
+    // In order for this to pass JWT_OVERRIDE: "Exists" must be uncommented in docker-compose file
     it('Check graphql user query has results', () => {
         cy.request('POST', 'http://localhost:4000/graphql', userQryStr).then(
             (response) => {

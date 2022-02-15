@@ -131,6 +131,10 @@ const resolvers = {
             }
             const { GroupsAccess } = process.env.JWT_OVERRIDE ? {GroupsAccess:['CommentApprover']}: authorizedToUse;
 
+            // show expected claims object
+            console.log('process.env.JWT_OVERRIDE',process.env.JWT_OVERRIDE)
+            console.log('GroupsAccess',GroupsAccess)
+
             if (!GroupsAccess.includes('CommentApprover')) {
                 console.log('does not include CommentApprover group')
                 throw new AuthenticationError('Not Authorized to Access');
