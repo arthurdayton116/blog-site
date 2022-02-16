@@ -1,6 +1,6 @@
 import React, {Suspense} from 'react'
 import { useParams } from "react-router-dom";
-import { Box, Heading, Text, Link } from 'rebass';
+import { Box, Heading, Text } from 'rebass';
 import blogContent from '../blogs/BlogMDX';
 import blogImages from '../blogs/images';
 import CustomCodeBlock from "../components/CodeBlock";

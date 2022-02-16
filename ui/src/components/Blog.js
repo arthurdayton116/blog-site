@@ -3,7 +3,6 @@ import { NavLink } from "react-router-dom";
 import {Flex, Box, Card, Heading} from 'rebass';
 import data from '../blogs/data.json';
 import {useTheme} from "@emotion/react";
-import {MDXProvider} from '@mdx-js/react';
 
 const maxPostNumber = 6
 const cardArr = [ 1, 1/2, 1/4 ]
