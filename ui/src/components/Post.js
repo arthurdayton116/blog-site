@@ -83,9 +83,9 @@ export const Post = (props) => {
                 <Suspense fallback={<div>Loading...</div>}>
                     <Content components={components} post={post} images={Images} theme={theme}/>
                 </Suspense>
-                <Box pt={2} pl={mlArr}>
-                Comments or questions create an issue on <Link href={blogIssue} target="_blank">blog repo</Link> or <Link href={awsTFIssue} target="_blank">code repo</Link>.
-                </Box>
+                {/*<Box pt={2} pl={mlArr}>*/}
+                {/*Comments or questions create an issue on <Link href={blogIssue} target="_blank">blog repo</Link> or <Link href={awsTFIssue} target="_blank">code repo</Link>.*/}
+                {/*</Box>*/}
                 </Box>
         </Box>
         <Comments postID={post.id}/>

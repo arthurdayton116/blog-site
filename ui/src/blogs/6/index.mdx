@@ -31,12 +31,12 @@ export const gaTerraform = "https://github.com/hashicorp/setup-terraform"
 
 #### Using GitHub Actions to continuously deploy a Serverless blog site
 
-In this post I am going to cover how to use GitHub Actions to continuously build and deploy a serverless web application (this site) using Terraform, React, GraphQL, and several AWS services including Lambda, API Gateway, S3, SNS, Route53, Certificate Manager and CloudFront.
+In this post I am going to cover how to use <a href="https://docs.github.com/en/actions" target="_blank">GitHub Actions</a> to continuously build and deploy a serverless web application (this site) using <a href="https://www.terraform.io/" target="_blank">Terraform</a>, <a href="https://reactjs.org/" target="_blank">React</a>, <a href="https://graphql.org/" target="_blank">GraphQL</a>, and several AWS services including <a href="https://aws.amazon.com/lambda/" target="_blank">Lambda</a>, <a href="https://aws.amazon.com/api-gateway/" target="_blank">API Gateway</a>, <a href="https://aws.amazon.com/s3/" target="_blank">S3</a>, <a href="https://aws.amazon.com/sns/" target="_blank">SNS</a>, <a href="https://aws.amazon.com/route53/" target="_blank">Route53</a>, <a href="https://aws.amazon.com/certificate-manager/" target="_blank">Certificate Manager</a> and <a href="https://aws.amazon.com/cloudfront/" target="_blank">CloudFront</a>.
 
 <br/>
 
 <details open style={{paddingLeft: props.theme.detail.paddingLeft}}>
-    <summary><strong>Diagram of what I am implementing:</strong></summary>
+<summary><strong>Diagram of what I am implementing:</strong></summary>
 
 
 <Image p={4} verticalAlign='middle' src="/images/6/ArchitectureDiagram.png" />
@@ -45,9 +45,11 @@ In this post I am going to cover how to use GitHub Actions to continuously build
 
 <br/>
 
-To set this up yourself you need an AWS account, a Terraform cloud account, a custom domain, basic React skills, basic Terraform skills, a working knowledge of GitHub Actions and of course the requisite amount of OCD needed to figure out the stuff I almost certainly left out because I wouldn't want to deny you the delicious pain of experience.
+To set this up yourself you need an <a href="https://aws.amazon.com/account/" target="_blank">AWS account</a>, a <a href="https://cloud.hashicorp.com/products/terraform" target="_blank">Terraform Cloud account</a>, a <a href="https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/domain-register.html" target="_blank">custom domain</a>, basic React skills, basic Terraform skills, a working knowledge of GitHub Actions and of course the requisite amount of OCD needed to figure out the stuff I almost certainly left out (I wouldn't want to deny you the sweet pain of experience).
 
-I started with the Create React App and built off of it <a href="https://arthurdayton.com/post/1/" target="_blank">How to set up a Git Hub Pages Blog Site Using React and MDX</a>.  The approach for using S3 to serve the static site assets is essentially the same as using GitHub pages but when you start to think about putting an API on the back end I think it's "easier" to use AWS.
+<br/>
+
+I started with the <a href="https://create-react-app.dev/" target="_blank">Create React App</a> and built off of it <a href="https://arthurdayton.com/post/1/" target="_blank">How to set up a Git Hub Pages Blog Site Using React and MDX</a>.  The approach for using S3 to serve the static site assets is essentially the same as using GitHub pages but when you start to think about putting an API on the back end I think it's "easier" to use AWS.
 
 <br/>
 
@@ -60,7 +62,7 @@ I started with the Create React App and built off of it <a href="https://arthurd
 
 <br/>
 
-S3 (Simple Storage Service) is the OG of AWS.  It's cheap, easy to use, and easily integrates with lots of other AWS resources, such as Cloudfront.  It cost me around 3 cents last month so that seems very reasonable.
+S3 (Simple Storage Service) is definitely the <a href="https://en.wikipedia.org/wiki/Amazon_S3" target="_blank">the OG of AWS</a> .  It's cheap (It currrently costs me less than 5 cents a month), easy to use(<a href="https://threatpost.com/sega-security-aws-s3-exposed-steam/177352/" target="_blank">to easy?</a>), and pretty seamlessly integrates with lots of other AWS resources, such as Cloudfront.
 
 <br/>
 
@@ -68,7 +70,7 @@ S3 (Simple Storage Service) is the OG of AWS.  It's cheap, easy to use, and easi
 
 <br/>
 
-Cloudfront is a CDN which allows users to easily cache content around the world and as mentioned above easily integrates with S3 and Route53 so we can easily map our domain to our content.
+Cloudfront is a CDN which allows users to cache content around the world and automatically integrates with S3 and Route53 so we can easily map our domain to our content.
 
 <br/>
 
@@ -85,7 +87,11 @@ Cloudfront is a CDN which allows users to easily cache content around the world 
 <h2>Building out components of architecture diagram</h2>
 
 
-My objective is to build a blog site that is deployed around the world and updates automatically whenever I push changes to the main branch of my repository.  I also want to create an API, using GraphQL, for getting and submitting comments for each blog entry.  I'll use a Lambda function to run GraphQL and DynamoDB as my data store so that my site is essentially free to deploy at low volume usage and will autoscale to any degree of usage.
+To build out my architecture diagram above I use Terraform to define my AWS resources, the AWS CLI to push my React code to my S3 bucket, and a GitHub Actions pipeline to deploy whenever I push changes to the main branch of my repository.  My API is Apollo GraphQL (<a href="https://www.apollographql.com/" target="_blank">❤️‍🔥</a>) for getting and submitting comments.  It's running as a Lambda function (<a href="https://www.apollographql.com/docs/apollo-server/deployment/lambda/" target="_blank">🤯</a>) and using DynamoDB as a data store so that this site is essentially free to deploy and will autoscale to any degree of usage.
+
+<br/>
+
+I could have easily used all AWS tools to do this, but I think there is good reason to stick with some tools that are Cloud agnostic as it becomes clearer every day that the enterprise cloud provider battle is going to work out like the enterprise database or development language battles (everybody is going to have pretty much everything).
 
 <br/>
 
@@ -100,7 +106,7 @@ My objective is to build a blog site that is deployed around the world and updat
 <summary><h2 style={{display: 'inline'}}>Hosted Zone</h2>
 
 
-If I want to reach the world with my brilliant musings then I'm going to need a domain and it will need to support SSL/TLS certificates so I'm using Route53 and ACM (Amazon Certificate Manager) to purchase and renew both.  My hosted zone in Route53 will route traffic to my Cloudfront distributions for my React site and my GraphQL endpoint.  I will need to create those Cloudfront distributions of course, which I show below. As I go along, I will be creating Terraform files for the creation of all resources so that I can easily create and destroy on demand as well as make the process of deploying my site automated and reusable.
+If I want to reach the world then I'm going to need a domain and it will need to support SSL/TLS certificates so I'm using Route53 and ACM (Amazon Certificate Manager) to purchase and renew both.  My hosted zone in Route53 will route traffic to my Cloudfront distributions for my React site and my GraphQL endpoint.  I will need to create those Cloudfront distributions of course, which I show below. As I go along, I will be creating Terraform files for the creation of all resources so that I can easily create and destroy on demand as well as make the process of deploying my site automated and reusable.
 </summary>
 <br/>
 
@@ -134,9 +140,9 @@ resource "aws_route53_record" "gmail_mx" {
 
 <br/>
 
-The most important thing to remember if you are switching what your domain points at is that when you are sure it's not DNS it's probably DNS.
+The most important thing to remember, especially  if you are switching what your domain points at, is that when you are sure it's not DNS it's probably DNS.
 
-This shows my hosted zone in AWS Console:
+This shows my hosted zone in the AWS Console:
 
 <Image p={4} verticalAlign='middle' src="/images/6/hostedzone.png" />
 
@@ -160,10 +166,12 @@ This shows the record detail and how to point to a Cloudfront distribution (I us
 <details style={{paddingLeft: props.theme.detail.paddingLeft}}>
 <summary><h2 style={{display: 'inline'}}>Certificate</h2>
 
-Using ACM(Amazon Certificate Manager) you can create a certificate for your domain and have it automatically validate by creating records in your hosted zone
+Using ACM you can create a certificate for your domain and have it automatically validate by creating records in your hosted zone
 </summary>
 
-This shows the certificate status and domain validation status in ACM panel:
+<br/>
+
+This shows the certificate status and domain validation status in the ACM panel:
 
 <Image p={4} verticalAlign='middle' src="/images/6/acm2.png" />
 
@@ -251,7 +259,7 @@ resource "aws_route53_record" "graphql" {
 <details style={{paddingLeft: props.theme.detail.paddingLeft}}>
 <summary><h2 style={{display: 'inline'}}>Cloudfront</h2>
 
-After creating a Cloudfront distribution for my S3 bucket, that I set as an origin, I can point the name records in Route53 at Cloudfront which I showed in Hosted Zone section above.  As with everything else we can automate and manage these with Terraform.
+After creating a Cloudfront distribution for my S3 bucket, that I set as an origin, I can point the name records in Route53 at Cloudfront which I showed in the Hosted Zone section above.  As with everything else we can automate and manage these with Terraform.
 </summary>
 
 <br/>
@@ -261,7 +269,7 @@ This shows my distribution for site assets:
 <Image p={4} verticalAlign='middle' src="/images/6/cloudfront.png" />
 <Image p={4} verticalAlign='middle' src="/images/6/cloudfront2.png" />
 
-This shows the configured S3 bucket origin where my React build artifacts are pushed from the Gitthub Actions pipeline that runs when I commit to my repository:
+This shows the configured S3 bucket origin where my React build artifacts are pushed from the GitHub Actions pipeline that runs when I commit to my repository:
 
 <Image p={4} verticalAlign='middle' src="/images/6/cloudfront3.png" />
 <br/>
@@ -384,11 +392,13 @@ For this site I'm using 2 S3 buckets.  One for the site assets that we will use 
 
 </summary>
 
+<br/>
+
 This shows the buckets:
 
 <Image p={4} verticalAlign='middle' src="/images/6/S3list.png" />
 
-This shows the site assets from react build:
+This shows the site assets from React build:
 
 <Image p={4} verticalAlign='middle' src="/images/6/S3assets.png" />
 
@@ -505,9 +515,9 @@ resource "aws_s3_bucket_policy" "a" {
 <!-- ######################### Github Actions ################################## -->
 
 <details style={{paddingLeft: props.theme.detail.paddingLeft}}>
-<summary><h2 style={{display: 'inline'}}>Github Actions</h2>
+<summary><h2 style={{display: 'inline'}}>GitHub Actions</h2>
 
-For my continuous integration I am using GitHub.  Right now I am using the main branch and not a PR flow because it's just me and I can make it work with local dev and GitHub actions.  In a context any larger than myself I would set up a separate dev domain either within a VPC or locked down by IP address.  GitHub Actions is pretty awesome and it's been exciting watching it mature towards being an Enterprise ready tool.  Care and feeding of architecture is painful and having this capability delivered right to my Github repository is awesome!  If you've used Azure Devops (lately) then it will look and feel very familiar.
+For my continuous integration I am using GitHub.  Right now I am using the main branch and not a PR flow because it's just me and I can make it work with local dev and GitHub actions.  In a context any larger than myself I would set up a separate dev domain either within a VPC or locked down by IP address.  GitHub Actions is pretty awesome and it's been exciting watching it mature towards being an Enterprise ready tool.  Care and feeding of architecture is painful and having this capability delivered right to my GitHub repository is awesome!  If you've used Azure Devops (lately) then it will look and feel very familiar.
 
 </summary>
 
@@ -518,11 +528,11 @@ First thing I needed to do was set up an environment in Actions so I can store s
 
 <h3>Actions Workflow</h3>
 
-Then I can set up the yaml file that will define my workflow that runs whenever I commit code.  Github has a default location for the file:
+Then I can set up the yaml file that will define my workflow that runs whenever I commit code.  GitHub has a default location for the file:
 
 <Image p={4} verticalAlign='middle' src="/images/6/actionslocation.png" />
 
-I reference my environment and then can pull secrets into my build job runs securely:
+I reference my environment and then I can pull secrets into my build job runs securely:
 
 <Image p={4} verticalAlign='middle' src="/images/6/yaml1.png" />
 

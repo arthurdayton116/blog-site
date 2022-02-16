@@ -7,6 +7,9 @@ You can see a working example, including an explanation of how I designed and bu
 
 For simplicity I am taking a mono-repo approach and using GitHub actions for deployment and Terraform Cloud for state storage.
 
+## Explanation
+<a> 
+
 ## Folder Structure
 
 ### .github/workflows
@@ -60,22 +63,7 @@ Cognitive load
 Authorization w/ Okta
 API protection
 
-TODO - terratest
 
-- It is possible for people to understand all of this stuff but very hard to keep it all in memory and not become overly reliant on experts.
-- This proves it can be done but also highlights the hard part that is the value you have to be able to deliver on
-
-- Setting up x as a service and enabling teams and platform, etc. is necessary
-
-- Needs to be open and not black boxed but also usable without 
-
-- Exploring the mono-repo
-
-- Enabling local development
-
-- Configuring linters and code editors
-
-- Where are fracture plane and team boundries
 
 
 
