@@ -1,6 +1,7 @@
 import React from 'react'
-import { render } from 'react-dom';
+import { render,hydrate } from 'react-dom';
 import { BrowserRouter as Router } from "react-router-dom";
+
 
 // import {
 //     ApolloClient,
@@ -60,9 +61,18 @@ import App from './App'
 //     cache: new InMemoryCache()
 // });
 
-render(
-    // <ApolloProvider client={client}>
-        <Router><App /></Router>,
-    // </ApolloProvider>,
-    document.getElementById('root'),
-);
+// render(
+//     // <ApolloProvider client={client}>
+//         <Router><App /></Router>,
+//     // </ApolloProvider>,
+//     document.getElementById('root'),
+// );
+
+
+
+const rootElement = document.getElementById("root");
+if (rootElement.hasChildNodes()) {
+    hydrate(<Router><App /></Router>, rootElement);
+} else {
+    render(<Router><App /></Router>, rootElement);
+}
