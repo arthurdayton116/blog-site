@@ -2,6 +2,8 @@ locals {
   s3_origin_id = "${local.resource_prefix}_${local.bucket_name}_a"
 }
 
+// https://stackoverflow.com/questions/51218979/react-router-doesnt-work-in-aws-s3-bucket/58978355#58978355
+// This solves issue with LinkedIn https://www.linkedin.com/post-inspector/inspect
 resource "aws_cloudfront_distribution" "s3_distribution_a" {
   origin {
     domain_name = local.s3_web_endpoint
@@ -14,6 +16,14 @@ resource "aws_cloudfront_distribution" "s3_distribution_a" {
       origin_protocol_policy = "http-only"
       origin_ssl_protocols   = ["TLSv1", "TLSv1.1", "TLSv1.2"]
     }
+  }
+
+  // This handles react router redirect to index.html without returning 404 to viewer
+  custom_error_response {
+    error_code            = 404
+    error_caching_min_ttl = 300
+    response_code         = 200
+    response_page_path    = "/index.html"
   }
 
   enabled         = true

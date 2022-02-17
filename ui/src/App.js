@@ -142,8 +142,9 @@ function App(props) {
                     { /* Apollo client for child components - put inside Security to give it access*/ }
                     <ApolloProvider client={client}>
                         <Helmet>
-                            <title>Blog</title>
-                            <meta name="description" content="Arthur uses this site to blog about and demonstrate technology concepts.  It is currently deployed using serverless technologies on AWS." />
+                            <meta property="og:title" content="Arthur Dayton Blog" />
+                            <meta property="og:description" content="Arthur uses this site to blog about and demonstrate technology concepts.  It is currently deployed using serverless technologies on AWS." />
+                            <meta property="og:image" content="%PUBLIC_URL%/ObservatoryPark.jpg" />
                         </Helmet>
                 <Box style={{'position':'fixed', 'width': '100%'}}><NavigationBar  /></Box>
                 <Box sx={{height: theme.navbar.imageHeight}}/>
