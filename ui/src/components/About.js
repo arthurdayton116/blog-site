@@ -11,6 +11,7 @@ import {
     Flex
 } from 'rebass';
 
+import {Helmet} from "react-helmet";
 
  export const About = () => {
      const theme = useTheme()
@@ -32,6 +33,17 @@ import {
 
      return (
          <Box>
+             <Helmet>
+                 <meta property="og:type" content="profile"/>
+                 <meta property="og:title" content="About"/>
+                 <meta property="og:url" content="https://arthurdayton.com/about"/>
+                 <meta property="og:image" content="%PUBLIC_URL%/will.jpg"/>
+                 <meta property="og:description" content="About Arthur Dayton"/>
+                 <meta property="article:author" content="Arthur Dayton"/>
+                 <meta property="article:published_date" content="2022-02-16"/>
+                 <meta property="article:tag" content="About"/>
+                 <meta property="article:tag" content="Profile"/>
+             </Helmet>
          <Flex flexWrap='wrap' p={[0,1,2]}>
              <Box sx={{width: ['1', '1/2', '1/2'],
                  display: ['flex','',''],

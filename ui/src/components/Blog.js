@@ -3,6 +3,8 @@ import { NavLink } from "react-router-dom";
 import {Flex, Box, Card, Heading} from 'rebass';
 import data from '../blogs/data.json';
 import {useTheme} from "@emotion/react";
+import {Helmet} from "react-helmet";
+
 
 const maxPostNumber = 6
 const cardArr = [ 1, 1/2, 1/4 ]
@@ -17,6 +19,13 @@ export const Blogs = (props) => {
 
         return (
             <div>
+                <Helmet>
+                    <meta property="og:title" content="Arthur Dayton Blog" />
+                    <meta property="og:description" content="Arthur uses this site to blog about and demonstrate technology concepts.  It is currently deployed using serverless technologies on AWS." />
+                    <meta property="og:image" content="%PUBLIC_URL%/ObservatoryPark.jpg" />
+                    <meta property="article:author" content="Arthur Dayton"/>
+                    <meta property="article:published_time" content="2022-02-16"/>
+                </Helmet>
                 <Flex id="posts" flexWrap={'wrap'} alignItems='center' sx={theme.linkSXAlt1}>
                     {data.filter(post =>  post.id <= maxPostNumber).sort(function (a, b) {
                         return a.order - b.order;
