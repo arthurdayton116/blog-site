@@ -145,6 +145,8 @@ function App(props) {
                             <meta property="og:title" content="Arthur Dayton Blog" />
                             <meta property="og:description" content="Arthur uses this site to blog about and demonstrate technology concepts.  It is currently deployed using serverless technologies on AWS." />
                             <meta property="og:image" content="%PUBLIC_URL%/ObservatoryPark.jpg" />
+                            <meta property="article:author" content="Arthur Dayton"/>
+                            <meta property="article:published_time" content="2022-02-16"/>
                         </Helmet>
                 <Box style={{'position':'fixed', 'width': '100%'}}><NavigationBar  /></Box>
                 <Box sx={{height: theme.navbar.imageHeight}}/>
