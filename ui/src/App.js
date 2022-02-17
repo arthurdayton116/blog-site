@@ -20,6 +20,9 @@ import { Route, Switch, useHistory } from "react-router-dom";
 import { Box } from "rebass";
 import { ThemeProvider } from '@emotion/react';
 
+// React Helmet
+import {Helmet} from "react-helmet";
+
 // Reactive Vars - https://www.apollographql.com/blog/apollo-client/caching/local-state-management-with-reactive-variables/
 import { accessTokenVar } from './cache';
 
@@ -138,6 +141,10 @@ function App(props) {
                 >
                     { /* Apollo client for child components - put inside Security to give it access*/ }
                     <ApolloProvider client={client}>
+                        <Helmet>
+                            <title>Blog</title>
+                            <meta name="description" content="Arthur uses this site to blog about and demonstrate technology concepts.  It is currently deployed using serverless technologies on AWS." />
+                        </Helmet>
                 <Box style={{'position':'fixed', 'width': '100%'}}><NavigationBar  /></Box>
                 <Box sx={{height: theme.navbar.imageHeight}}/>
                       { /* App routes go here */ }
