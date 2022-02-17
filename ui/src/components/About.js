@@ -60,10 +60,9 @@ import {
                  <Box  sx={h4Sx}>
                      <Text sx={textSx}>Husband, Dad</Text>
                      <Text sx={textSx}>Skier, Hiker, Builder</Text>
-                     <Text sx={textSx}>Software Engineer, Architect, Cloud Enthusiast</Text>
-                     <Text sx={textSx}>Love me some Terraform, Go, Docker, K8s, JavaScript, React and GraphQL</Text>
+                     <Text sx={textSx}>Software Engineer, Architect, Cloud Enthusiast (All of them!)</Text>
+                     <Text sx={textSx}>Love Terraform, Go, Docker, K8s, JavaScript, React and GraphQL</Text>
                      <Text sx={textSx}>Relational Database Apologist, Kimball Believer</Text>
-                     <Text sx={textSx}>#Techmiscuous</Text>
                  </Box>
              </Box>
 
