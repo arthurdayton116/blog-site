@@ -15,7 +15,7 @@ import {
 
 // React and Router
 import React from 'react';
-import { Route, Switch, useHistory } from "react-router-dom";
+import {BrowserRouter as Router, Route, Switch, useHistory} from "react-router-dom";
 
 import { Box } from "rebass";
 import { ThemeProvider } from '@emotion/react';
@@ -134,6 +134,7 @@ function App(props) {
 
     return (
         // Provides theme to child components
+        <Router>
         <ThemeProvider theme={theme}>
             <React.Fragment>
                 <Security oktaAuth={oktaAuth}
@@ -170,6 +171,7 @@ function App(props) {
           </React.Fragment>
 
         </ThemeProvider>
+        </Router>
     )
 }
 

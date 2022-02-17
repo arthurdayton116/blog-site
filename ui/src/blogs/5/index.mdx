@@ -8,28 +8,38 @@ import {
     Link
 } from 'rebass';
 
-export const vpcConcepts = "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html"
+import {Helmet} from "react-helmet";
 
-export const Repo = "https://github.com/arthurdayton116/aws-terraform/tree/main/peering/terraform_vpc_peering"
-export const RepoEC2 = "https://github.com/arthurdayton116/aws-terraform/tree/main/peering/terraform_ec2_dynamic"
-export const tfProviders = "https://registry.terraform.io/browse/providers"
-export const tfCloud = "https://www.terraform.io/cloud"
-export const iaacTools = "https://dzone.com/articles/the-top-7-infrastructure-as-code-tools-for-automat"
-export const tfTypes = "https://www.terraform.io/docs/language/expressions/types.html"
-export const tfForEach = "https://www.terraform.io/docs/language/meta-arguments/for_each.html"
-export const tfForEachVsCount = "https://www.terraform.io/docs/language/meta-arguments/count.html#when-to-use-for_each-instead-of-count"
-export const tfFor = "https://www.terraform.io/docs/language/expressions/for.html"
+
+<Helmet>
+    <meta property="og:type" content="article"/>
+    <meta property="og:title" content="The magic of Infrastructure as Code with Terraform"/>
+    <meta property="og:url" content="https://arthurdayton.com/post/5/"/>
+    <meta property="og:image" content="%PUBLIC_URL%/AWS_serverless_web_app.png"/>
+    <meta property="og:description" content="This post shows hows to use maps and for-each loops with Terraform to dynamically create infrastructure on AWS"/>
+    <meta property="article:author" content="Arthur Dayton"/>
+    <meta property="article:published_date" content="2022-02-16"/>
+    <meta property="article:tag" content="Terraform"/>
+    <meta property="article:tag" content="AWS"/>
+    <meta property="article:tag" content="Docker"/>
+    <meta property="article:tag" content="VPC"/>
+    <meta property="article:tag" content="Terraform maps"/>
+    <meta property="article:tag" content="Terraform for each"/>
+    <meta property="article:tag" content="EC2"/>
+</Helmet>
 
 #### Using maps and for-each to kick it up a notch
-Infrastructure as code is the standard for cloud development that all companies are trying to achieve.  <Link href={iaacTools} target="_blank">Lots of tools exist</Link> but I'm a big fan of Terraform, especially over learning cloud vendor specific tools like Cloud Formation or ARM, because of the ease with which I can do similar things on different clouds, state management with <Link href={tfCloud} target="_blank">Terraform Cloud</Link> and their ever expanding <Link href={tfProviders} target="_blank">list of providers</Link>.  Deploying single stand alone resources is easy and for a lot of scenarios that's fine but what happens when we have more complex scenarios where we need to deploy multiple types of resources that have interdependencies, different lifecycles and n number of instances?  This is where infrastructure as code becomes more like development then configuration and the power of maps and loops in Terraform shines.
+Infrastructure as code is the standard for cloud development that all companies are trying to achieve.  <a href="https://dzone.com/articles/the-top-7-infrastructure-as-code-tools-for-automat" target="_blank">Lots of tools exist</a> but I'm a big fan of Terraform, especially over learning cloud vendor specific tools like Cloud Formation or ARM, because of the ease with which I can do similar things on different clouds, state management with <a href="https://www.terraform.io/cloud" target="_blank">Terraform Cloud</a> and their ever expanding <a href="https://registry.terraform.io/browse/providers" target="_blank">list of providers</a>.  Deploying single stand alone resources is easy and for a lot of scenarios that's fine but what happens when we have more complex scenarios where we need to deploy multiple types of resources that have interdependencies, different lifecycles and n number of instances?  This is where infrastructure as code becomes more like development then configuration and the power of maps and loops in Terraform shines.
 
 <br/>
 
-<Link pl={2} href={tfTypes} target="_blank">Terraform types </Link> include maps which allow us to define hierarchical objects which we can iterate over and output to be used by other processes.  The scenario I need to accommodate is creating multiple peered VPCs, subnets and compute instances.  The number of all is arbitrary and I need to be able to iterate the results of the creation of my VPCs to create the subnets and EC2 instances.
+<a pl={2} href="https://www.terraform.io/docs/language/expressions/types.html" target="_blank">Terraform types </a> include maps which allow us to define hierarchical objects which we can iterate over and output to be used by other processes.  The scenario I need to accommodate is creating multiple peered VPCs, subnets and compute instances.  The number of all is arbitrary and I need to be able to iterate the results of the creation of my VPCs to create the subnets and EC2 instances.
 
 <br/>
 
-<Link p={4} href={Repo} target="_blank">Code located here</Link>
+<a p={4} href="https://github.com/arthurdayton116/aws-terraform/tree/main/peering/terraform_vpc_peering" target="_blank">Code located here</a>
+
+<br/>
 
 I will start by using a local variable to define the configuration of my VPCs
 
@@ -56,9 +66,9 @@ locals {
 
 Looking at the vpc_values we see values for two VPCs, a and b, with cidr ranges for the vpc and ranges for defining peering realationships and security groups.
 
-There are two approaches, count and for_each, to create multiple instances of resources with Terraform.  When to use one or the other is described <Link href={tfForEachVsCount} target="_blank">here.</Link>
+There are two approaches, count and for_each, to create multiple instances of resources with Terraform.  When to use one or the other is described <a href="https://www.terraform.io/docs/language/meta-arguments/count.html#when-to-use-for_each-instead-of-count" target="_blank">here.</a>
 
-To create VPCs from these values we use a <Link href={tfForEach} target="_blank">for_each</Link> loop:
+To create VPCs from these values we use a <a href="https://www.terraform.io/docs/language/meta-arguments/for_each.html" target="_blank">for_each</a> loop:
 
 ```json
 resource "aws_vpc" "vpc" {
@@ -85,7 +95,7 @@ resource "aws_internet_gateway" "i" {
 }
 ```
 
-We can use the <Link href={tfFor} target="_blank">for</Link> expression in our outputs to create maps of values to reference in other terrafom projects downstream:
+We can use the <a href="https://www.terraform.io/docs/language/expressions/for.html" target="_blank">for</a> expression in our outputs to create maps of values to reference in other terrafom projects downstream:
 
 ```json
 output "vpc_ids" {
@@ -471,7 +481,9 @@ subnet_info = {
 
 After creating our VPCs and Subnets we can then reference the outputs via remote state in a separate EC2 repository.
 
-<Link p={4} href={RepoEC2} target="_blank">Code located here</Link>
+<a p={4} href="https://github.com/arthurdayton116/aws-terraform/tree/main/peering/terraform_ec2_dynamic" target="_blank">Code located here</a>
+
+<br/>
 
 In our data.tf file we define these two local variables:
 

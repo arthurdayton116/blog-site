@@ -8,9 +8,29 @@ import {
     Link
 } from 'rebass';
 
+import {Helmet} from "react-helmet";
+
 export const vpcConcepts = "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html"
 
 export const Repo = "https://github.com/arthurdayton116/aws-terraform/tree/main/terraform_vpc"
+
+<Helmet>
+    <meta property="og:type" content="article"/>
+    <meta property="og:title" content="Serverless Web Application Deployement on AWS"/>
+    <meta property="og:url" content="https://arthurdayton.com/post/6/"/>
+    <meta property="og:image" content="%PUBLIC_URL%/AWS_serverless_web_app.png"/>
+    <meta property="og:description" content="This post shows the code for deploying a serverless application to AWS using Terraform, React, GraphQL and GitHub Actions."/>
+    <meta property="article:author" content="Arthur Dayton"/>
+    <meta property="article:published_date" content="2022-02-16"/>
+    <meta property="article:tag" content="Terraform"/>
+    <meta property="article:tag" content="AWS"/>
+    <meta property="article:tag" content="React"/>
+    <meta property="article:tag" content="Cloudfront"/>
+    <meta property="article:tag" content="Route53"/>
+    <meta property="article:tag" content="GraphQL"/>
+    <meta property="article:tag" content="ACM"/>
+    <meta property="article:tag" content="GitHub Actions"/>
+</Helmet>
 
 #### What is THIS POST
 In this post I am going to cover some of the basics of SOMETHING and show how I deploy one using TECHNOLOGY
